@@ -88,7 +88,7 @@ Erros de validação geram mensagens acionáveis em português. Erros técnicos 
 - **Fluxos:** cadastro, lançamento, pagamento, estorno, operação offline e reconexão.
 - **Contrato:** payloads entre cliente e Supabase.
 
-Jest será configurado no Prompt 23 ou antecipado quando a primeira regra crítica for implementada.
+Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 02 para proteger utilitários monetários, persistência/resolução de tema e estados críticos dos componentes. O Prompt 23 ampliará a cobertura para integração e fluxos completos; não substitui os testes existentes.
 
 ## Decisões do Prompt 01
 
@@ -97,3 +97,14 @@ Jest será configurado no Prompt 23 ou antecipado quando a primeira regra críti
 - TypeScript estrito com `noUncheckedIndexedAccess`.
 - StyleSheet na tela provisória; NativeWind será configurado no Design System, quando houver componentes reutilizáveis.
 - Nenhuma persistência, autenticação ou integração externa foi criada nesta etapa.
+
+## Decisões do Prompt 02
+
+- NativeWind 4.2.7 permanece na linha estável e usa Tailwind CSS 3.4.17; a linha NativeWind 5 ainda é pré-lançamento e não foi adotada.
+- `ThemeProvider` concentra preferência, resolução e tokens. Variáveis semânticas do NativeWind são derivadas desses mesmos tokens, evitando uma segunda fonte de verdade.
+- AsyncStorage persiste somente `light`, `dark` ou `system`; dados financeiros e credenciais continuam fora dessa camada.
+- Inter é carregada em runtime com Expo Font e splash screen coordenada. Uma falha de fonte não bloqueia indefinidamente a inicialização.
+- Componentes compartilhados vivem em `src/components/ui`; componentes de apresentação financeira em `src/components/cards` recebem somente propriedades e não conhecem domínio ou persistência.
+- Dinheiro permanece inteiro em centavos desde a API dos componentes até os utilitários. Formatação separa parte inteira e centavos sem cálculo financeiro em ponto flutuante.
+- A galeria `/design-system` existe apenas para desenvolvimento: o acesso visual usa `__DEV__` e a rota redireciona para `/` em produção.
+- Reanimated é usado somente em feedback funcional e respeita redução de movimento. Haptics é reservado a ações relevantes.

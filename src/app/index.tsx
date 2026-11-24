@@ -1,81 +1,115 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Palette, ShieldCheck } from 'lucide-react-native';
+import { useRouter, type Href } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
-import { colors } from '@/theme/colors';
+import { BrandLogo } from '@/components/brand/BrandLogo';
+import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
+import { Screen } from '@/components/ui/Screen';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function HomeScreen() {
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'right', 'bottom', 'left']}>
-      <View style={styles.container}>
-        <View accessible accessibilityLabel="Marca Fiados Moreira" style={styles.brandMark}>
-          <View style={[styles.brandBar, styles.brandBarShort]} />
-          <View style={[styles.brandBar, styles.brandBarMedium]} />
-          <View style={[styles.brandBar, styles.brandBarTall]} />
-        </View>
+  const router = useRouter();
+  const { tokens } = useTheme();
 
-        <Text accessibilityRole="header" style={styles.title}>
-          Fiados Moreira
-        </Text>
-        <Text style={styles.slogan}>Seu trabalho. Seu dinheiro. Seu controle.</Text>
+  return (
+    <Screen contentContainerStyle={styles.screen}>
+      <View
+        style={[
+          styles.glow,
+          {
+            backgroundColor: `${tokens.colors.accent}18`,
+            borderColor: `${tokens.colors.accent}20`,
+          },
+        ]}
+      />
+      <View className="w-full items-center" style={styles.hero}>
+        <BrandLogo size={64} variant="symbol" />
+        <View style={styles.copy}>
+          <AppText accessibilityRole="header" align="center" variant="display">
+            Fiados Moreira
+          </AppText>
+          <AppText align="center" color="textSecondary" style={styles.slogan} variant="body">
+            Seu trabalho. Seu dinheiro. Seu controle.
+          </AppText>
+        </View>
+        <View
+          style={[
+            styles.promise,
+            {
+              backgroundColor: tokens.colors.surface,
+              borderColor: tokens.colors.border,
+              borderRadius: tokens.radius.lg,
+            },
+            tokens.shadows.sm,
+          ]}
+        >
+          <ShieldCheck color={tokens.colors.success} size={22} />
+          <View style={styles.promiseCopy}>
+            <AppText variant="label" weight="semibold">
+              Controle simples e confiável
+            </AppText>
+            <AppText color="textMuted" variant="caption">
+              Uma base visual preparada para organizar os fiados da oficina.
+            </AppText>
+          </View>
+        </View>
+        {__DEV__ ? (
+          <Button
+            fullWidth
+            icon={Palette}
+            label="Abrir galeria do Design System"
+            onPress={() => router.push('/design-system' as Href)}
+            variant="secondary"
+          />
+        ) : null}
       </View>
-    </SafeAreaView>
+      <AppText align="center" color="textMuted" variant="caption">
+        Fundação visual do aplicativo · sem dados financeiros reais
+      </AppText>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.brandDark,
-  },
-  container: {
+  screen: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    paddingTop: 48,
+    paddingBottom: 16,
   },
-  brandMark: {
-    width: 76,
-    height: 76,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: 7,
-    marginBottom: 28,
-    padding: 15,
-    borderRadius: 22,
-    backgroundColor: colors.brandInstitutional,
+  glow: {
+    position: 'absolute',
+    top: -90,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    borderWidth: 1,
   },
-  brandBar: {
-    width: 9,
-    borderRadius: 5,
-    backgroundColor: colors.brandPrimary,
+  hero: {
+    maxWidth: 420,
+    gap: 28,
   },
-  brandBarShort: {
-    height: 18,
-    opacity: 0.7,
-  },
-  brandBarMedium: {
-    height: 30,
-    opacity: 0.85,
-  },
-  brandBarTall: {
-    height: 43,
-  },
-  title: {
-    color: colors.white,
-    fontSize: 34,
-    fontWeight: '800',
-    letterSpacing: -0.8,
-    textAlign: 'center',
+  copy: {
+    alignItems: 'center',
+    gap: 8,
   },
   slogan: {
     maxWidth: 320,
-    marginTop: 12,
-    color: colors.background,
-    fontSize: 16,
-    fontWeight: '400',
-    lineHeight: 24,
-    opacity: 0.86,
-    textAlign: 'center',
+  },
+  promise: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: 16,
+    borderWidth: 1,
+  },
+  promiseCopy: {
+    flex: 1,
+    gap: 2,
   },
 });

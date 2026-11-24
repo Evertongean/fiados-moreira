@@ -6,9 +6,9 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Fundação Expo/TypeScript/Router.
   - [x] Tela provisória e identidade básica.
   - [x] Documentação de produto, arquitetura, dados, regras e roadmap.
-- [ ] **Prompt 02 — Design System**
-  - [ ] Tokens completos, tipografia Inter, NativeWind e componentes base.
-  - [ ] Temas e acessibilidade dos componentes.
+- [x] **Prompt 02 — Design System**
+  - [x] Tokens completos, tipografia Inter, NativeWind e componentes base.
+  - [x] Temas claro/escuro/sistema, persistência, acessibilidade e galeria de desenvolvimento.
 - [ ] **Prompt 03 — Navegação**
   - [ ] Fluxos, layouts e rotas definitivas.
 - [ ] **Prompt 04 — Banco de dados**

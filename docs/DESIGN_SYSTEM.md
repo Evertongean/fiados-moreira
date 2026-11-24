@@ -1,67 +1,192 @@
 # Design System
 
-## Direção visual
+## Princípios
 
-A interface deve transmitir controle, confiança e objetividade, com estética financeira moderna e adequada ao ambiente de oficina. A informação financeira tem prioridade sobre ornamentação. O slogan é “Seu trabalho. Seu dinheiro. Seu controle.”
+O Design System do Fiados Moreira transmite controle, confiança e objetividade. A interface combina a sobriedade de um produto financeiro com referências discretas ao ambiente de oficina, priorizando leitura rápida, áreas de toque confortáveis e estados inequívocos.
 
-O Design System completo será implementado no Prompt 02. Nesta etapa, somente as cores básicas usadas pela tela provisória estão em `src/theme/colors.ts`.
+Todas as telas novas devem consumir os tokens e componentes compartilhados deste documento. Não crie cores, espaçamentos, tipografia ou componentes paralelos dentro de uma feature sem uma necessidade documentada.
 
-## Paleta
+O slogan institucional é **“Seu trabalho. Seu dinheiro. Seu controle.”**
 
-| Token planejado      | Cor       | Uso                                                  |
-| -------------------- | --------- | ---------------------------------------------------- |
-| `brandDark`          | `#10271F` | Fundo institucional e superfícies de alto contraste. |
-| `brandPrimary`       | `#22C55E` | Ações principais, foco e indicadores positivos.      |
-| `brandInstitutional` | `#184D37` | Superfícies e elementos secundários da marca.        |
-| `background`         | `#F8FAFC` | Fundo claro.                                         |
-| `danger`             | `#EF4444` | Erro, dívida atrasada e ação destrutiva.             |
-| `attention`          | `#F59E0B` | Avisos e vencimento próximo.                         |
-| `white`              | `#FFFFFF` | Conteúdo sobre fundos escuros.                       |
+## Identidade visual
 
-No Prompt 02 serão definidos tokens semânticos para texto, borda, superfície, estado desabilitado e versões de tema escuro. Estado nunca deve ser comunicado somente por cor.
+`BrandLogo` implementa uma marca vetorial inicial e provisória, sem recurso externo ou restrição de licença. O símbolo combina uma chave mecânica e barras de organização financeira.
+
+- `variant="full"`: símbolo e nome; aceita o slogan com `showSlogan`.
+- `variant="symbol"`: somente o símbolo.
+- `background="light" | "dark"`: contraste para o fundo de destino; quando omitido, acompanha o tema.
+- `size`: dimensão configurável e proporção preservada.
+
+A descrição acessível identifica a arte como marca provisória. Ela não deve ser apresentada como logotipo definitivo.
+
+## Cores
+
+### Paleta institucional
+
+| Cor       | Valor     | Uso                                                 |
+| --------- | --------- | --------------------------------------------------- |
+| `dark`    | `#10271F` | Base institucional e símbolo em superfícies claras. |
+| `primary` | `#184D37` | Marca e ação principal no tema claro.               |
+| `accent`  | `#22C55E` | Ênfase, foco e associação positiva.                 |
+| `white`   | `#FFFFFF` | Conteúdo de alto contraste.                         |
+| `error`   | `#EF4444` | Referência de erro da marca.                        |
+| `warning` | `#F59E0B` | Referência de atenção da marca.                     |
+| `info`    | `#3B82F6` | Referência informativa da marca.                    |
+
+### Tokens semânticos
+
+Os componentes usam papéis semânticos, nunca uma cor literal quando existe um token equivalente.
+
+| Token               | Claro     | Escuro    | Responsabilidade                    |
+| ------------------- | --------- | --------- | ----------------------------------- |
+| `background`        | `#F8FAFC` | `#101714` | Fundo de tela.                      |
+| `surface`           | `#FFFFFF` | `#18231D` | Superfície principal.               |
+| `surfaceSecondary`  | `#F1F5F9` | `#223129` | Superfície secundária/desabilitada. |
+| `foreground`        | `#0F172A` | `#F8FAFC` | Texto principal.                    |
+| `textSecondary`     | `#475569` | `#CBD5E1` | Texto complementar.                 |
+| `textMuted`         | `#64748B` | `#94A3B8` | Texto de menor ênfase.              |
+| `primary`           | `#184D37` | `#22C55E` | Ação principal e foco.              |
+| `primaryForeground` | `#FFFFFF` | `#071C12` | Conteúdo sobre `primary`.           |
+| `secondary`         | `#E7F1EB` | `#263C31` | Ações e destaques secundários.      |
+| `accent`            | `#22C55E` | `#4ADE80` | Acento institucional.               |
+| `border`            | `#E2E8F0` | `#304138` | Divisores e contornos.              |
+| `input`             | `#CBD5E1` | `#40584B` | Contorno de controles.              |
+| `success`           | `#15803D` | `#4ADE80` | Confirmação e quitação.             |
+| `warning`           | `#92400E` | `#FBBF24` | Atenção e pendência.                |
+| `destructive`       | `#B91C1C` | `#F87171` | Erro, atraso e ação destrutiva.     |
+| `info`              | `#1D4ED8` | `#60A5FA` | Informação e estado parcial.        |
+| `disabled`          | `#94A3B8` | `#64748B` | Conteúdo indisponível.              |
+| `overlay`           | `#0F172A` | `#020806` | Fundo de modal com transparência.   |
+
+As mesmas cores alimentam propriedades React Native e variáveis CSS do NativeWind no `ThemeProvider`, evitando fontes de verdade concorrentes.
+
+## Espaçamento, raios e elevação
+
+- Espaçamento: `2`, `4`, `8`, `12`, `16`, `20`, `24`, `32`, `40`, `48` e `64`.
+- Raios: `xs=4`, `sm=8`, `md=12`, `lg=16`, `xl=20`, `2xl=24` e `full=9999`.
+- Elevação: `none`, `sm`, `md` e `lg`.
+
+As sombras são geradas para Android e iOS. No tema escuro, sua opacidade é reduzida; bordas continuam responsáveis por separar superfícies.
 
 ## Tipografia
 
-Inter é a família planejada. Até sua instalação, usa-se a fonte nativa do sistema para evitar carregamento/configuração prematuros. A escala deve distinguir display, títulos, corpo, rótulos e legendas, respeitar o aumento de fonte do sistema e manter line-height legível. Valores financeiros devem ter alinhamento e hierarquia consistentes.
+Inter é carregada na inicialização com Expo Font. A splash screen permanece visível até a preferência de tema e as fontes estarem prontas. Caso uma fonte falhe, a aplicação libera a inicialização em vez de ficar bloqueada.
 
-## Iconografia
+Pesos disponíveis: `regular` (400), `medium` (500), `semibold` (600) e `bold` (700).
 
-Lucide React Native é a biblioteca planejada. Ícones terão traço, tamanho e área de toque padronizados, sempre com rótulo ou descrição acessível quando a função não for evidente. Não usar emojis como substitutos de ícones. Logotipo e marca próprios não precisam ser ícones Lucide.
+| Variante    | Tamanho/linha | Uso                                     |
+| ----------- | ------------- | --------------------------------------- |
+| `display`   | 40/48         | Identidade e destaques excepcionais.    |
+| `h1`        | 32/40         | Título principal.                       |
+| `h2`        | 28/36         | Título de seção maior.                  |
+| `h3`        | 24/32         | Cabeçalho de tela ou modal.             |
+| `h4`        | 20/28         | Título de card ou subseção.             |
+| `body`      | 16/24         | Texto principal.                        |
+| `bodySmall` | 14/20         | Texto complementar.                     |
+| `label`     | 14/20         | Rótulos.                                |
+| `caption`   | 12/16         | Metadados e ajuda.                      |
+| `button`    | 15/20         | Ações.                                  |
+| `currency`  | 30/38         | Valores financeiros com número tabular. |
 
-## Espaçamento e forma
+`AppText` aceita variante, peso, cor semântica, alinhamento e todas as propriedades nativas, incluindo `numberOfLines`. O aumento de fonte do sistema permanece habilitado e sem teto imposto pelo componente.
 
-- Unidade-base planejada: 4 pontos.
-- Escala: 4, 8, 12, 16, 20, 24, 32 e 40.
-- Área de toque mínima: 44 × 44 pontos.
-- Raios e sombras devem formar uma escala curta e consistente.
-- Safe areas são obrigatórias; conteúdo não deve colidir com recortes ou navegação do sistema.
+## Temas
 
-## Componentes planejados
+`ThemeProvider` é a fonte única de preferência e tokens. `useTheme` expõe:
 
-`Button`, `IconButton`, `TextField`, `MoneyInput`, `DateInput`, `Select`, `Checkbox`, `Card`, `CustomerCard`, `DebtCard`, `PaymentCard`, `Badge`, `Alert`, `EmptyState`, `ErrorState`, `LoadingState`, `SearchField`, `FilterChip`, `ListItem`, `Divider`, `Modal`, `BottomSheet` e feedback de sincronização.
+- `preference`: `light`, `dark` ou `system`;
+- `resolvedTheme`: tema efetivamente renderizado;
+- `tokens`: cores, tipografia, espaçamento, raios e sombras;
+- `setPreference`: alteração e persistência assíncrona;
+- `isReady`: restauração inicial concluída.
 
-Cada componente deverá documentar variantes, estados, tokens, acessibilidade e exemplos reais. Não serão criados componentes genéricos sem caso de uso.
+Somente a preferência visual é salva no AsyncStorage, na chave `@fiados-moreira/theme-preference`. Nenhum dado financeiro ou segredo usa esse armazenamento. No modo `system`, mudanças de aparência do dispositivo atualizam tokens e StatusBar automaticamente. `expo-system-ui` sincroniza o fundo nativo.
 
-## Tema claro e escuro
+Exemplo:
 
-Tokens de componente devem consumir papéis semânticos, não cores literais. Preferência poderá seguir o sistema ou escolha manual. Ambos os temas preservarão significado, contraste e legibilidade. O tema escuro ainda não está implementado; `userInterfaceStyle` permanece claro na fundação.
+```tsx
+const { tokens, setPreference } = useTheme();
+
+<View style={{ backgroundColor: tokens.colors.surface }} />;
+await setPreference('dark');
+```
+
+O NativeWind usa Tailwind CSS 3 e variáveis semânticas fornecidas pelo mesmo provider. Classes como `bg-background`, `text-foreground` e `border-border` recebem o tema atual.
+
+## Iconografia e movimento
+
+Lucide React Native é a biblioteca padrão. Ícones funcionais sem texto devem usar `IconButton`, que exige `accessibilityLabel`. O símbolo institucional é SVG próprio.
+
+Feedbacks de pressão usam opacidade/escala discretas. Haptics é reservado a ações primárias, destrutivas e notificações relevantes. Toasts usam entrada e saída curtas; Skeleton respeita a preferência de redução de movimento do sistema.
+
+## Catálogo de componentes
+
+### Base (`src/components/ui`)
+
+- `AppText`: tipografia semântica e acessível.
+- `Button`: `primary`, `secondary`, `outline`, `ghost`, `destructive` e `link`; tamanhos `sm`, `md`, `lg` e `icon`; ícone, largura total, loading e disabled.
+- `IconButton`: ação somente com ícone, rótulo obrigatório e alvo de 40–56 pontos conforme tamanho.
+- `Input`: label acessível, ajuda, erro, ícones/acessório, foco, senha, teclados nativos, read-only, disabled e ref.
+- `TextArea`: entrada multilinha para observações.
+- `CurrencyInput`: apresentação BRL e contrato externo em centavos inteiros.
+- `SearchInput`: pesquisa visual e ação de limpar; não executa busca de domínio.
+- `Card`: `default`, `outlined`, `elevated` e `highlighted`, com header/footer e interação opcional.
+- `Badge`: `default`, `success`, `warning`, `destructive`, `info` e `outline`.
+- `Avatar`: imagem opcional ou iniciais locais, nos tamanhos `sm`, `md`, `lg` e `xl`.
+- `Divider`: horizontal ou vertical.
+- `Screen`: safe area, scroll, teclado e padding por token.
+- `Header`: título, subtítulo, voltar, ação direita e alinhamento.
+- `EmptyState`, `LoadingState` e `Skeleton`: estados consistentes de tela/conteúdo.
+- `Alert`: `success`, `warning`, `error` e `info`, sempre com ícone e texto.
+- `Toast`: feedback global `success`, `error`, `warning` ou `info`, limitado a três mensagens visíveis.
+- `ConfirmDialog`: confirmação comum/destrutiva, cancelamento e loading.
+- `Switch`, `Checkbox` e `RadioGroup`: seleções com roles e estados nativos.
+
+### Apresentação financeira (`src/components/cards`)
+
+- `BalanceCard`: valor formatado, descrição, ícone e ocultação opcional.
+- `StatCard`: indicador, valor, ícone e variante semântica.
+- `DebtStatusBadge`: apresenta um status explicitamente recebido; não o calcula.
+- `CustomerListItem`: avatar, nome, detalhe, valor pendente, status e seleção.
+- `PaymentListItem`: valor, data, método e descrição.
+
+Esses componentes recebem somente propriedades. Não acessam banco, stores, repositórios ou serviços.
+
+## Dinheiro
+
+Valores são representados como números inteiros em centavos. `formatBRLCents` separa reais e centavos antes de formatar, sem aritmética monetária de ponto flutuante. `parseBRLToCents` valida texto BRL e `parseCurrencyDigits` sustenta a digitação do `CurrencyInput`.
+
+```tsx
+const [amountCents, setAmountCents] = useState<number | null>(null);
+
+<CurrencyInput label="Valor" onChangeCents={setAmountCents} valueCents={amountCents} />;
+```
+
+O limite padrão é `R$ 999.999.999,99`. Regras como saldo disponível ou valor mínimo pertencem ao domínio, não ao componente.
 
 ## Acessibilidade
 
-- Contraste mínimo alinhado à WCAG AA: 4,5:1 para texto normal e 3:1 para texto grande/elementos relevantes.
-- Labels, hints e roles para leitores de tela.
-- Ordem de foco previsível e foco visível onde aplicável.
-- Alvos de toque de pelo menos 44 pontos e espaçamento que evite toques acidentais.
-- Suporte a escala de fonte sem truncar valores críticos.
-- Movimento reduzido respeitado e animações nunca essenciais para compreender o estado.
-- Erros associados ao campo, em texto claro e não apenas por cor.
+- Ações principais usam altura mínima de 48 pontos; controles compactos preservam área mínima próxima do padrão de plataforma.
+- Labels visuais de `Input` também nomeiam o campo para leitores de tela.
+- Seleção, indisponibilidade, loading e progresso expõem roles e estados acessíveis.
+- Alertas, erros e toasts usam texto/ícone além de cor e regiões de anúncio quando apropriado.
+- O texto respeita escala de fonte; layouts usam flex, scroll e limites responsivos.
+- Safe areas e teclado virtual são tratados por `Screen`.
+- Skeleton e animações Reanimated respeitam redução de movimento.
 
-## Diretrizes de experiência
+TalkBack/VoiceOver e contraste devem ser novamente inspecionados em dispositivo a cada tela real, principalmente quando combinações de tokens receberem conteúdo novo.
 
-1. A ação financeira sempre mostra valor, destino e consequência antes da confirmação.
-2. Pagamento e estorno recebem feedback inequívoco e não dependem da rede para parecer concluídos localmente.
-3. Ações destrutivas ou irreversíveis exigem confirmação proporcional ao risco.
-4. Estados vazio, carregando, offline, sincronizando e erro são explícitos.
-5. Máscaras e formatação facilitam entrada, sem ocultar o valor efetivamente salvo.
-6. A interface usa português direto e evita termos técnicos.
-7. Informações essenciais permanecem legíveis sob sol, com uma mão e em telas pequenas.
+## Galeria de desenvolvimento
+
+A rota `/design-system` demonstra identidade, cores, tipografia, controles, estados e cards financeiros com dados explicitamente fictícios. Inputs, tema, toast, ocultação de saldo e diálogo são interativos.
+
+1. Execute `npm start`.
+2. Abra a aplicação em desenvolvimento.
+3. Toque em **Abrir galeria do Design System** na tela inicial.
+4. Use o `RadioGroup` da galeria para alternar entre claro, escuro e sistema.
+
+O botão só é renderizado com `__DEV__`. Em bundle de produção, a própria rota redireciona para `/`, impedindo acesso à demonstração e aos dados fictícios.
+
+## Evolução
+
+Antes de criar uma primitiva visual em uma feature, verifique este catálogo. Uma necessidade recorrente deve evoluir o componente compartilhado e sua documentação. Regras de negócio, consulta de dados e navegação definitiva permanecem fora do Design System.

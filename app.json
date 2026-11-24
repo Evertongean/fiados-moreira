@@ -5,14 +5,14 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "fiadosmoreira",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false
     },
     "android": {
       "predictiveBackGestureEnabled": false
     },
-    "plugins": ["expo-router"],
+    "plugins": ["expo-router", "expo-font", "expo-splash-screen"],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

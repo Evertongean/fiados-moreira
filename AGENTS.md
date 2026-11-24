@@ -21,6 +21,9 @@ Não altere a arquitetura nem introduza dependências relevantes sem justificati
 - TypeScript deve permanecer em modo `strict`; não use `any` sem justificativa explícita.
 - Evite duplicação, abstrações prematuras, dados fictícios de produção e serviços simulados apresentados como reais.
 - Use aliases `@/*` e os aliases específicos já configurados.
+- Reutilize tokens de `src/theme` e componentes de `src/components/ui` e `src/components/cards`. Não crie cores, espaçamentos, tipografia ou primitivas paralelas dentro de features sem justificativa documentada.
+- A preferência visual é controlada exclusivamente por `ThemeProvider`/`useTheme`; mantenha os tokens React Native e as variáveis semânticas do NativeWind derivados da mesma fonte.
+- Componentes de apresentação financeira recebem centavos inteiros por propriedades e não acessam banco, stores, repositórios ou serviços.
 
 ## Nomenclatura
 
@@ -55,6 +58,7 @@ Consulte `docs/BUSINESS_RULES.md` antes de alterar cálculos ou estados financei
 - Testes unitários cobrem regras financeiras, validações, estados derivados e resolução de conflitos.
 - Testes de integração cobrem repositórios, transações, fila de sincronização e migrations.
 - Testes de interface cobrem fluxos críticos e acessibilidade.
+- Alterações no Design System devem ser demonstradas na galeria de desenvolvimento e documentadas em `docs/DESIGN_SYSTEM.md`.
 - Ao modificar código, execute no mínimo `npm run typecheck`, `npm run lint` e `npm run format:check`; execute testes aplicáveis e `npm run doctor` em mudanças de dependências/configuração Expo.
 - Nunca afirme que uma validação passou se ela não foi executada. Informe erros, limitações e pendências.
 
