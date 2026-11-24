@@ -26,8 +26,17 @@ credentials.json
 # Local databases and persistence
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
+*.sqlite-wal
+*.sqlite-shm
 *.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite-backup
+*.db-backup
+*.dump
 
 # Tests, logs, caches, and temporary files
 coverage/

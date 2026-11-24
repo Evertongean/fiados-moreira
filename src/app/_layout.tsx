@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ToastProvider } from '@/components/ui/Toast';
+import { DatabaseProvider } from '@/database/DatabaseProvider';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 
@@ -48,26 +49,28 @@ function AppBootstrap() {
   }
 
   return (
-    <ToastProvider>
-      <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          animation: 'slide_from_right',
-          contentStyle: { backgroundColor: tokens.colors.background },
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="customers" />
-        <Stack.Screen name="vehicles" />
-        <Stack.Screen name="debts" />
-        <Stack.Screen name="payments" />
-        <Stack.Screen name="notifications" />
-        <Stack.Screen name="settings" />
-        <Stack.Screen name="reports" />
-        <Stack.Screen name="dev" />
-        <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
-      </Stack>
-    </ToastProvider>
+    <DatabaseProvider>
+      <ToastProvider>
+        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+        <Stack
+          screenOptions={{
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: tokens.colors.background },
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="customers" />
+          <Stack.Screen name="vehicles" />
+          <Stack.Screen name="debts" />
+          <Stack.Screen name="payments" />
+          <Stack.Screen name="notifications" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="reports" />
+          <Stack.Screen name="dev" />
+          <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
+        </Stack>
+      </ToastProvider>
+    </DatabaseProvider>
   );
 }

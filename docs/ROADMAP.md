@@ -11,8 +11,10 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Temas claro/escuro/sistema, persistência, acessibilidade e galeria de desenvolvimento.
 - [x] **Prompt 03 — Navegação**
   - [x] Cinco abas, stacks, rotas dinâmicas, layouts e estruturas preliminares das telas.
-- [ ] **Prompt 04 — Banco de dados**
-  - [ ] Expo SQLite, Drizzle, schema, migrations e repositórios base.
+- [ ] **Prompt 04 — Banco de dados** (implementação concluída; aceite mobile pendente)
+  - [x] Expo SQLite, Drizzle, schema, migrations, repositórios e serviços financeiros base.
+  - [x] Integridade, transações, idempotência, auditoria e testes SQLite isolados.
+  - [ ] Validar abertura, reabertura e persistência do Expo SQLite em dispositivo/emulador Android e iOS.
 - [ ] **Prompt 05 — Clientes**
   - [ ] Cadastro, edição, lista, detalhes e inativação.
 - [ ] **Prompt 06 — Veículos**

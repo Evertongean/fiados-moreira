@@ -24,6 +24,8 @@ Não altere a arquitetura nem introduza dependências relevantes sem justificati
 - Reutilize tokens de `src/theme` e componentes de `src/components/ui` e `src/components/cards`. Não crie cores, espaçamentos, tipografia ou primitivas paralelas dentro de features sem justificativa documentada.
 - A preferência visual é controlada exclusivamente por `ThemeProvider`/`useTheme`; mantenha os tokens React Native e as variáveis semânticas do NativeWind derivados da mesma fonte.
 - Componentes de apresentação financeira recebem centavos inteiros por propriedades e não acessam banco, stores, repositórios ou serviços.
+- Operações financeiras passam pelos serviços de domínio e pelo `SqlExecutor` transacional; telas não escrevem diretamente em repositórios financeiros.
+- Toda nova tabela ou alteração física exige migration Drizzle versionada, revisão do SQL gerado e teste de integridade.
 
 ## Nomenclatura
 

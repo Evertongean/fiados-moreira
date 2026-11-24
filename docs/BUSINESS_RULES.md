@@ -14,7 +14,8 @@
 2. Ponto flutuante não pode representar dinheiro em persistência ou regras.
 3. A entrada formatada em BRL deve ser convertida e validada antes de chegar ao domínio.
 4. Valor original do fiado deve ser positivo. Descontos ou correções futuras exigem evento explícito e auditoria; não podem ser pagamentos negativos.
-5. A apresentação usa `Intl.NumberFormat` com locale `pt-BR` e moeda `BRL` quando suportado.
+5. O limite operacional atual é R$ 999.999.999,99; entradas e somas devem permanecer inteiros seguros.
+6. A apresentação usa os utilitários BRL compartilhados; textos formatados nunca participam de cálculos.
 
 ## Fiados e saldo
 
@@ -43,13 +44,14 @@ saldo(D) = valor_original(D) - soma(pagamentos válidos de D)
 
 ## Situação do fiado
 
-A situação é determinada nesta ordem:
+A situação financeira é determinada nesta ordem:
 
-1. **Quitado:** saldo igual a zero, independentemente do vencimento anterior.
-2. **Atrasado:** saldo positivo, vencimento definido e data atual posterior ao vencimento.
-3. **Em aberto:** saldo positivo e sem vencimento, ou vencimento ainda não ultrapassado.
+1. **Cancelado:** cancelamento válido e auditado.
+2. **Quitado:** saldo igual a zero.
+3. **Parcialmente pago:** líquido pago positivo e saldo positivo.
+4. **Pendente:** nenhum pagamento líquido e saldo positivo.
 
-Um fiado sem vencimento nunca é classificado automaticamente como atrasado. A comparação de vencimento deve usar uma convenção única de data civil/fuso para evitar mudança indevida próxima da meia-noite.
+`isOverdue` é uma condição separada: saldo positivo, não cancelado, vencimento anterior à data civil atual. Um fiado parcial também pode estar atrasado; sem vencimento, quitado ou com vencimento hoje não está atrasado. A data civil usa o fuso do workspace.
 
 ## Datas e vencimentos
 
@@ -68,14 +70,14 @@ Um fiado sem vencimento nunca é classificado automaticamente como atrasado. A c
 
 ## Transações
 
-As seguintes ações são atômicas: pagamento + atualização/derivação de saldo + auditoria + fila de sync; estorno + auditoria + fila; criação/alteração financeira + auditoria + fila. Nenhum estado intermediário pode ser apresentado como confirmado.
+As seguintes ações são atômicas: pagamento + auditoria; estorno + auditoria; criação, alteração ou cancelamento de fiado + auditoria. A conexão serializada e `BEGIN IMMEDIATE` mantêm leitura do saldo e escrita sob a mesma proteção. Nenhum estado intermediário pode ser apresentado como confirmado. A fila de sync ainda não recebe registros porque não há consumidor.
 
 ## Offline e sincronização
 
 1. Cadastro, consulta e operações financeiras essenciais funcionam sem internet.
-2. O dispositivo gera IDs globais e `operation_id` antes da escrita local.
-3. A fila é persistente; fechar o aplicativo não perde operações pendentes.
-4. Retentativas são idempotentes e respeitam dependências entre entidades.
+2. O dispositivo gera UUIDs globais e `operation_id` antes da escrita local.
+3. Pagamentos e estornos locais repetidos com a mesma operação e dados retornam o registro existente; dados diferentes geram conflito.
+4. A tabela de fila está preparada, mas a produção de eventos e o worker pertencem ao Prompt 19.
 5. A sincronização não pode criar duplicatas de registros ou pagamentos.
 6. Conflitos não financeiros podem adotar política específica por campo/versão; conflitos financeiros nunca são sobrescritos silenciosamente.
 7. Um erro remoto não apaga a mudança local; deve permanecer diagnosticável e recuperável.

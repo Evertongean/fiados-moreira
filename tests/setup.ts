@@ -8,5 +8,8 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'success', Error: 'error', Warning: 'warning' },
 }));
 jest.mock('expo-system-ui', () => ({ setBackgroundColorAsync: jest.fn() }));
+jest.mock('expo-crypto', () => ({
+  randomUUID: () => require('node:crypto').randomUUID(),
+}));
 
 require('react-native-reanimated').setUpTests();

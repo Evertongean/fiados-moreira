@@ -20,12 +20,12 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System e a arquitetura de navegação foram implementados**. As telas estruturais existem, mas persistência e funcionalidades financeiras ainda não estão disponíveis.
+Nesta etapa, **a fundação técnica, o Design System, a navegação e a infraestrutura local SQLite/Drizzle foram implementados**. As telas continuam estruturais; repositórios e serviços financeiros existem, mas ainda não estão conectados ao CRUD visual.
 
 ## Stack
 
-- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para a preferência visual, Jest 30, React Native Testing Library, ESLint e Prettier.
-- Planejado: Zustand, React Hook Form, Zod, Expo SQLite, Drizzle ORM, Supabase/PostgreSQL, Expo Notifications, SecureStore, Local Authentication e EAS Build.
+- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
+- Planejado: Zustand, React Hook Form, Supabase/PostgreSQL, Expo Notifications, SecureStore, Local Authentication e EAS Build.
 
 Dependências planejadas serão adicionadas apenas quando houver uso real.
 
@@ -46,11 +46,14 @@ fiados-moreira/
 │   │   ├── layouts/       # Estados e composições compartilhadas de tela
 │   │   ├── navigation/    # Cabeçalhos e controles de navegação
 │   │   └── ui/            # Primitivas reutilizáveis
-│   ├── features/          # Estruturas visuais por domínio
-│   ├── hooks/             # Hooks compartilhados, incluindo useTheme
+│   ├── database/          # Conexão, schema, repositórios e provider SQLite
+│   ├── features/          # Telas, domínio e serviços financeiros
+│   ├── hooks/             # Hooks compartilhados, tema e banco
 │   ├── theme/             # Tokens e sistema global de temas
 │   └── utils/             # Moeda, iniciais e composição de classes
-├── tests/                 # Testes unitários e de componentes
+├── drizzle/               # Migrations SQL e metadados versionados
+├── tests/                 # Testes unitários, componentes e SQLite real isolado
+├── drizzle.config.ts
 ├── .env.example
 ├── AGENTS.md
 ├── app.json
@@ -63,7 +66,7 @@ fiados-moreira/
 └── tsconfig.json
 ```
 
-Diretórios futuros de `database`, `services`, `stores` e `types` serão criados quando a primeira implementação correspondente existir, evitando módulos vazios.
+Diretórios futuros de integrações externas e stores serão criados somente quando tiverem implementação real.
 
 ## Pré-requisitos
 
@@ -103,6 +106,9 @@ O produto é exclusivamente mobile. Não há alvo web configurado.
 | `npm run format`       | Formata arquivos com Prettier.                       |
 | `npm run format:check` | Verifica a formatação.                               |
 | `npm run doctor`       | Executa o Expo Doctor.                               |
+| `npm run db:generate`  | Gera migration versionada a partir do schema.        |
+| `npm run db:check`     | Verifica o histórico de migrations Drizzle.          |
+| `npm run db:test`      | Executa testes de persistência e domínio.            |
 | `npm run validate`     | Executa tipos, lint, formatação e testes.            |
 
 ## Design System e temas
@@ -132,4 +138,4 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 
 ## Status
 
-**Prompt 03 — Navegação e estrutura das telas:** implementado. A próxima etapa planejada é o Prompt 04, dedicado ao banco local. Banco de dados, autenticação, CRUD e recursos financeiros ainda não foram implementados.
+**Prompt 04 — Banco SQLite e Drizzle:** infraestrutura implementada. Schema, migration, repositórios, transações, cálculos, estornos e auditoria estão protegidos por testes locais. A próxima etapa é o Prompt 05 (clientes). Autenticação, sincronização e CRUD visual permanecem fora do escopo.

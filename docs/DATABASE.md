@@ -1,74 +1,150 @@
-# Modelagem conceitual do banco de dados
+# Banco de dados local
 
-> Este documento descreve o modelo inicial. Nenhum banco, schema ou migration foi implementado no Prompt 01.
+## Estado da implementação
 
-## Identificação e campos comuns
+O Prompt 04 implementa a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline. As telas ainda são estruturais: o CRUD será conectado a partir do Prompt 05.
 
-Registros sincronizáveis usarão identificadores globais (preferencialmente UUID v7) gerados no cliente, evitando IDs provisórios e colisões offline. Entidades mutáveis terão `created_at`, `updated_at` e `version`; exclusão lógica adicionará `deleted_at` quando necessária. Datas são persistidas em UTC e exibidas no fuso local. Valores monetários são inteiros em centavos.
+Não existe Supabase, autenticação, worker de sincronização, backup definitivo nem criptografia própria do arquivo nesta etapa.
 
-## Entidades
+## Arquitetura
 
-### `users`
+```text
+DatabaseProvider
+  ├── client.ts → abre SQLite, aplica PRAGMAs e migrations
+  ├── Drizzle → schema, relações, tipos e migration mobile
+  └── SqlExecutor parametrizado
+       ├── repositories → persistência por workspace
+       └── services → validação + transação + auditoria
+```
 
-Representa o usuário autenticado e proprietário lógico dos dados. Campos conceituais: `id`, `auth_user_id`, `display_name`, `created_at`, `updated_at`, `version`. `auth_user_id` será único e referenciará a identidade do Supabase Auth.
+`DatabaseProvider` possui os estados `initializing`, `ready` e `error`. Ele é montado no layout raiz depois do tema/fontes e antes da navegação. Em falha, preserva o arquivo e oferece nova tentativa, sem expor SQL ou caminhos ao usuário.
 
-### `customers`
+## Configuração SQLite
 
-Pessoa responsável pelos fiados. Campos: `id`, `user_id`, `name`, `phone`, `document` opcional, `notes`, `is_active`, `created_at`, `updated_at`, `deleted_at`, `version`. A inativação preserva vínculos financeiros.
+Na abertura da conexão são executados:
 
-### `vehicles`
+- `foreign_keys = ON`, para ativar as FKs físicas;
+- `journal_mode = WAL`, para durabilidade e melhor concorrência;
+- `synchronous = FULL`, por se tratar de registros financeiros;
+- `busy_timeout = 5000`, para aguardar bloqueios transitórios.
 
-Veículo associado a um cliente. Campos: `id`, `user_id`, `customer_id`, `license_plate`, `brand`, `model`, `year`, `color`, `notes`, timestamps, `deleted_at`, `version`. Placa será normalizada; eventual unicidade deve considerar o proprietário e veículos inativos.
+O executor serializa todas as operações na conexão. Serviços financeiros usam `BEGIN IMMEDIATE`, leem o saldo e gravam operação/auditoria na mesma transação. A opção foi preferida à conexão separada de `withExclusiveTransactionAsync`, cujos PRAGMAs não são herdados automaticamente no Expo SQLite.
 
-### `debts`
+## Drizzle e migrations
 
-Fiado originado por serviços e/ou peças. Campos: `id`, `user_id`, `customer_id`, `vehicle_id` opcional, `description`, `original_amount_cents`, `occurred_at`, `due_date` opcional, `status` derivado/materializado de forma controlada, timestamps, `deleted_at`, `version`. Itens detalhados poderão ser normalizados quando o módulo for implementado; nunca se usará ponto flutuante para valores.
+- Configuração: `drizzle.config.ts`.
+- Schema: `src/database/schema`.
+- Saída versionável: `drizzle/` (SQL, journal, snapshot e módulo para Expo).
+- Bundle: Babel importa `.sql` inline e Metro reconhece a extensão.
+- Inicialização: `drizzle-orm/expo-sqlite/migrator` registra migrations em `__drizzle_migrations` e não reaplica versões concluídas.
 
-### `payments`
+Comandos:
 
-Pagamento aplicado a um fiado. Campos: `id`, `user_id`, `debt_id`, `amount_cents`, `paid_at`, `method` opcional, `notes`, `status` (`valid` ou `reversed`), `reversed_at`, `reversal_reason`, timestamps e `version`. Pagamentos financeiros não são apagados; estorno altera estado e cria auditoria.
+```bash
+npm run db:generate  # gera uma migration a partir do schema
+npm run db:check     # verifica a consistência do histórico
+npm run db:test      # executa testes de banco, repositórios e domínio
+```
 
-### `reminders`
+Para uma mudança futura, altere o schema, execute `npm run db:generate`, revise SQL e metadados, rode `npm run db:check` e a suíte completa. Não use `drizzle-kit push` em produção e não apague o banco diante de falha.
 
-Lembrete de cobrança vinculado a um fiado. Campos: `id`, `user_id`, `debt_id`, `scheduled_at`, `status`, `notification_identifier` opcional, `sent_at`, timestamps, `deleted_at`, `version`.
+## Diagrama
 
-### `settings`
+```mermaid
+erDiagram
+  WORKSPACES ||--o{ CUSTOMERS : owns
+  WORKSPACES ||--o{ VEHICLES : owns
+  WORKSPACES ||--o{ DEBTS : owns
+  WORKSPACES ||--o{ PAYMENTS : owns
+  WORKSPACES ||--o{ PAYMENT_REVERSALS : owns
+  WORKSPACES ||--o{ REMINDERS : owns
+  WORKSPACES ||--o{ SETTINGS : owns
+  WORKSPACES ||--o{ SYNC_QUEUE : owns
+  WORKSPACES ||--o{ AUDIT_LOGS : owns
+  CUSTOMERS ||--o{ VEHICLES : has
+  CUSTOMERS ||--o{ DEBTS : owes
+  VEHICLES o|--o{ DEBTS : relates
+  DEBTS ||--o{ PAYMENTS : receives
+  PAYMENTS ||--o| PAYMENT_REVERSALS : may_have
+  DEBTS ||--o{ REMINDERS : schedules
+```
 
-Preferências por usuário. Campos: `id`, `user_id`, `theme`, preferências de notificação, bloqueio biométrico, política de backup e timestamps. Configurações sensíveis não são armazenadas em texto aberto nesta tabela.
+## Dicionário de dados
 
-### `sync_queue`
+Todos os nomes físicos usam `snake_case`; propriedades TypeScript usam `camelCase`. UUIDs são `TEXT`, valores financeiros são `INTEGER`, instantes são ISO 8601 UTC em `TEXT` e datas civis são `YYYY-MM-DD`.
 
-Outbox local de mutações. Campos: `id`, `operation_id` único, `entity_type`, `entity_id`, `operation`, `payload` versionado, `dependency_ids`, `status`, `attempt_count`, `next_attempt_at`, `last_error_code`, `created_at`, `processed_at`. Payloads não devem conter segredos e erros não devem armazenar dados pessoais desnecessários.
+| Tabela              | Campos principais                                                                   | Integridade e índices relevantes                                                                                               |
+| ------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `workspaces`        | `id`, `name`, `timezone`, `currency`, timestamps                                    | PK UUID; workspace inicial idempotente (`Oficina Moreira`, `BRL`, `America/Fortaleza`)                                         |
+| `customers`         | workspace, nome, telefones, endereço, notas, timestamps de arquivo/exclusão lógica  | FK restritiva; únicos auxiliares `(workspace_id,id)`; índices por nome, telefone e arquivamento                                |
+| `vehicles`          | workspace, cliente, tipo, marca, modelo, ano, placa, cor, notas                     | FK composta workspace/cliente; tipo e ano com `CHECK`; índices por cliente e placa                                             |
+| `debts`             | workspace, cliente, veículo opcional, descrição, `total_cents`, datas, cancelamento | FKs compostas validam workspace e dono do veículo; total positivo/limitado; índices por cliente, datas, cancelamento e veículo |
+| `payments`          | workspace, fiado, `operation_id`, `amount_cents`, método, `paid_at`, notas          | FK composta; operação única por workspace; valor/método com `CHECK`; índices por fiado e período                               |
+| `payment_reversals` | workspace, pagamento, `operation_id`, motivo, `reversed_at`                         | um estorno por pagamento; operação única; FK restritiva                                                                        |
+| `reminders`         | workspace, fiado, tipo, agendamento, estado, ID da notificação                      | enums por `CHECK`; índice workspace/estado/agendamento; não agenda notificações nesta etapa                                    |
+| `settings`          | workspace, chave, JSON, atualização                                                 | PK composta `(workspace_id,key)`; não armazena segredos                                                                        |
+| `sync_queue`        | workspace, entidade, operação, estado, tentativas e erro sanitizado                 | estrutura futura; `CHECK` de enum/tentativas e índice de processamento                                                         |
+| `audit_logs`        | workspace, entidade, ação, operação, metadados minimizados e instante               | operação única quando informada; append-only pelos fluxos normais; índices por entidade e data                                 |
 
-### `audit_logs`
+Não há `ON DELETE CASCADE` em relacionamentos financeiros. As FKs compostas impedem associação entre oficinas e, em fiados, associação a veículo de outro cliente.
 
-Trilha imutável de eventos relevantes. Campos: `id`, `user_id`, `entity_type`, `entity_id`, `action`, `operation_id`, `before_data` e `after_data` minimizados, `reason`, `occurred_at`, `device_id`/origem e metadados seguros. Retenção e acesso serão restritos.
+## Identificadores e tempo
 
-## Relacionamentos
+IDs e identificadores de operação são UUID v4 criptograficamente seguros gerados por `expo-crypto`. Eles funcionam offline e são compatíveis com o futuro PostgreSQL. O workspace é criado uma única vez na inicialização.
 
-- `users 1:N customers`, `vehicles`, `debts`, `payments`, `reminders`, `settings` e `audit_logs`.
-- `customers 1:N vehicles` e `customers 1:N debts`.
-- `vehicles 1:N debts`; o veículo em um fiado é opcional.
-- `debts 1:N payments` e `debts 1:N reminders`.
-- `sync_queue` referencia entidades de forma polimórfica por tipo/ID, sem substituir as FKs do domínio.
+Instantes usam `new Date().toISOString()` (UTC). `service_date` e `due_date` são datas civis sem horário. A condição de atraso calcula a data civil atual com o fuso do workspace e aceita uma data de referência injetável para testes.
 
-## Integridade referencial
+## Dinheiro, saldo e status
 
-- FKs obrigatórias impedem registros órfãos; operações relacionadas usam transação.
-- Um pagamento válido exige fiado existente, valor positivo e saldo suficiente.
-- `original_amount_cents > 0` e `amount_cents > 0` são invariantes também protegidas no banco quando possível.
-- Cliente/fiado com histórico financeiro não sofre exclusão física.
-- Estorno mantém pagamento e auditoria; saldo considera somente pagamentos válidos.
-- Exclusões lógicas não usam `CASCADE` para apagar histórico financeiro.
-- Índices serão definidos para proprietário, vínculos, vencimento, status de sync, data e chaves de busca normalizadas.
+O limite operacional é `99.999.999.999` centavos (R$ 999.999.999,99), definido por `MAX_CURRENCY_CENTS`. Entradas exigem inteiro seguro, positivo quando aplicável, sem `NaN`, infinito ou ponto flutuante. Somas também são validadas.
 
-## Concorrência e sincronização
+```text
+líquido pago = bruto pago - pagamentos integralmente estornados
+saldo = valor original - líquido pago
+```
 
-`version` permitirá controle otimista. `operation_id` garantirá que repetir uma mutação não crie um segundo pagamento. O servidor validará propriedade, versão e invariantes financeiras em transação. Divergências financeiras não serão resolvidas silenciosamente por timestamp.
+Saldo negativo é erro; não é mascarado com `Math.max`. Os estados financeiros derivados são `pending`, `partially_paid`, `paid` e `canceled`. `isOverdue` é uma condição independente e dinâmica.
 
-## Questões para o Prompt 04
+## Repositórios e serviços
 
-- Validar UUID v7 com as versões escolhidas de SQLite/PostgreSQL.
-- Definir normalização de itens de serviço/peça e métodos de pagamento.
-- Fechar estratégia de status derivado versus materializado.
-- Especificar retenção/minimização de auditoria e índices a partir das consultas reais.
+Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository` e `AuditRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
+
+Serviços financeiros:
+
+- `DebtService`: cria, atualiza e cancela fiados com auditoria; impede total menor que líquido pago e cancelamento com pagamento líquido;
+- `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
+- `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
+
+Zod valida entradas separadas dos registros de persistência. Telas não executam SQL e, nesta etapa, ainda não consomem os serviços.
+
+## Idempotência, concorrência e auditoria
+
+Pagamentos e estornos têm `operation_id` único por workspace. Repetir a mesma operação e os mesmos dados retorna o registro existente; reutilizar o ID com dados diferentes retorna `IDEMPOTENCY_CONFLICT`.
+
+A fila da conexão mais `BEGIN IMMEDIATE` impede que dois pagamentos concorrentes observem o mesmo saldo livre. Falha em qualquer passo, inclusive auditoria, faz rollback. A auditoria local preserva rastreabilidade, mas não é inviolável; hardening adicional pertence ao Prompt 20.
+
+## Arquivamento e retenção
+
+Clientes e veículos usam `archived_at` para sair dos fluxos ativos sem perder relações. `deleted_at` está reservado para exclusão lógica com política futura de privacidade. Fiados usam cancelamento, pagamentos usam estorno e registros financeiros não possuem API de exclusão física.
+
+Retenção, anonimização e exclusão de dados pessoais serão tratadas na etapa de segurança e privacidade.
+
+## Sincronização futura
+
+`sync_queue` existe apenas como estrutura: nenhum registro é gerado enquanto não houver consumidor no Prompt 19. SQLite e Supabase não sincronizam automaticamente. A implementação futura deverá importar os registros locais preexistentes, deduplicar pagamentos, resolver conflitos explicitamente, revalidar finanças no servidor e aplicar autenticação/RLS.
+
+## Segurança e limitações
+
+- arquivos `*.db`, WAL/SHM, backups e dumps locais são ignorados pelo Git;
+- consultas recebem parâmetros; `execAsync` é usado somente para SQL estático controlado;
+- mensagens de produção não contêm SQL, stack, caminhos ou dados pessoais;
+- o arquivo fica no sandbox privado do aplicativo, o que **não equivale a criptografia do banco**;
+- SQLCipher não foi ativado: exige avaliação de suporte nativo, build de desenvolvimento, chaves no SecureStore e recuperação segura no Prompt 20;
+- não há credenciais no SQLite comum;
+- o aplicativo ainda não deve ser considerado pronto para dados reais até validar dispositivo, criptografia/ameaças, backup e recuperação.
+
+## Testes
+
+Os testes de domínio cobrem dinheiro, saldo, estorno, status e fuso. Testes de integração usam SQLite real e isolado via `node:sqlite`, aplicam o SQL versionado, verificam constraints/índices/integridade, reabertura, repositórios, atomicidade, idempotência e concorrência.
+
+O adaptador Node usa a mesma engine SQLite e os mesmos arquivos SQL, mas não substitui a validação do Expo SQLite em Android/iOS. A abertura mobile, PRAGMAs e empacotamento também são verificados por TypeScript e bundles; teste em dispositivo/emulador continua necessário.

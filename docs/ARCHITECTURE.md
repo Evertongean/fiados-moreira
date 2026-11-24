@@ -37,17 +37,19 @@ Rotas orquestram navegação; componentes renderizam; hooks conectam tela e caso
 ## Estratégia Offline First
 
 1. A entrada é validada no dispositivo.
-2. A mudança de domínio, o registro de auditoria e o item da `sync_queue` são gravados na mesma transação SQLite.
+2. A mudança financeira e o registro de auditoria são gravados na mesma transação SQLite.
 3. A interface lê imediatamente o estado local confirmado.
 4. Quando houver rede e sessão válida, o worker envia itens pendentes.
 5. O servidor processa a operação de modo idempotente e retorna confirmação/versão.
-6. A fila local é atualizada; erros transitórios usam backoff, e conflitos exigem política explícita.
+6. Quando o Prompt 19 implementar o consumidor, a fila local será atualizada com backoff e conflitos explícitos.
 
 Falha de rede nunca deve desfazer uma operação local já confirmada. Falha de persistência local deve impedir a confirmação visual da operação.
 
 ## Persistência local
 
-Expo SQLite e Drizzle ORM serão introduzidos no Prompt 04. Migrations serão incrementais, versionadas e testadas. Escritas financeiras usarão transações; consultas derivadas terão índices definidos a partir dos fluxos reais. Valores serão `INTEGER` em centavos e timestamps usarão UTC em formato consistente.
+Expo SQLite e Drizzle ORM foram introduzidos no Prompt 04. Migrations são incrementais, versionadas, empacotadas no bundle e aplicadas antes de liberar os repositórios. Escritas financeiras usam fila serial e `BEGIN IMMEDIATE`; FKs compostas isolam workspaces e validam o dono do veículo. Valores usam `INTEGER` em centavos, instantes usam ISO UTC e datas civis usam `YYYY-MM-DD`.
+
+A tabela `sync_queue` está modelada, mas propositalmente não recebe eventos até existir consumidor no Prompt 19. O banco local não é apagado automaticamente em falhas de migration.
 
 ## Integração futura com Supabase
 
@@ -119,3 +121,13 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - A galeria foi movida para o segmento `/dev`, protegido no layout e na tela, e só recebe link em desenvolvimento.
 - As telas estruturais não consultam dados simulados, não salvam formulários e não executam cálculos ou transações financeiras.
 - A entrada permanece direta em `(tabs)`. O Stack raiz está preparado para receber grupos públicos/protegidos quando a autenticação real for implementada.
+
+## Decisões do Prompt 04
+
+- `DatabaseProvider` mantém uma única conexão, executa PRAGMAs/migrations e cria o workspace local idempotente antes da navegação.
+- Drizzle é a fonte do schema, relações, tipos e migrations; repositórios usam um executor SQL estritamente parametrizado que também funciona em transações compartilhadas.
+- A serialização de acesso combinada com `BEGIN IMMEDIATE` evita pagamento concorrente acima do saldo sem depender da interface.
+- UUID v4 seguro vem de Expo Crypto. Pagamentos e estornos possuem `operation_id` único e conflito explícito.
+- Status financeiro e atraso são derivados; pagamentos estornados permanecem no histórico e deixam de compor o líquido pago.
+- A auditoria é atômica e minimizada, porém local e não inviolável. Segurança, criptografia e retenção serão aprofundadas no Prompt 20.
+- Testes de integração usam `node:sqlite` com o SQL versionado. Isso não substitui validação do adaptador Expo em Android/iOS.
