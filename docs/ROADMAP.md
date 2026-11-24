@@ -9,8 +9,8 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
 - [x] **Prompt 02 — Design System**
   - [x] Tokens completos, tipografia Inter, NativeWind e componentes base.
   - [x] Temas claro/escuro/sistema, persistência, acessibilidade e galeria de desenvolvimento.
-- [ ] **Prompt 03 — Navegação**
-  - [ ] Fluxos, layouts e rotas definitivas.
+- [x] **Prompt 03 — Navegação**
+  - [x] Cinco abas, stacks, rotas dinâmicas, layouts e estruturas preliminares das telas.
 - [ ] **Prompt 04 — Banco de dados**
   - [ ] Expo SQLite, Drizzle, schema, migrations e repositórios base.
 - [ ] **Prompt 05 — Clientes**

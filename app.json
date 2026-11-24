@@ -12,7 +12,19 @@
     "android": {
       "predictiveBackGestureEnabled": false
     },
-    "plugins": ["expo-router", "expo-font", "expo-splash-screen"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F8FAFC",
+          "dark": {
+            "backgroundColor": "#101714"
+          }
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

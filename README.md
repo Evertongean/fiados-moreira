@@ -20,7 +20,7 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica e o Design System foram implementados**. As funcionalidades financeiras acima ainda não estão disponíveis.
+Nesta etapa, **a fundação técnica, o Design System e a arquitetura de navegação foram implementados**. As telas estruturais existem, mas persistência e funcionalidades financeiras ainda não estão disponíveis.
 
 ## Stack
 
@@ -39,11 +39,14 @@ O projeto adota arquitetura modular por funcionalidades e estratégia Offline Fi
 fiados-moreira/
 ├── docs/                  # Produto, arquitetura e decisões do projeto
 ├── src/
-│   ├── app/               # Layout, tela institucional e galeria de desenvolvimento
+│   ├── app/               # Rotas, tabs, stacks e galeria de desenvolvimento
 │   ├── components/
 │   │   ├── brand/         # Marca vetorial provisória
 │   │   ├── cards/         # Apresentações financeiras sem regras de domínio
+│   │   ├── layouts/       # Estados e composições compartilhadas de tela
+│   │   ├── navigation/    # Cabeçalhos e controles de navegação
 │   │   └── ui/            # Primitivas reutilizáveis
+│   ├── features/          # Estruturas visuais por domínio
 │   ├── hooks/             # Hooks compartilhados, incluindo useTheme
 │   ├── theme/             # Tokens e sistema global de temas
 │   └── utils/             # Moeda, iniciais e composição de classes
@@ -60,7 +63,7 @@ fiados-moreira/
 └── tsconfig.json
 ```
 
-Diretórios futuros de `features`, `database`, `services`, `stores` e `types` serão criados quando a primeira implementação correspondente existir, evitando módulos vazios.
+Diretórios futuros de `database`, `services`, `stores` e `types` serão criados quando a primeira implementação correspondente existir, evitando módulos vazios.
 
 ## Pré-requisitos
 
@@ -104,9 +107,11 @@ O produto é exclusivamente mobile. Não há alvo web configurado.
 
 ## Design System e temas
 
-O aplicativo oferece tema claro, escuro e automático, com preferência persistida localmente. A tela institucional acompanha o tema e carrega a família Inter antes de liberar a interface.
+O aplicativo oferece tema claro, escuro e automático, com preferência persistida localmente. A navegação e todas as telas acompanham o tema; a família Inter é carregada antes de liberar a interface.
 
-Em desenvolvimento, execute `npm start` e use o botão **Abrir galeria do Design System** na tela inicial. A rota `/design-system` reúne todos os componentes e permite testar inputs, moeda, toasts, diálogo, ocultação de saldo e troca de tema. O acesso é removido da interface e redirecionado em bundles de produção.
+Em desenvolvimento, execute `npm start`, abra **Ajustes → Sobre** e use o botão **Abrir galeria do Design System**. A rota protegida `/dev/design-system` reúne os componentes e permite testar inputs, moeda, toasts, diálogo, ocultação de saldo e troca de tema. Todo o segmento `/dev` redireciona em bundles de produção.
+
+Consulte [docs/NAVIGATION.md](docs/NAVIGATION.md) para o mapa completo de rotas, convenções de parâmetros e status das telas.
 
 Consulte [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) antes de implementar uma tela. Tokens e componentes compartilhados devem ser reutilizados em vez de estilos arbitrários por feature.
 
@@ -121,9 +126,10 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Banco de dados](docs/DATABASE.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
+- [Navegação](docs/NAVIGATION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Segurança e dependências](docs/SECURITY.md)
 
 ## Status
 
-**Prompt 02 — Design System e identidade visual:** implementado. A próxima etapa planejada é o Prompt 03, dedicado à navegação. Banco de dados, autenticação, navegação definitiva e recursos financeiros ainda não foram implementados.
+**Prompt 03 — Navegação e estrutura das telas:** implementado. A próxima etapa planejada é o Prompt 04, dedicado ao banco local. Banco de dados, autenticação, CRUD e recursos financeiros ainda não foram implementados.

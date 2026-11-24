@@ -9,7 +9,7 @@ import { formatBRLCents } from '@/utils/currency';
 
 export interface BalanceCardProps extends ViewProps {
   title: string;
-  valueCents: number;
+  valueCents: number | null;
   description?: string;
   icon?: LucideIcon;
   hidden?: boolean;
@@ -37,7 +37,7 @@ export function BalanceCard({
             {title}
           </AppText>
         </View>
-        {onToggleHidden ? (
+        {onToggleHidden && valueCents !== null ? (
           <IconButton
             accessibilityLabel={hidden ? 'Mostrar valor' : 'Ocultar valor'}
             icon={hidden ? EyeOff : Eye}
@@ -47,7 +47,9 @@ export function BalanceCard({
           />
         ) : null}
       </View>
-      <AppText variant="currency">{hidden ? 'R$ ••••••' : formatBRLCents(valueCents)}</AppText>
+      <AppText variant={valueCents === null ? 'h4' : 'currency'}>
+        {valueCents === null ? 'Indisponível' : hidden ? 'R$ ••••••' : formatBRLCents(valueCents)}
+      </AppText>
       {description ? (
         <AppText color="textSecondary" variant="bodySmall">
           {description}

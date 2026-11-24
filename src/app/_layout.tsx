@@ -28,7 +28,7 @@ export default function RootLayout() {
 }
 
 function AppBootstrap() {
-  const { isReady, resolvedTheme } = useTheme();
+  const { isReady, resolvedTheme, tokens } = useTheme();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -50,7 +50,24 @@ function AppBootstrap() {
   return (
     <ToastProvider>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          animation: 'slide_from_right',
+          contentStyle: { backgroundColor: tokens.colors.background },
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="customers" />
+        <Stack.Screen name="vehicles" />
+        <Stack.Screen name="debts" />
+        <Stack.Screen name="payments" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="reports" />
+        <Stack.Screen name="dev" />
+        <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
+      </Stack>
     </ToastProvider>
   );
 }

@@ -152,6 +152,16 @@ Feedbacks de pressão usam opacidade/escala discretas. Haptics é reservado a a�
 
 Esses componentes recebem somente propriedades. Não acessam banco, stores, repositórios ou serviços.
 
+### Navegação (`src/components/navigation`)
+
+- `AppHeader`: identidade das telas principais e acesso opcional às notificações.
+- `PageHeader`: retorno com fallback para deep links, título e ação contextual.
+- `SectionHeader`: título, descrição e ação de uma seção interna.
+- `FloatingActionButton`: ação primária de lista com alvo confortável e feedback.
+- `SettingsListItem`: opção de configuração com ícone, descrição, valor e indisponibilidade.
+
+`BalanceCard` aceita `valueCents={null}` para apresentar “Indisponível” em estruturas ainda sem fonte de dados. Quando informado, o valor continua obrigatoriamente em centavos inteiros.
+
 ## Dinheiro
 
 Valores são representados como números inteiros em centavos. `formatBRLCents` separa reais e centavos antes de formatar, sem aritmética monetária de ponto flutuante. `parseBRLToCents` valida texto BRL e `parseCurrencyDigits` sustenta a digitação do `CurrencyInput`.
@@ -178,14 +188,14 @@ TalkBack/VoiceOver e contraste devem ser novamente inspecionados em dispositivo 
 
 ## Galeria de desenvolvimento
 
-A rota `/design-system` demonstra identidade, cores, tipografia, controles, estados e cards financeiros com dados explicitamente fictícios. Inputs, tema, toast, ocultação de saldo e diálogo são interativos.
+A rota `/dev/design-system` demonstra identidade, cores, tipografia, controles, estados e cards financeiros com dados explicitamente fictícios. Inputs, tema, toast, ocultação de saldo e diálogo são interativos.
 
 1. Execute `npm start`.
 2. Abra a aplicação em desenvolvimento.
-3. Toque em **Abrir galeria do Design System** na tela inicial.
+3. Acesse **Ajustes → Sobre → Abrir galeria do Design System**.
 4. Use o `RadioGroup` da galeria para alternar entre claro, escuro e sistema.
 
-O botão só é renderizado com `__DEV__`. Em bundle de produção, a própria rota redireciona para `/`, impedindo acesso à demonstração e aos dados fictícios.
+O botão só é renderizado com `__DEV__`. Em bundle de produção, o layout do segmento `/dev` e a própria rota redirecionam para `/`, impedindo acesso à demonstração e aos dados fictícios.
 
 ## Evolução
 

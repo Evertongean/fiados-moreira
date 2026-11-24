@@ -93,4 +93,4 @@ Inclui os RF-01 a RF-15 para um fluxo de uso individual da oficina, com base loc
 
 ## Estado atual
 
-No Prompt 01 foram implementadas apenas a fundação Expo, a tela inicial provisória e a documentação. Todos os requisitos funcionais permanecem planejados.
+Os Prompts 01 a 03 implementaram a fundação Expo, o Design System, os temas e a arquitetura de navegação com estruturas preliminares das telas. A preferência de aparência é funcional. CRUD, persistência, cálculos, relatórios, notificações e demais requisitos de domínio permanecem planejados.

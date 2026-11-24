@@ -106,5 +106,16 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Inter é carregada em runtime com Expo Font e splash screen coordenada. Uma falha de fonte não bloqueia indefinidamente a inicialização.
 - Componentes compartilhados vivem em `src/components/ui`; componentes de apresentação financeira em `src/components/cards` recebem somente propriedades e não conhecem domínio ou persistência.
 - Dinheiro permanece inteiro em centavos desde a API dos componentes até os utilitários. Formatação separa parte inteira e centavos sem cálculo financeiro em ponto flutuante.
-- A galeria `/design-system` existe apenas para desenvolvimento: o acesso visual usa `__DEV__` e a rota redireciona para `/` em produção.
+- A galeria, atualmente em `/dev/design-system`, existe apenas para desenvolvimento: o acesso visual usa `__DEV__` e a rota redireciona para `/` em produção.
 - Reanimated é usado somente em feedback funcional e respeita redução de movimento. Haptics é reservado a ações relevantes.
+
+## Decisões do Prompt 03
+
+- O Expo Router compõe um Stack raiz, cinco JavaScript Tabs e stacks secundários por domínio. Detalhes e formulários ficam fora das tabs para aproveitar a tela inteira.
+- Arquivos em `src/app` permanecem finos; as estruturas visuais foram distribuídas em `src/features/<feature>` e os elementos compartilhados em `src/components/navigation`.
+- Cabeçalhos customizados reutilizam o Design System e o cabeçalho nativo não é montado em paralelo.
+- Rotas dinâmicas transportam apenas identificadores validados e oferecem fallback seguro para acesso direto inválido.
+- O tema da navegação deriva do mesmo `ThemeProvider`; não foi criado outro estado ou provider visual.
+- A galeria foi movida para o segmento `/dev`, protegido no layout e na tela, e só recebe link em desenvolvimento.
+- As telas estruturais não consultam dados simulados, não salvam formulários e não executam cálculos ou transações financeiras.
+- A entrada permanece direta em `(tabs)`. O Stack raiz está preparado para receber grupos públicos/protegidos quando a autenticação real for implementada.

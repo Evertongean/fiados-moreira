@@ -16,11 +16,12 @@ export function renderWithTheme(
   element: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'> & { theme?: Partial<ThemeContextValue> },
 ) {
-  const value = { ...defaultTheme, ...options?.theme };
+  const { theme, ...renderOptions } = options ?? {};
+  const value = { ...defaultTheme, ...theme };
 
   function Wrapper({ children }: PropsWithChildren) {
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
   }
 
-  return render(element, { ...options, wrapper: Wrapper });
+  return render(element, { ...renderOptions, wrapper: Wrapper });
 }
