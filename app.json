@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Fiados Moreira",
+    "slug": "fiados-moreira",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fiadosmoreira",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
