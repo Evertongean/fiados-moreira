@@ -7,6 +7,10 @@
 3. Clientes com qualquer histórico financeiro não podem ser excluídos fisicamente; devem ser inativados.
 4. Inativação não altera dívidas, pagamentos nem relatórios históricos.
 5. Dados usados em busca, como telefone e placa, devem ser normalizados sem destruir o valor apresentado ao usuário.
+6. Nome e telefone não são únicos; semelhanças geram aviso e nunca fusão ou bloqueio automático.
+7. Cliente arquivado permanece no histórico e não pode receber novos fiados até ser restaurado.
+8. Cliente com saldo líquido positivo não pode ser arquivado; a verificação e a alteração devem ocorrer na mesma transação.
+9. Cadastro, edição, arquivamento e restauração de cliente geram auditoria atômica e minimizada.
 
 ## Valores monetários
 

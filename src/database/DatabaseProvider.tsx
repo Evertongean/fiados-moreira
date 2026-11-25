@@ -9,6 +9,7 @@ import {
 import { StyleSheet, View } from 'react-native';
 
 import { Alert, Button, LoadingState, Screen } from '@/components/ui';
+import { CustomerService } from '@/features/customers/services/CustomerService';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
@@ -41,6 +42,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     audit: AuditRepository;
   };
   services: {
+    customers: CustomerService;
     debts: DebtService;
     payments: PaymentService;
     reversals: PaymentReversalService;
@@ -86,6 +88,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         audit: new AuditRepository(executor),
       },
       services: {
+        customers: new CustomerService(executor),
         debts: new DebtService(executor),
         payments: new PaymentService(executor),
         reversals: new PaymentReversalService(executor),

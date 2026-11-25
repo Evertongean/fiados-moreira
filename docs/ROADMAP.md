@@ -15,8 +15,10 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Expo SQLite, Drizzle, schema, migrations, repositórios e serviços financeiros base.
   - [x] Integridade, transações, idempotência, auditoria e testes SQLite isolados.
   - [ ] Validar abertura, reabertura e persistência do Expo SQLite em dispositivo/emulador Android e iOS.
-- [ ] **Prompt 05 — Clientes**
-  - [ ] Cadastro, edição, lista, detalhes e inativação.
+- [ ] **Prompt 05 — Clientes** (implementação concluída; aceite mobile pendente)
+  - [x] Cadastro, edição, lista, busca, detalhes, duplicidades, arquivamento e restauração.
+  - [x] Auditoria, isolamento por workspace, bloqueio com saldo e testes SQLite isolados.
+  - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 06 — Veículos**
   - [ ] Cadastro e vínculo com clientes.
 - [ ] **Prompt 07 — Fiados**

@@ -2,7 +2,7 @@
 
 ## Estado da implementação
 
-O Prompt 04 implementa a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline. As telas ainda são estruturais: o CRUD será conectado a partir do Prompt 05.
+O Prompt 04 implementou a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. O Prompt 05 conectou o CRUD de clientes ao banco. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline.
 
 Não existe Supabase, autenticação, worker de sincronização, backup definitivo nem criptografia própria do arquivo nesta etapa.
 
@@ -111,11 +111,13 @@ Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `Vehicl
 
 Serviços financeiros:
 
-- `DebtService`: cria, atualiza e cancela fiados com auditoria; impede total menor que líquido pago e cancelamento com pagamento líquido;
+- `DebtService`: cria, atualiza e cancela fiados com auditoria; impede criação para cliente arquivado, total menor que líquido pago e cancelamento com pagamento líquido;
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
-Zod valida entradas separadas dos registros de persistência. Telas não executam SQL e, nesta etapa, ainda não consomem os serviços.
+Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro.
+
+O Prompt 05 não alterou o schema nem migrations. A busca sem acento normaliza em memória somente os registros do workspace e filtro selecionados. Uma coluna indexada de busca será considerada apenas se medições reais justificarem nova migration.
 
 ## Idempotência, concorrência e auditoria
 

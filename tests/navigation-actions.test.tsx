@@ -13,9 +13,23 @@ const mockRouter = {
   push: jest.fn(),
   replace: jest.fn(),
 };
+const mockCustomerRepository = {
+  list: jest.fn().mockResolvedValue([]),
+  countActive: jest.fn().mockResolvedValue(0),
+};
 
 jest.mock('expo-router', () => ({
+  useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
   useRouter: () => mockRouter,
+}));
+
+jest.mock('@/hooks/useDatabase', () => ({
+  useDatabase: () => ({
+    workspace: { id: 'workspace-test' },
+    repositories: {
+      customers: mockCustomerRepository,
+    },
+  }),
 }));
 
 describe('navigation actions', () => {
@@ -26,7 +40,7 @@ describe('navigation actions', () => {
   it('opens the new customer screen from the customer empty state', async () => {
     await renderWithTheme(<CustomersScreen />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Cadastrar cliente' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Cadastrar cliente' }));
     expect(mockRouter.push).toHaveBeenCalledWith('/customers/new');
   });
 

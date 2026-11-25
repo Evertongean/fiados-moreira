@@ -18,6 +18,9 @@ function createMockIcon(name: string) {
 }
 
 export const ArrowLeft = createMockIcon('ArrowLeft');
+export const ArrowDownAZ = createMockIcon('ArrowDownAZ');
+export const Archive = createMockIcon('Archive');
+export const Banknote = createMockIcon('Banknote');
 export const BanknoteArrowDown = createMockIcon('BanknoteArrowDown');
 export const Bell = createMockIcon('Bell');
 export const BellRing = createMockIcon('BellRing');
@@ -54,6 +57,7 @@ export const Pencil = createMockIcon('Pencil');
 export const Plus = createMockIcon('Plus');
 export const ReceiptText = createMockIcon('ReceiptText');
 export const RefreshCw = createMockIcon('RefreshCw');
+export const RotateCcw = createMockIcon('RotateCcw');
 export const Save = createMockIcon('Save');
 export const Search = createMockIcon('Search');
 export const Settings = createMockIcon('Settings');
@@ -63,6 +67,7 @@ export const Sun = createMockIcon('Sun');
 export const TrendingUp = createMockIcon('TrendingUp');
 export const UserPlus = createMockIcon('UserPlus');
 export const UserRound = createMockIcon('UserRound');
+export const UserRoundPlus = createMockIcon('UserRoundPlus');
 export const Users = createMockIcon('Users');
 export const Wallet = createMockIcon('Wallet');
 export const WalletCards = createMockIcon('WalletCards');

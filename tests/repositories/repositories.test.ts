@@ -17,7 +17,7 @@ describe('workspace-scoped repositories', () => {
       phone: ' 85999990000 ',
     });
     expect(customer.name).toBe('Cliente Teste');
-    expect((await customers.findById(workspace.id, customer.id))?.phone).toBe('85999990000');
+    expect((await customers.findById(workspace.id, customer.id))?.phone).toBe('+5585999990000');
     expect(
       (await customers.update(workspace.id, customer.id, { name: 'Nome Atualizado' })).name,
     ).toBe('Nome Atualizado');
@@ -51,7 +51,7 @@ describe('workspace-scoped repositories', () => {
     const workspace = await new WorkspaceRepository(database).initializeLocal();
     const customers = new CustomerRepository(database);
     await expect(customers.create(workspace.id, { name: '  ' })).rejects.toMatchObject({
-      code: 'VALIDATION_ERROR',
+      code: 'CUSTOMER_VALIDATION_ERROR',
     });
     const customer = await customers.create(workspace.id, { name: 'Cliente Isolado' });
     expect(await customers.findById(randomUUID(), customer.id)).toBeNull();

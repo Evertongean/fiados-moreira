@@ -6,7 +6,8 @@ import { getRouteId } from '@/utils/routes';
 
 export default function EditCustomerRoute() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  if (!getRouteId(id)) {
+  const customerId = getRouteId(id);
+  if (!customerId) {
     return (
       <RouteState
         description="O identificador recebido não é válido."
@@ -15,5 +16,5 @@ export default function EditCustomerRoute() {
       />
     );
   }
-  return <CustomerFormScreen mode="edit" />;
+  return <CustomerFormScreen customerId={customerId} mode="edit" />;
 }

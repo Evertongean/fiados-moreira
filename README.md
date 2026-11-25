@@ -20,12 +20,12 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System, a navegação e a infraestrutura local SQLite/Drizzle foram implementados**. As telas continuam estruturais; repositórios e serviços financeiros existem, mas ainda não estão conectados ao CRUD visual.
+Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e o módulo de clientes foram implementados**. Clientes já possuem cadastro, busca, edição, perfil, arquivamento, restauração e auditoria offline. Veículos e fluxos financeiros visuais continuam estruturais.
 
 ## Stack
 
-- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
-- Planejado: Zustand, React Hook Form, Supabase/PostgreSQL, Expo Notifications, SecureStore, Local Authentication e EAS Build.
+- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
+- Planejado: Zustand, Supabase/PostgreSQL, Expo Notifications, SecureStore, Local Authentication e EAS Build.
 
 Dependências planejadas serão adicionadas apenas quando houver uso real.
 
@@ -130,6 +130,7 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [PRD](docs/PRD.md)
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Banco de dados](docs/DATABASE.md)
+- [Módulo de clientes](docs/CUSTOMERS.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Navegação](docs/NAVIGATION.md)
@@ -138,4 +139,4 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 
 ## Status
 
-**Prompt 04 — Banco SQLite e Drizzle:** infraestrutura implementada. Schema, migration, repositórios, transações, cálculos, estornos e auditoria estão protegidos por testes locais. A próxima etapa é o Prompt 05 (clientes). Autenticação, sincronização e CRUD visual permanecem fora do escopo.
+**Prompt 05 — Clientes:** implementação concluída e protegida por testes locais. Cadastro, consulta, pesquisa, edição, duplicidades, perfil, resumo financeiro, arquivamento, restauração e auditoria funcionam sobre SQLite. A validação manual em Android/iOS permanece pendente; veículos são a próxima etapa. Autenticação e sincronização continuam fora do escopo.

@@ -39,10 +39,10 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Tela                  | Rota                      | Responsabilidade                      | Status                   | Funcionalidade definitiva |
 | --------------------- | ------------------------- | ------------------------------------- | ------------------------ | ------------------------- |
 | Dashboard             | `/`                       | Resumo e atalhos sem dados inventados | Estrutural               | Prompt 10                 |
-| Clientes              | `/customers`              | Busca, vazio e acesso ao cadastro     | Estrutural               | Prompt 05                 |
-| Novo cliente          | `/customers/new`          | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 05                 |
-| Detalhes do cliente   | `/customers/[id]`         | Áreas de dados, veículos e finanças   | Estrutural               | Prompt 05                 |
-| Editar cliente        | `/customers/[id]/edit`    | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 05                 |
+| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional                | Prompt 05                 |
+| Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional                | Prompt 05                 |
+| Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional                | Prompt 05                 |
+| Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional                | Prompt 05                 |
 | Histórico do cliente  | `/customers/[id]/history` | Linha do tempo futura                 | Estrutural               | Prompt 09                 |
 | Novo veículo          | `/vehicles/new`           | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 06                 |
 | Detalhes do veículo   | `/vehicles/[id]`          | Dados do veículo e vínculo            | Estrutural               | Prompt 06                 |
@@ -115,3 +115,5 @@ O Stack raiz concentra providers e será o ponto de composição para um futuro 
 8. Regenere os tipos de rota, execute `npm run validate` e teste o retorno em Android e iOS.
 
 Mudanças na configuração nativa da splash screen só aparecem em um novo development build ou build de produção; o Expo Go não representa integralmente essa configuração.
+
+Os formulários de cliente desabilitam o gesto de retorno e interceptam o botão físico Android quando há conteúdo alterado, oferecendo confirmação antes do descarte. Após criação ou edição confirmada no SQLite, a rota é substituída pelo perfil usando somente o UUID.

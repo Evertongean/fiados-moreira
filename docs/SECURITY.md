@@ -9,7 +9,7 @@
 
 Vulnerabilidades devem ser avaliadas por alcance, explorabilidade e correção compatível. Uma exceção temporária precisa registrar origem, impacto e condição de revisão.
 
-## Exceções transitivas — revisão de 2026-11-24
+## Exceções transitivas — revisão de 2026-11-25
 
 `npm audit --omit=dev` reportou 20 entradas moderadas e nenhuma vulnerabilidade alta ou crítica. O relatório inclui duas cadeias de tooling:
 
@@ -24,6 +24,8 @@ Os achados exigem que uma aplicação forneça padrões glob hostis ao tooling p
 - Forçar versões major por `overrides` pode quebrar consumidores de APIs removidas e não foi aplicado.
 
 Decisão: aceitar temporariamente o risco residual de tooling. Revisar em toda atualização patch do Expo SDK 58, Jest 30 e `jest-expo`, removendo a exceção quando as cadeias oficiais resolverem versões corrigidas. Não executar `npm audit fix --force` para esses achados.
+
+A revisão após adicionar React Hook Form, o resolver Zod e declarar `expo-asset` diretamente manteve exatamente os mesmos 20 avisos moderados nas cadeias de tooling descritas acima; não surgiu alerta runtime atribuível às novas dependências.
 
 Referências: [advisory do Minimatch](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249) e [advisory do Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4).
 

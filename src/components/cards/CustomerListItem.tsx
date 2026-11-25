@@ -10,8 +10,9 @@ import { formatBRLCents } from '@/utils/currency';
 export interface CustomerListItemProps extends Omit<PressableProps, 'children' | 'style'> {
   name: string;
   detail?: string;
-  pendingCents: number;
+  pendingCents?: number | null;
   status?: DebtStatus;
+  archived?: boolean;
 }
 
 export function CustomerListItem({
@@ -19,6 +20,7 @@ export function CustomerListItem({
   detail,
   pendingCents,
   status,
+  archived = false,
   disabled,
   ...props
 }: CustomerListItemProps) {
@@ -26,7 +28,7 @@ export function CustomerListItem({
 
   return (
     <Pressable
-      accessibilityLabel={`${name}, saldo pendente ${formatBRLCents(pendingCents)}`}
+      accessibilityLabel={`${name}${archived ? ', arquivado' : ''}${pendingCents == null ? '' : `, saldo pendente ${formatBRLCents(pendingCents)}`}`}
       accessibilityRole="button"
       disabled={disabled}
       style={({ pressed }) => [
@@ -51,11 +53,18 @@ export function CustomerListItem({
           </AppText>
         ) : null}
         {status ? <DebtStatusBadge status={status} /> : null}
+        {archived ? (
+          <AppText color="warning" variant="caption" weight="semibold">
+            Arquivado
+          </AppText>
+        ) : null}
       </View>
       <View style={styles.trailing}>
-        <AppText variant="bodySmall" weight="semibold">
-          {formatBRLCents(pendingCents)}
-        </AppText>
+        {pendingCents == null ? null : (
+          <AppText variant="bodySmall" weight="semibold">
+            {formatBRLCents(pendingCents)}
+          </AppText>
+        )}
         <ChevronRight color={tokens.colors.textMuted} size={18} />
       </View>
     </Pressable>

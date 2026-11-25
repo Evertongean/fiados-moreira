@@ -1,5 +1,6 @@
 import { AppDatabaseError } from '@/database/errors/DatabaseError';
 import { AuditRepository } from '@/database/repositories/audit.repository';
+import { CustomerRepository } from '@/database/repositories/customer.repository';
 import { DebtRepository } from '@/database/repositories/debt.repository';
 import type { DebtRow } from '@/database/schema';
 import type { SqlExecutor } from '@/database/types/executor';
@@ -19,6 +20,17 @@ export class DebtService {
     const value = createDebtSchema.safeParse(input);
     if (!value.success) throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do fiado inválidos.');
     return this.executor.transaction(async (transaction) => {
+      const customer = await new CustomerRepository(transaction).findById(
+        workspaceId,
+        value.data.customerId,
+      );
+      if (!customer) throw new AppDatabaseError('CUSTOMER_NOT_FOUND', 'Cliente não encontrado.');
+      if (customer.archivedAt) {
+        throw new AppDatabaseError(
+          'CUSTOMER_ARCHIVED',
+          'Restaure o cliente antes de registrar um novo fiado.',
+        );
+      }
       const debt = await new DebtRepository(transaction).insertValidated(workspaceId, value.data);
       await new AuditRepository(transaction).record(workspaceId, {
         entityType: 'debt',

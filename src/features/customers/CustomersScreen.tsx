@@ -1,38 +1,194 @@
-import { UserPlus, Users } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import type { CustomerRow } from '@/database/schema';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { ArrowDownAZ, UserPlus, Users } from 'lucide-react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppHeader, FloatingActionButton, SectionHeader } from '@/components/navigation';
-import { Button, EmptyState, Screen, SearchInput } from '@/components/ui';
+import { CustomerListItem } from '@/components/cards';
+import { AppHeader, FloatingActionButton } from '@/components/navigation';
+import { AppText, Button, EmptyState, LoadingState, Screen, SearchInput } from '@/components/ui';
+import type {
+  CustomerSortOrder,
+  CustomerStatusFilter,
+} from '@/features/customers/domain/customerTypes';
+import { useDatabase } from '@/hooks/useDatabase';
+import { useTheme } from '@/hooks/useTheme';
+import { formatBrazilianPhone } from '@/utils/phone';
+
+const FILTERS: readonly { value: CustomerStatusFilter; label: string }[] = [
+  { value: 'active', label: 'Ativos' },
+  { value: 'archived', label: 'Arquivados' },
+  { value: 'all', label: 'Todos' },
+];
+
+const SORTS: readonly { value: CustomerSortOrder; label: string }[] = [
+  { value: 'name_asc', label: 'Nome A–Z' },
+  { value: 'name_desc', label: 'Nome Z–A' },
+  { value: 'newest', label: 'Mais recentes' },
+  { value: 'oldest', label: 'Mais antigos' },
+];
 
 export function CustomersScreen() {
   const router = useRouter();
+  const { tokens } = useTheme();
+  const { workspace, repositories } = useDatabase();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filter, setFilter] = useState<CustomerStatusFilter>('active');
+  const [sort, setSort] = useState<CustomerSortOrder>('name_asc');
+  const [customers, setCustomers] = useState<CustomerRow[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const requestVersion = useRef(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const load = useCallback(async () => {
+    const version = ++requestVersion.current;
+    setStatus((current) => (current === 'ready' ? current : 'loading'));
+    try {
+      const [rows, count] = await Promise.all([
+        repositories.customers.list(workspace.id, {
+          query: debouncedSearch,
+          status: filter,
+          sort,
+        }),
+        repositories.customers.countActive(workspace.id),
+      ]);
+      if (requestVersion.current !== version) return;
+      setCustomers(rows);
+      setActiveCount(count);
+      setStatus('ready');
+    } catch {
+      if (requestVersion.current === version) setStatus('error');
+    }
+  }, [debouncedSearch, filter, repositories.customers, sort, workspace.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return () => {
+        requestVersion.current += 1;
+      };
+    }, [load]),
+  );
+
+  const emptyTitle = search.trim()
+    ? 'Nenhum cliente encontrado.'
+    : filter === 'archived'
+      ? 'Nenhum cliente arquivado.'
+      : 'Nenhum cliente cadastrado.';
+  const emptyDescription = search.trim()
+    ? 'Tente pesquisar outro nome ou telefone.'
+    : filter === 'archived'
+      ? 'Os clientes arquivados aparecerão aqui.'
+      : 'Cadastre seu primeiro cliente para começar a organizar os fiados da oficina.';
 
   return (
     <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
-      <AppHeader subtitle="Cadastre e acompanhe os responsáveis pelos fiados" title="Clientes" />
-      <SearchInput onChangeText={setSearch} placeholder="Pesquisar clientes" value={search} />
-      <SectionHeader
-        action={
-          <Button
-            icon={UserPlus}
-            label="Cadastrar"
-            onPress={() => router.push('/customers/new')}
-            size="sm"
-          />
-        }
-        description="Filtros estarão disponíveis junto ao módulo funcional."
-        title="Todos os clientes"
-      />
-      <View style={styles.empty}>
-        <EmptyState
-          action={{ label: 'Cadastrar cliente', onPress: () => router.push('/customers/new') }}
-          description="Cadastre os clientes da sua oficina para organizar seus fiados e pagamentos."
-          icon={Users}
-          title="Nenhum cliente cadastrado."
+      <AppHeader subtitle="Gerencie os clientes da sua oficina." title="Clientes" />
+      <View style={styles.summary}>
+        <View style={styles.summaryCopy}>
+          <AppText variant="h4">{activeCount}</AppText>
+          <AppText color="textSecondary" variant="bodySmall">
+            {activeCount === 1 ? 'cliente ativo' : 'clientes ativos'}
+          </AppText>
+        </View>
+        <Button
+          icon={UserPlus}
+          label="Novo cliente"
+          onPress={() => router.push('/customers/new')}
+          size="sm"
         />
+      </View>
+      <SearchInput
+        onChangeText={setSearch}
+        placeholder="Buscar nome ou telefone..."
+        value={search}
+      />
+      <View style={styles.controls}>
+        <ScrollView
+          contentContainerStyle={styles.controlRow}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          {FILTERS.map((option) => (
+            <Button
+              key={option.value}
+              label={option.label}
+              onPress={() => setFilter(option.value)}
+              size="sm"
+              variant={filter === option.value ? 'secondary' : 'outline'}
+            />
+          ))}
+        </ScrollView>
+        <ScrollView
+          contentContainerStyle={styles.controlRow}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          <View style={styles.sortIcon}>
+            <ArrowDownAZ color={tokens.colors.textMuted} size={18} />
+          </View>
+          {SORTS.map((option) => (
+            <Button
+              key={option.value}
+              label={option.label}
+              onPress={() => setSort(option.value)}
+              size="sm"
+              variant={sort === option.value ? 'secondary' : 'ghost'}
+            />
+          ))}
+        </ScrollView>
+      </View>
+      <View style={styles.listArea}>
+        {status === 'loading' ? (
+          <LoadingState fullScreen label="Carregando clientes…" />
+        ) : status === 'error' ? (
+          <EmptyState
+            action={{ label: 'Tentar novamente', onPress: () => void load() }}
+            description="Verifique os dados locais e tente novamente."
+            icon={Users}
+            title="Não foi possível carregar os clientes."
+          />
+        ) : (
+          <FlatList
+            contentContainerStyle={customers.length ? styles.list : styles.emptyList}
+            data={customers}
+            keyExtractor={(customer) => customer.id}
+            ListEmptyComponent={
+              <EmptyState
+                action={
+                  search.trim()
+                    ? { label: 'Limpar pesquisa', onPress: () => setSearch('') }
+                    : filter === 'archived'
+                      ? undefined
+                      : {
+                          label: 'Cadastrar cliente',
+                          onPress: () => router.push('/customers/new'),
+                        }
+                }
+                description={emptyDescription}
+                icon={Users}
+                title={emptyTitle}
+              />
+            }
+            renderItem={({ item }) => (
+              <CustomerListItem
+                archived={Boolean(item.archivedAt)}
+                detail={formatBrazilianPhone(item.phone) ?? undefined}
+                name={item.name}
+                onPress={() =>
+                  router.push({ pathname: '/customers/[id]', params: { id: item.id } })
+                }
+                pendingCents={null}
+              />
+            )}
+          />
+        )}
       </View>
       <FloatingActionButton
         accessibilityLabel="Cadastrar novo cliente"
@@ -43,6 +199,13 @@ export function CustomersScreen() {
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 20, paddingBottom: 88 },
-  empty: { flex: 1, justifyContent: 'center' },
+  page: { gap: 16, paddingBottom: 88 },
+  summary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  summaryCopy: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  controls: { gap: 8 },
+  controlRow: { alignItems: 'center', gap: 8 },
+  sortIcon: { width: 32, alignItems: 'center' },
+  listArea: { flex: 1, minHeight: 180 },
+  list: { gap: 10, paddingBottom: 16 },
+  emptyList: { flexGrow: 1, justifyContent: 'center' },
 });

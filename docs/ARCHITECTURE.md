@@ -131,3 +131,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Status financeiro e atraso são derivados; pagamentos estornados permanecem no histórico e deixam de compor o líquido pago.
 - A auditoria é atômica e minimizada, porém local e não inviolável. Segurança, criptografia e retenção serão aprofundadas no Prompt 20.
 - Testes de integração usam `node:sqlite` com o SQL versionado. Isso não substitui validação do adaptador Expo em Android/iOS.
+
+## Decisões do Prompt 05
+
+- O módulo de clientes usa React Hook Form com `Controller` e Zod; SQLite continua sendo a única fonte persistente.
+- `CustomerService` coordena normalização, idempotência, transações e auditoria. Telas não executam SQL nem usam operações inseguras do repositório para mutações.
+- A busca por nome normaliza NFD e remove diacríticos após a consulta isolada por workspace/status, evitando depender do `NOCASE` ASCII do SQLite e evitando migration prematura.
+- Criação reutiliza um UUID estável durante retentativas. Arquivamento calcula saldo líquido e grava auditoria dentro de `BEGIN IMMEDIATE`.
+- `DebtService` revalida o estado ativo do cliente dentro da transação, impedindo que outro chamador contorne a restrição visual de cliente arquivado.
+- Atualização de tela usa o ciclo de foco do Router e controle simples de versão da busca; Zustand ou cache remoto não foram necessários.
