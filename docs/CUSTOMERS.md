@@ -14,9 +14,10 @@ src/features/customers
 ├── components                      formulário e diálogo de duplicidade
 ├── domain                          schemas, tipos e normalização
 ├── services/CustomerService.ts     transações, auditoria e regras de mutação
-└── *Screen.tsx                     lista, formulário, perfil e histórico estrutural
+└── *Screen.tsx                     lista, formulário, perfil e histórico financeiro
 src/database/repositories
-└── customer.repository.ts          consultas SQLite por workspace
+├── customer.repository.ts          cadastro e consultas por workspace
+└── customer-history.repository.ts  resumo e linha do tempo consolidada
 src/utils/phone.ts                   normalização e apresentação de telefone
 ```
 
@@ -30,7 +31,7 @@ Nenhuma migration foi necessária: os campos e índices da tabela `customers` cr
 - `/customers/new`: cadastro rápido ou completo com aviso de alterações não salvas.
 - `/customers/[id]`: perfil, dados cadastrais, resumo financeiro real somente de leitura, arquivamento e restauração.
 - `/customers/[id]/edit`: edição com o mesmo formulário e preservação de UUID, criação e vínculos.
-- `/customers/[id]/history`: continua explicitamente estrutural até o Prompt 09.
+- `/customers/[id]/history`: resumo atual, filtros e linha do tempo paginada de fiados, pagamentos, estornos, alterações e cancelamentos.
 
 Veículos e fiados são listados no perfil. O Prompt 08 habilitou o registro de pagamento: havendo um fiado aberto, ele é selecionado diretamente; havendo vários, o usuário escolhe qual dívida receberá o valor.
 
@@ -86,7 +87,9 @@ O serviço bloqueia arquivamento quando o saldo líquido de fiados não cancelad
 
 ## Resumo financeiro
 
-O perfil consulta, em uma única agregação SQLite, total dos fiados não cancelados, total pago válido, saldo e quantidade de fiados abertos. Pagamentos estornados não entram no pago líquido. A lista não mostra `R$ 0,00` fictício: saldo individual foi omitido porque não é necessário para a listagem nesta etapa.
+O perfil consulta uma agregação SQLite com total dos fiados não cancelados, total líquido recebido, saldo, valor em atraso, quantidades em aberto/quitada e último pagamento válido. Pagamentos estornados não entram no líquido; fiados cancelados não compõem saldo ou totais atuais.
+
+O histórico usa as tabelas financeiras para pagamentos/estornos e auditorias de fiados para criação, alteração e cancelamento. Filtros de período, veículo e tipo afetam somente a linha do tempo, nunca o resumo atual.
 
 ## Auditoria
 
@@ -131,4 +134,4 @@ Os testes SQLite usam `node:sqlite`, banco isolado e o SQL versionado real. Eles
 - Não há autenticação, criptografia do arquivo, backup, sync ou Supabase.
 - Testes manuais Android/iOS, TalkBack/VoiceOver e telas pequenas continuam pendentes.
 - A busca em memória deve ser medida antes de volumes muito altos.
-- Veículos, fiados e pagamentos estão conectados pelos Prompts 06 a 08. A linha do tempo consolidada do cliente continua no Prompt 09.
+- Veículos, fiados, pagamentos, histórico consolidado e dashboard estão conectados pelos Prompts 06 a 10. Relatórios gerais permanecem em etapa posterior.

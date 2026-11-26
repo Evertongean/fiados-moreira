@@ -25,6 +25,7 @@ import {
 import { AppDatabaseError } from './errors/DatabaseError';
 import { AuditRepository } from './repositories/audit.repository';
 import { CustomerRepository } from './repositories/customer.repository';
+import { CustomerHistoryRepository } from './repositories/customer-history.repository';
 import { DashboardRepository } from './repositories/dashboard.repository';
 import { DebtRepository } from './repositories/debt.repository';
 import { GlobalSearchRepository } from './repositories/global-search.repository';
@@ -42,6 +43,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
   repositories: {
     workspaces: WorkspaceRepository;
     customers: CustomerRepository;
+    customerHistory: CustomerHistoryRepository;
     dashboard: DashboardRepository;
     globalSearch: GlobalSearchRepository;
     vehicles: VehicleRepository;
@@ -98,6 +100,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
       repositories: {
         workspaces: new WorkspaceRepository(executor),
         customers: new CustomerRepository(executor),
+        customerHistory: new CustomerHistoryRepository(executor),
         dashboard: new DashboardRepository(executor),
         globalSearch: new GlobalSearchRepository(executor),
         vehicles: new VehicleRepository(executor),

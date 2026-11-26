@@ -44,7 +44,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional             | Prompt 05                 |
 | Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional             | Prompt 05                 |
 | Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional             | Prompt 05                 |
-| Histórico do cliente  | `/customers/[id]/history` | Linha do tempo futura                 | Estrutural            | Prompt 09                 |
+| Histórico do cliente  | `/customers/[id]/history` | Resumo, filtros e linha do tempo      | Funcional             | Prompt 09                 |
 | Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional             | Prompt 06                 |
 | Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional             | Prompt 06                 |
 | Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional             | Prompt 06                 |

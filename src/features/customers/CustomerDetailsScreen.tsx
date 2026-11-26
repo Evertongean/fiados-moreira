@@ -2,9 +2,7 @@ import type { CustomerRow, VehicleRow } from '@/database/schema';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Archive,
-  Banknote,
   Car,
-  CircleDollarSign,
   History,
   Pencil,
   ReceiptText,
@@ -15,7 +13,6 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { BalanceCard, StatCard } from '@/components/cards';
 import { RouteState } from '@/components/layouts/RouteState';
 import { PageHeader, SectionHeader } from '@/components/navigation';
 import {
@@ -32,13 +29,14 @@ import {
   SearchInput,
   useToast,
 } from '@/components/ui';
-import type { CustomerFinancialSummary } from '@/features/customers/domain/customerTypes';
+import { CustomerFinancialSummary } from '@/features/customers/components/CustomerFinancialSummary';
+import type { CustomerHistorySummary } from '@/features/customers/domain/customerTypes';
 import { DebtListItem } from '@/features/debts/components/DebtListItem';
 import type { DebtOverview } from '@/features/debts/domain/debtTypes';
 import { VehicleListItem } from '@/features/vehicles/components/VehicleListItem';
 import { vehicleMatchesQuery } from '@/features/vehicles/domain/vehicleUtils';
 import { useDatabase } from '@/hooks/useDatabase';
-import { formatBRLCents } from '@/utils/currency';
+import { getCivilDate } from '@/utils/date';
 import { formatBrazilianPhone } from '@/utils/phone';
 import { getRouteId } from '@/utils/routes';
 
@@ -86,7 +84,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const { showToast } = useToast();
   const { workspace, repositories, services } = useDatabase();
   const [customer, setCustomer] = useState<CustomerRow | null>(null);
-  const [summary, setSummary] = useState<CustomerFinancialSummary | null>(null);
+  const [summary, setSummary] = useState<CustomerHistorySummary | null>(null);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [debts, setDebts] = useState<DebtOverview[]>([]);
   const [vehicleSearch, setVehicleSearch] = useState('');
@@ -107,7 +105,11 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
         return;
       }
       const [financial, customerVehicles, customerDebts] = await Promise.all([
-        repositories.customers.getFinancialSummary(workspace.id, customerId),
+        repositories.customerHistory.getSummary(
+          workspace.id,
+          customerId,
+          getCivilDate(new Date(), workspace.timezone),
+        ),
         repositories.vehicles.listByCustomer(workspace.id, customerId, { status: 'all' }),
         repositories.debts.listOverview(workspace.id, {
           customerId,
@@ -126,6 +128,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   }, [
     customerId,
     repositories.customers,
+    repositories.customerHistory,
     repositories.debts,
     repositories.vehicles,
     workspace.id,
@@ -261,27 +264,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
           description="Valores reais calculados a partir dos fiados e pagamentos válidos."
           title="Resumo financeiro"
         />
-        <BalanceCard
-          description={`${summary.openDebtCount} ${summary.openDebtCount === 1 ? 'fiado em aberto' : 'fiados em aberto'}`}
-          icon={CircleDollarSign}
-          title="Saldo devedor"
-          valueCents={summary.outstandingCents}
-        />
-        <View style={styles.stats}>
-          <StatCard
-            icon={ReceiptText}
-            label="Total em fiados"
-            style={styles.stat}
-            value={formatBRLCents(summary.totalDebtCents)}
-          />
-          <StatCard
-            icon={Banknote}
-            label="Total pago"
-            style={styles.stat}
-            value={formatBRLCents(summary.totalPaidCents)}
-            variant="success"
-          />
-        </View>
+        <CustomerFinancialSummary summary={summary} timezone={workspace.timezone} />
       </View>
 
       <Card variant="outlined">
@@ -514,8 +497,6 @@ const styles = StyleSheet.create({
   profile: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   profileCopy: { flex: 1, alignItems: 'flex-start', gap: 5 },
   section: { gap: 12 },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  stat: { minWidth: 148, flexGrow: 1, flexBasis: 148 },
   info: { gap: 14 },
   infoRow: { gap: 2 },
   actions: { gap: 10 },

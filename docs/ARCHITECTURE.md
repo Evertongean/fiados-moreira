@@ -170,6 +170,15 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Perfis e detalhes recarregam SQLite ao receber foco, portanto pagamentos e estornos atualizam saldos sem cache financeiro paralelo.
 - O schema existente já possuía pagamentos, estornos, índices, FKs e auditoria; nenhuma migration ou dependência foi necessária.
 
+## Decisões do Prompt 09
+
+- `CustomerHistoryRepository` executa uma consulta consolidada por cliente e workspace, sem N+1, combinando eventos com `UNION ALL` e paginação determinística.
+- Pagamentos e estornos vêm das tabelas financeiras; somente auditorias da entidade `debt` fornecem criação, alteração e cancelamento. Auditorias de pagamento são excluídas da consulta para não duplicar eventos.
+- O resumo atual possui consulta independente da linha do tempo e de seus filtros. Valores vencidos usam a data civil do workspace e os cálculos preservam centavos inteiros.
+- Metadados de auditoria são interpretados de forma defensiva. A interface não fabrica estado anterior quando o evento não registrou esse dado.
+- A tela usa `FlatList`, busca páginas de 40 eventos e recarrega resumo e movimentações ao receber foco. SQLite permanece a única fonte de verdade.
+- Nenhuma migration ou dependência foi necessária; os índices e relacionamentos existentes atendem ao volume inicial.
+
 ## Decisões do Prompt 10
 
 - `DashboardRepository` concentra projeções de leitura agregadas e isoladas por workspace; a tela não executa SQL nem replica saldos em store.

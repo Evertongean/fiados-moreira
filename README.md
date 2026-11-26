@@ -20,7 +20,7 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos, fiados, pagamentos e dashboard foram implementados**. A tela inicial consolida saldos, recebimentos, vencimentos e atividades reais com funcionamento offline.
+Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos, fiados, pagamentos, histórico financeiro, dashboard, pesquisa e notificações locais foram implementados**. A tela inicial consolida saldos, recebimentos, vencimentos e atividades reais com funcionamento offline.
 
 ## Stack
 
@@ -134,6 +134,7 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Módulo de veículos](docs/VEHICLES.md)
 - [Módulo de fiados](docs/DEBTS.md)
 - [Módulo de pagamentos](docs/PAYMENTS.md)
+- [Histórico financeiro do cliente](docs/CUSTOMER_HISTORY.md)
 - [Dashboard financeiro](docs/DASHBOARD.md)
 - [Pesquisa global e filtros](docs/SEARCH.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
