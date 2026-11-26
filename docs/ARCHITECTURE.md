@@ -45,6 +45,8 @@ Rotas orquestram navegação; componentes renderizam; hooks conectam tela e caso
 
 Falha de rede nunca deve desfazer uma operação local já confirmada. Falha de persistência local deve impedir a confirmação visual da operação.
 
+Notificações locais são um efeito posterior à transação financeira: pagamentos, estornos e alterações de fiado são confirmados primeiro no SQLite, e uma eventual falha de agendamento não desfaz esses dados. O `ReminderService` reconcilia SQLite e o agendador nativo na inicialização, ao voltar ao primeiro plano e após mutações financeiras; o adaptador Expo fica isolado em `src/services/notifications`.
+
 ## Persistência local
 
 Expo SQLite e Drizzle ORM foram introduzidos no Prompt 04. Migrations são incrementais, versionadas, empacotadas no bundle e aplicadas antes de liberar os repositórios. Escritas financeiras usam fila serial e `BEGIN IMMEDIATE`; FKs compostas isolam workspaces e validam o dono do veículo. Valores usam `INTEGER` em centavos, instantes usam ISO UTC e datas civis usam `YYYY-MM-DD`.

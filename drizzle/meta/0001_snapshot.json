@@ -1,0 +1,1137 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "9640c444-b8ca-4d0a-8a18-023fb1db3b0c",
+  "prevId": "67ab6871-7d4b-45f7-9b52-71cbb235f547",
+  "tables": {
+    "audit_logs": {
+      "name": "audit_logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata_json": {
+          "name": "metadata_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "audit_logs_workspace_entity_idx": {
+          "name": "audit_logs_workspace_entity_idx",
+          "columns": ["workspace_id", "entity_type", "entity_id"],
+          "isUnique": false
+        },
+        "audit_logs_workspace_created_idx": {
+          "name": "audit_logs_workspace_created_idx",
+          "columns": ["workspace_id", "created_at"],
+          "isUnique": false
+        },
+        "audit_logs_workspace_operation_unique": {
+          "name": "audit_logs_workspace_operation_unique",
+          "columns": ["workspace_id", "operation_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "audit_logs_workspace_id_workspaces_id_fk": {
+          "name": "audit_logs_workspace_id_workspaces_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "audit_logs_action_check": {
+          "name": "audit_logs_action_check",
+          "value": "\"audit_logs\".\"action\" in ('create','update','archive','cancel','payment_registered','payment_reversed','restore')"
+        }
+      }
+    },
+    "customers": {
+      "name": "customers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "whatsapp": {
+          "name": "whatsapp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "customers_workspace_id_id_unique": {
+          "name": "customers_workspace_id_id_unique",
+          "columns": ["workspace_id", "id"],
+          "isUnique": true
+        },
+        "customers_workspace_name_idx": {
+          "name": "customers_workspace_name_idx",
+          "columns": ["workspace_id", "name"],
+          "isUnique": false
+        },
+        "customers_workspace_phone_idx": {
+          "name": "customers_workspace_phone_idx",
+          "columns": ["workspace_id", "phone"],
+          "isUnique": false
+        },
+        "customers_workspace_archived_idx": {
+          "name": "customers_workspace_archived_idx",
+          "columns": ["workspace_id", "archived_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "customers_workspace_id_workspaces_id_fk": {
+          "name": "customers_workspace_id_workspaces_id_fk",
+          "tableFrom": "customers",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "debts": {
+      "name": "debts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vehicle_id": {
+          "name": "vehicle_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "total_cents": {
+          "name": "total_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "service_date": {
+          "name": "service_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "canceled_at": {
+          "name": "canceled_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cancellation_reason": {
+          "name": "cancellation_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "debts_workspace_id_unique": {
+          "name": "debts_workspace_id_unique",
+          "columns": ["workspace_id", "id"],
+          "isUnique": true
+        },
+        "debts_workspace_customer_idx": {
+          "name": "debts_workspace_customer_idx",
+          "columns": ["workspace_id", "customer_id"],
+          "isUnique": false
+        },
+        "debts_workspace_due_date_idx": {
+          "name": "debts_workspace_due_date_idx",
+          "columns": ["workspace_id", "due_date"],
+          "isUnique": false
+        },
+        "debts_workspace_service_date_idx": {
+          "name": "debts_workspace_service_date_idx",
+          "columns": ["workspace_id", "service_date"],
+          "isUnique": false
+        },
+        "debts_workspace_canceled_idx": {
+          "name": "debts_workspace_canceled_idx",
+          "columns": ["workspace_id", "canceled_at"],
+          "isUnique": false
+        },
+        "debts_vehicle_idx": {
+          "name": "debts_vehicle_idx",
+          "columns": ["vehicle_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "debts_workspace_id_workspaces_id_fk": {
+          "name": "debts_workspace_id_workspaces_id_fk",
+          "tableFrom": "debts",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "debts_workspace_customer_fk": {
+          "name": "debts_workspace_customer_fk",
+          "tableFrom": "debts",
+          "tableTo": "customers",
+          "columnsFrom": ["workspace_id", "customer_id"],
+          "columnsTo": ["workspace_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "debts_workspace_customer_vehicle_fk": {
+          "name": "debts_workspace_customer_vehicle_fk",
+          "tableFrom": "debts",
+          "tableTo": "vehicles",
+          "columnsFrom": ["workspace_id", "customer_id", "vehicle_id"],
+          "columnsTo": ["workspace_id", "customer_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "debts_total_cents_check": {
+          "name": "debts_total_cents_check",
+          "value": "\"debts\".\"total_cents\" > 0 and \"debts\".\"total_cents\" <= 99999999999"
+        },
+        "debts_cancellation_check": {
+          "name": "debts_cancellation_check",
+          "value": "(\"debts\".\"canceled_at\" is null and \"debts\".\"cancellation_reason\" is null) or (\"debts\".\"canceled_at\" is not null and length(trim(\"debts\".\"cancellation_reason\")) > 0)"
+        }
+      }
+    },
+    "payment_reversals": {
+      "name": "payment_reversals",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payment_id": {
+          "name": "payment_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reversed_at": {
+          "name": "reversed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "payment_reversals_workspace_payment_unique": {
+          "name": "payment_reversals_workspace_payment_unique",
+          "columns": ["workspace_id", "payment_id"],
+          "isUnique": true
+        },
+        "payment_reversals_workspace_operation_unique": {
+          "name": "payment_reversals_workspace_operation_unique",
+          "columns": ["workspace_id", "operation_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "payment_reversals_workspace_id_workspaces_id_fk": {
+          "name": "payment_reversals_workspace_id_workspaces_id_fk",
+          "tableFrom": "payment_reversals",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "payment_reversals_workspace_payment_fk": {
+          "name": "payment_reversals_workspace_payment_fk",
+          "tableFrom": "payment_reversals",
+          "tableTo": "payments",
+          "columnsFrom": ["workspace_id", "payment_id"],
+          "columnsTo": ["workspace_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "payments": {
+      "name": "payments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "debt_id": {
+          "name": "debt_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_cents": {
+          "name": "amount_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "payments_workspace_id_unique": {
+          "name": "payments_workspace_id_unique",
+          "columns": ["workspace_id", "id"],
+          "isUnique": true
+        },
+        "payments_workspace_operation_unique": {
+          "name": "payments_workspace_operation_unique",
+          "columns": ["workspace_id", "operation_id"],
+          "isUnique": true
+        },
+        "payments_workspace_debt_idx": {
+          "name": "payments_workspace_debt_idx",
+          "columns": ["workspace_id", "debt_id"],
+          "isUnique": false
+        },
+        "payments_workspace_paid_at_idx": {
+          "name": "payments_workspace_paid_at_idx",
+          "columns": ["workspace_id", "paid_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "payments_workspace_id_workspaces_id_fk": {
+          "name": "payments_workspace_id_workspaces_id_fk",
+          "tableFrom": "payments",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "payments_workspace_debt_fk": {
+          "name": "payments_workspace_debt_fk",
+          "tableFrom": "payments",
+          "tableTo": "debts",
+          "columnsFrom": ["workspace_id", "debt_id"],
+          "columnsTo": ["workspace_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "payments_amount_cents_check": {
+          "name": "payments_amount_cents_check",
+          "value": "\"payments\".\"amount_cents\" > 0 and \"payments\".\"amount_cents\" <= 99999999999"
+        },
+        "payments_method_check": {
+          "name": "payments_method_check",
+          "value": "\"payments\".\"payment_method\" in ('cash','pix','debit_card','credit_card','bank_transfer','other')"
+        }
+      }
+    },
+    "reminders": {
+      "name": "reminders",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "debt_id": {
+          "name": "debt_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scheduled_at": {
+          "name": "scheduled_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "notification_identifier": {
+          "name": "notification_identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "delivered_at": {
+          "name": "delivered_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "reminders_workspace_status_scheduled_idx": {
+          "name": "reminders_workspace_status_scheduled_idx",
+          "columns": ["workspace_id", "status", "scheduled_at"],
+          "isUnique": false
+        },
+        "reminders_workspace_debt_type_scheduled_unique": {
+          "name": "reminders_workspace_debt_type_scheduled_unique",
+          "columns": ["workspace_id", "debt_id", "type", "scheduled_at"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "reminders_workspace_id_workspaces_id_fk": {
+          "name": "reminders_workspace_id_workspaces_id_fk",
+          "tableFrom": "reminders",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reminders_workspace_debt_fk": {
+          "name": "reminders_workspace_debt_fk",
+          "tableFrom": "reminders",
+          "tableTo": "debts",
+          "columnsFrom": ["workspace_id", "debt_id"],
+          "columnsTo": ["workspace_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reminders_type_check": {
+          "name": "reminders_type_check",
+          "value": "\"reminders\".\"type\" in ('before_due','due_date','overdue','custom')"
+        },
+        "reminders_status_check": {
+          "name": "reminders_status_check",
+          "value": "\"reminders\".\"status\" in ('pending','scheduled','delivered','canceled','failed')"
+        }
+      }
+    },
+    "settings": {
+      "name": "settings",
+      "columns": {
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value_json": {
+          "name": "value_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "settings_workspace_id_workspaces_id_fk": {
+          "name": "settings_workspace_id_workspaces_id_fk",
+          "tableFrom": "settings",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "settings_workspace_id_key_pk": {
+          "columns": ["workspace_id", "key"],
+          "name": "settings_workspace_id_key_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sync_queue": {
+      "name": "sync_queue",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation": {
+          "name": "operation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "last_error_code": {
+          "name": "last_error_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "sync_queue_workspace_status_created_idx": {
+          "name": "sync_queue_workspace_status_created_idx",
+          "columns": ["workspace_id", "status", "created_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sync_queue_workspace_id_workspaces_id_fk": {
+          "name": "sync_queue_workspace_id_workspaces_id_fk",
+          "tableFrom": "sync_queue",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "sync_queue_attempts_check": {
+          "name": "sync_queue_attempts_check",
+          "value": "\"sync_queue\".\"attempts\" >= 0"
+        },
+        "sync_queue_operation_check": {
+          "name": "sync_queue_operation_check",
+          "value": "\"sync_queue\".\"operation\" in ('create','update','delete')"
+        },
+        "sync_queue_status_check": {
+          "name": "sync_queue_status_check",
+          "value": "\"sync_queue\".\"status\" in ('pending','processing','completed','failed')"
+        }
+      }
+    },
+    "vehicles": {
+      "name": "vehicles",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "brand": {
+          "name": "brand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "plate": {
+          "name": "plate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "vehicles_workspace_id_unique": {
+          "name": "vehicles_workspace_id_unique",
+          "columns": ["workspace_id", "id"],
+          "isUnique": true
+        },
+        "vehicles_workspace_customer_id_unique": {
+          "name": "vehicles_workspace_customer_id_unique",
+          "columns": ["workspace_id", "customer_id", "id"],
+          "isUnique": true
+        },
+        "vehicles_workspace_customer_idx": {
+          "name": "vehicles_workspace_customer_idx",
+          "columns": ["workspace_id", "customer_id"],
+          "isUnique": false
+        },
+        "vehicles_workspace_plate_idx": {
+          "name": "vehicles_workspace_plate_idx",
+          "columns": ["workspace_id", "plate"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "vehicles_workspace_id_workspaces_id_fk": {
+          "name": "vehicles_workspace_id_workspaces_id_fk",
+          "tableFrom": "vehicles",
+          "tableTo": "workspaces",
+          "columnsFrom": ["workspace_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "vehicles_workspace_customer_fk": {
+          "name": "vehicles_workspace_customer_fk",
+          "tableFrom": "vehicles",
+          "tableTo": "customers",
+          "columnsFrom": ["workspace_id", "customer_id"],
+          "columnsTo": ["workspace_id", "id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "vehicles_type_check": {
+          "name": "vehicles_type_check",
+          "value": "\"vehicles\".\"type\" in ('motorcycle','car','truck','van','other')"
+        },
+        "vehicles_year_check": {
+          "name": "vehicles_year_check",
+          "value": "\"vehicles\".\"year\" is null or \"vehicles\".\"year\" between 1886 and 9999"
+        }
+      }
+    },
+    "workspaces": {
+      "name": "workspaces",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'BRL'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

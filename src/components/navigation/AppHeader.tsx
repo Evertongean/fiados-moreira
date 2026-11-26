@@ -4,6 +4,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { AppText, IconButton } from '@/components/ui';
+import { useNotifications } from '@/features/notifications/NotificationProvider';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface AppHeaderProps {
   title: string;
@@ -21,6 +23,8 @@ export function AppHeader({
   showSearch = false,
 }: AppHeaderProps) {
   const router = useRouter();
+  const { unreadCount } = useNotifications();
+  const { tokens } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -47,12 +51,23 @@ export function AppHeader({
           />
         ) : null}
         {showNotifications ? (
-          <IconButton
-            accessibilityLabel="Abrir notificações"
-            icon={Bell}
-            onPress={() => router.push('/notifications')}
-            variant="ghost"
-          />
+          <View style={styles.notificationAction}>
+            <IconButton
+              accessibilityLabel={
+                unreadCount ? `Abrir notificações, ${unreadCount} não lidas` : 'Abrir notificações'
+              }
+              icon={Bell}
+              onPress={() => router.push('/notifications')}
+              variant="ghost"
+            />
+            {unreadCount ? (
+              <View style={[styles.badge, { backgroundColor: tokens.colors.destructive }]}>
+                <AppText color="primaryForeground" variant="caption">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </AppText>
+              </View>
+            ) : null}
+          </View>
         ) : null}
       </View>
     </View>
@@ -70,4 +85,16 @@ const styles = StyleSheet.create({
   copy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   titleGroup: { flex: 1, gap: 2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  notificationAction: { position: 'relative' },
+  badge: {
+    position: 'absolute',
+    right: -3,
+    top: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
 });

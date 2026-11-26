@@ -27,6 +27,8 @@ Decisão: aceitar temporariamente o risco residual de tooling. Revisar em toda a
 
 A revisão após adicionar React Hook Form, o resolver Zod e declarar `expo-asset` diretamente manteve exatamente os mesmos 20 avisos moderados nas cadeias de tooling descritas acima; não surgiu alerta runtime atribuível às novas dependências.
 
+A revisão após adicionar `expo-notifications` 58.1.10 também manteve 20 avisos moderados, nenhum alto ou crítico, nas mesmas cadeias de tooling. A permissão é solicitada apenas por ação contextual; o conteúdo do sistema oculta cliente, serviço e valores por padrão.
+
 Referências: [advisory do Minimatch](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249) e [advisory do Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4).
 
 ## Pendência de tooling

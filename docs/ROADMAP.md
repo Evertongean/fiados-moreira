@@ -42,8 +42,11 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Filtros combináveis para clientes, veículos, fiados e pagamentos, com limpeza rápida.
   - [x] Filtros financeiros avançados nas listagens de clientes e fiados.
   - [ ] Validar teclado, painéis extensos, responsividade e acessibilidade em Android e iOS.
-- [ ] **Prompt 12 — Notificações**
-  - [ ] Lembretes e permissões com Expo Notifications.
+- [ ] **Prompt 12 — Notificações** (implementação concluída; aceite mobile pendente)
+  - [x] Lembretes automáticos e personalizados, resumo semanal e preferências locais.
+  - [x] Permissão contextual, canais Android, reconciliação, central e leitura.
+  - [x] Cancelamento/reagendamento por quitação, estorno, cancelamento e vencimento.
+  - [ ] Validar entrega, navegação, permissões e restrições do SO em development builds Android e iOS.
 - [ ] **Prompt 13 — WhatsApp**
   - [ ] Preparação de cobrança e compartilhamento explícito.
 - [ ] **Prompt 14 — Relatórios**

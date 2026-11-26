@@ -13,7 +13,9 @@ import { CustomerService } from '@/features/customers/services/CustomerService';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
+import { ReminderService } from '@/features/notifications/services/ReminderService';
 import { VehicleService } from '@/features/vehicles/services/VehicleService';
+import { ExpoNotificationGateway } from '@/services/notifications/ExpoNotificationGateway';
 
 import {
   initializeDatabase,
@@ -28,6 +30,8 @@ import { DebtRepository } from './repositories/debt.repository';
 import { GlobalSearchRepository } from './repositories/global-search.repository';
 import { PaymentReversalRepository } from './repositories/payment-reversal.repository';
 import { PaymentRepository } from './repositories/payment.repository';
+import { ReminderRepository } from './repositories/reminder.repository';
+import { SettingsRepository } from './repositories/settings.repository';
 import { VehicleRepository } from './repositories/vehicle.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
 
@@ -45,6 +49,8 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     payments: PaymentRepository;
     reversals: PaymentReversalRepository;
     audit: AuditRepository;
+    reminders: ReminderRepository;
+    settings: SettingsRepository;
   };
   services: {
     customers: CustomerService;
@@ -52,6 +58,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     debts: DebtService;
     payments: PaymentService;
     reversals: PaymentReversalService;
+    reminders: ReminderService;
   };
 }
 
@@ -81,6 +88,10 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
   const value = useMemo<DatabaseContextValue | null>(() => {
     if (status !== 'ready' || !environment) return null;
     const executor = environment.executor;
+    const reminderService = new ReminderService(executor, new ExpoNotificationGateway());
+    const reconcileFinancialChange = async () => {
+      await reminderService.reconcile(environment.workspace.id, environment.workspace.timezone);
+    };
     return {
       ...environment,
       status: 'ready',
@@ -94,13 +105,16 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         payments: new PaymentRepository(executor),
         reversals: new PaymentReversalRepository(executor),
         audit: new AuditRepository(executor),
+        reminders: new ReminderRepository(executor),
+        settings: new SettingsRepository(executor),
       },
       services: {
         customers: new CustomerService(executor),
         vehicles: new VehicleService(executor),
-        debts: new DebtService(executor),
-        payments: new PaymentService(executor),
-        reversals: new PaymentReversalService(executor),
+        debts: new DebtService(executor, reconcileFinancialChange),
+        payments: new PaymentService(executor, reconcileFinancialChange),
+        reversals: new PaymentReversalService(executor, reconcileFinancialChange),
+        reminders: reminderService,
       },
     };
   }, [environment, status]);

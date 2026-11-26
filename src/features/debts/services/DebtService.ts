@@ -38,7 +38,10 @@ function debtMatchesUpdate(debt: DebtRow, input: UpdateDebtInput): boolean {
 }
 
 export class DebtService {
-  constructor(private readonly executor: SqlExecutor) {}
+  constructor(
+    private readonly executor: SqlExecutor,
+    private readonly onFinancialChange?: (workspaceId: string, debtId: string) => Promise<void>,
+  ) {}
 
   async create(
     workspaceId: string,
@@ -47,7 +50,7 @@ export class DebtService {
   ): Promise<DebtRow> {
     const value = createDebtSchema.safeParse(input);
     if (!value.success) throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do fiado inválidos.');
-    return this.executor.transaction(async (transaction) => {
+    const debt = await this.executor.transaction(async (transaction) => {
       const audit = new AuditRepository(transaction);
       if (operationId) {
         const previous = await audit.findByOperationId(workspaceId, operationId);
@@ -97,6 +100,8 @@ export class DebtService {
       });
       return debt;
     });
+    await this.notifyFinancialChange(workspaceId, debt.id);
+    return debt;
   }
 
   async update(
@@ -107,7 +112,7 @@ export class DebtService {
   ): Promise<DebtRow> {
     const value = updateDebtSchema.safeParse(input);
     if (!value.success) throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do fiado inválidos.');
-    return this.executor.transaction(async (transaction) => {
+    const debt = await this.executor.transaction(async (transaction) => {
       const debts = new DebtRepository(transaction);
       const current = await debts.findById(workspaceId, debtId);
       if (!current) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Fiado não encontrado.');
@@ -168,13 +173,15 @@ export class DebtService {
       });
       return updated;
     });
+    await this.notifyFinancialChange(workspaceId, debt.id);
+    return debt;
   }
 
   async cancel(workspaceId: string, debtId: string, input: CancelDebtInput): Promise<DebtRow> {
     const value = cancelDebtSchema.safeParse(input);
     if (!value.success)
       throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do cancelamento inválidos.');
-    return this.executor.transaction(async (transaction) => {
+    const debt = await this.executor.transaction(async (transaction) => {
       const debts = new DebtRepository(transaction);
       const current = await debts.findById(workspaceId, debtId);
       if (!current) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Fiado não encontrado.');
@@ -215,6 +222,8 @@ export class DebtService {
       });
       return debt;
     });
+    await this.notifyFinancialChange(workspaceId, debt.id);
+    return debt;
   }
 
   private async validateVehicle(
@@ -236,6 +245,14 @@ export class DebtService {
         'VEHICLE_ARCHIVED',
         'Restaure o veículo antes de vinculá-lo a um novo fiado.',
       );
+    }
+  }
+
+  private async notifyFinancialChange(workspaceId: string, debtId: string): Promise<void> {
+    try {
+      await this.onFinancialChange?.(workspaceId, debtId);
+    } catch {
+      // A falha de uma notificação nunca desfaz uma operação financeira já confirmada.
     }
   }
 }

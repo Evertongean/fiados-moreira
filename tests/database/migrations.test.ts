@@ -37,6 +37,7 @@ describe('SQLite migrations and initialization', () => {
         'payments_workspace_operation_unique',
         'payment_reversals_workspace_payment_unique',
         'debts_workspace_due_date_idx',
+        'reminders_workspace_debt_type_scheduled_unique',
       ]),
     );
     expect(

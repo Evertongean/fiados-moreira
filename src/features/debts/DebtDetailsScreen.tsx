@@ -1,6 +1,7 @@
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import {
   Ban,
+  BellPlus,
   CalendarDays,
   Car,
   CircleDollarSign,
@@ -390,6 +391,15 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
               : 'Registrar pagamento'
         }
         onPress={() => router.push({ pathname: '/debts/[id]/payment', params: { id: debt.id } })}
+      />
+
+      <Button
+        disabled={isCanceled || debt.summary.isPaid}
+        fullWidth
+        icon={BellPlus}
+        label="Criar lembrete"
+        onPress={() => router.push(`/debts/${debt.id}/reminder` as Href)}
+        variant="secondary"
       />
 
       {!isCanceled && debt.summary.netPaidCents > 0 ? (

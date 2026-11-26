@@ -10,14 +10,17 @@ import {
 } from '@/features/payments/domain/paymentSchemas';
 
 export class PaymentReversalService {
-  constructor(private readonly executor: SqlExecutor) {}
+  constructor(
+    private readonly executor: SqlExecutor,
+    private readonly onFinancialChange?: (workspaceId: string, debtId: string) => Promise<void>,
+  ) {}
 
   async reverse(workspaceId: string, input: ReversePaymentInput): Promise<PaymentReversalRow> {
     const value = reversePaymentSchema.safeParse(input);
     if (!value.success)
       throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do estorno inválidos.');
 
-    return this.executor.transaction(async (transaction) => {
+    const result = await this.executor.transaction(async (transaction) => {
       const reversals = new PaymentReversalRepository(transaction);
       const byOperation = await reversals.findByOperationId(workspaceId, value.data.operationId);
       if (byOperation) {
@@ -25,7 +28,14 @@ export class PaymentReversalService {
           byOperation.paymentId === value.data.paymentId &&
           byOperation.reason === value.data.reason &&
           byOperation.reversedAt === value.data.reversedAt;
-        if (same) return byOperation;
+        if (same) {
+          const payment = await new PaymentRepository(transaction).findById(
+            workspaceId,
+            byOperation.paymentId,
+          );
+          if (!payment) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Pagamento não encontrado.');
+          return { reversal: byOperation, debtId: payment.debtId };
+        }
         throw new AppDatabaseError(
           'IDEMPOTENCY_CONFLICT',
           'A operação já foi usada com outros dados.',
@@ -56,7 +66,13 @@ export class PaymentReversalService {
         operationId: reversal.operationId,
         metadata: { debtId: payment.debtId, amountCents: payment.amountCents },
       });
-      return reversal;
+      return { reversal, debtId: payment.debtId };
     });
+    try {
+      await this.onFinancialChange?.(workspaceId, result.debtId);
+    } catch {
+      // A persistência financeira já foi confirmada e não depende das notificações.
+    }
+    return result.reversal;
   }
 }

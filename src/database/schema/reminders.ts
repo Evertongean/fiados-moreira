@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { check, foreignKey, index, text, sqliteTable } from 'drizzle-orm/sqlite-core';
+import { check, foreignKey, index, text, sqliteTable, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { debts } from './debts';
 import { workspaces } from './workspaces';
@@ -25,6 +25,8 @@ export const reminders = sqliteTable(
     scheduledAt: text('scheduled_at').notNull(),
     status: text('status', { enum: reminderStatuses }).notNull().default('pending'),
     notificationIdentifier: text('notification_identifier'),
+    deliveredAt: text('delivered_at'),
+    readAt: text('read_at'),
     createdAt: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -41,6 +43,12 @@ export const reminders = sqliteTable(
     index('reminders_workspace_status_scheduled_idx').on(
       table.workspaceId,
       table.status,
+      table.scheduledAt,
+    ),
+    uniqueIndex('reminders_workspace_debt_type_scheduled_unique').on(
+      table.workspaceId,
+      table.debtId,
+      table.type,
       table.scheduledAt,
     ),
     check(

@@ -24,8 +24,8 @@ Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraest
 
 ## Stack
 
-- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
-- Planejado: Zustand, Supabase/PostgreSQL, Expo Notifications, SecureStore, Local Authentication e EAS Build.
+- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Expo Notifications, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
+- Planejado: Zustand, Supabase/PostgreSQL, SecureStore, Local Authentication e EAS Build.
 
 Dependências planejadas serão adicionadas apenas quando houver uso real.
 

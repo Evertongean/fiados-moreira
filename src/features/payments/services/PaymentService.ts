@@ -21,14 +21,17 @@ function isSamePayment(current: PaymentRow, input: ReturnType<typeof registerPay
 }
 
 export class PaymentService {
-  constructor(private readonly executor: SqlExecutor) {}
+  constructor(
+    private readonly executor: SqlExecutor,
+    private readonly onFinancialChange?: (workspaceId: string, debtId: string) => Promise<void>,
+  ) {}
 
   async register(workspaceId: string, input: RegisterPaymentInput): Promise<PaymentRow> {
     const value = registerPaymentSchema.safeParse(input);
     if (!value.success)
       throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do pagamento inválidos.');
 
-    return this.executor.transaction(async (transaction) => {
+    const payment = await this.executor.transaction(async (transaction) => {
       const payments = new PaymentRepository(transaction);
       const previous = await payments.findByOperationId(workspaceId, value.data.operationId);
       if (previous) {
@@ -63,5 +66,11 @@ export class PaymentService {
       });
       return payment;
     });
+    try {
+      await this.onFinancialChange?.(workspaceId, payment.debtId);
+    } catch {
+      // A persistência financeira já foi confirmada e não depende das notificações.
+    }
+    return payment;
   }
 }

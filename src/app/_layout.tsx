@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ToastProvider } from '@/components/ui/Toast';
 import { DatabaseProvider } from '@/database/DatabaseProvider';
+import { NotificationProvider } from '@/features/notifications/NotificationProvider';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 
@@ -50,28 +51,30 @@ function AppBootstrap() {
 
   return (
     <DatabaseProvider>
-      <ToastProvider>
-        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-        <Stack
-          screenOptions={{
-            animation: 'slide_from_right',
-            contentStyle: { backgroundColor: tokens.colors.background },
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="customers" />
-          <Stack.Screen name="vehicles" />
-          <Stack.Screen name="debts" />
-          <Stack.Screen name="payments" />
-          <Stack.Screen name="notifications" />
-          <Stack.Screen name="settings" />
-          <Stack.Screen name="reports" />
-          <Stack.Screen name="search" />
-          <Stack.Screen name="dev" />
-          <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
-        </Stack>
-      </ToastProvider>
+      <NotificationProvider>
+        <ToastProvider>
+          <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+          <Stack
+            screenOptions={{
+              animation: 'slide_from_right',
+              contentStyle: { backgroundColor: tokens.colors.background },
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="customers" />
+            <Stack.Screen name="vehicles" />
+            <Stack.Screen name="debts" />
+            <Stack.Screen name="payments" />
+            <Stack.Screen name="notifications" />
+            <Stack.Screen name="settings" />
+            <Stack.Screen name="reports" />
+            <Stack.Screen name="search" />
+            <Stack.Screen name="dev" />
+            <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
+          </Stack>
+        </ToastProvider>
+      </NotificationProvider>
     </DatabaseProvider>
   );
 }
