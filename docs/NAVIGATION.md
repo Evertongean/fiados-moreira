@@ -47,10 +47,10 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional                | Prompt 06                 |
 | Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional                | Prompt 06                 |
 | Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional                | Prompt 06                 |
-| Fiados                | `/debts`                  | Pesquisa, filtros e vazio             | Estrutural               | Prompt 07                 |
-| Novo fiado            | `/debts/new`              | Formulário monetário preliminar       | Estrutural, sem salvar   | Prompt 07                 |
-| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Estrutural               | Prompt 07                 |
-| Editar fiado          | `/debts/[id]/edit`        | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 07                 |
+| Fiados                | `/debts`                  | Pesquisa, filtros e listagem SQLite   | Funcional                | Prompt 07                 |
+| Novo fiado            | `/debts/new`              | Cadastro validado e auditado          | Funcional                | Prompt 07                 |
+| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional                | Prompt 07                 |
+| Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional                | Prompt 07                 |
 | Registrar pagamento   | `/debts/[id]/payment`     | Formulário preliminar                 | Estrutural, desabilitado | Prompt 08                 |
 | Detalhes do pagamento | `/payments/[id]`          | Dados futuros da transação            | Estrutural               | Prompt 08                 |
 | Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar    | Prompt 15                 |
@@ -70,7 +70,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 
 ## Rotas dinâmicas e parâmetros
 
-Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A interface mostra um estado amigável em vez de lançar erro. Nenhum objeto de cliente, veículo, fiado, pagamento ou valor financeiro viaja pela URL.
+Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A criação de fiado pode receber `customerId` e `vehicleId` validados para preencher vínculos vindos dos perfis. A interface mostra um estado amigável em vez de lançar erro. Nenhum objeto de cliente, veículo, fiado, pagamento ou valor financeiro viaja pela URL.
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
 

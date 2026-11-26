@@ -6,7 +6,8 @@ import { getRouteId } from '@/utils/routes';
 
 export default function EditDebtRoute() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  if (!getRouteId(id)) {
+  const debtId = getRouteId(id);
+  if (!debtId) {
     return (
       <RouteState
         description="O identificador recebido não é válido."
@@ -15,5 +16,5 @@ export default function EditDebtRoute() {
       />
     );
   }
-  return <DebtFormScreen mode="edit" />;
+  return <DebtFormScreen debtId={debtId} mode="edit" />;
 }

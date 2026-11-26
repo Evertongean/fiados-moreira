@@ -32,6 +32,8 @@ import {
   useToast,
 } from '@/components/ui';
 import type { CustomerFinancialSummary } from '@/features/customers/domain/customerTypes';
+import { DebtListItem } from '@/features/debts/components/DebtListItem';
+import type { DebtOverview } from '@/features/debts/domain/debtTypes';
 import { VehicleListItem } from '@/features/vehicles/components/VehicleListItem';
 import { vehicleMatchesQuery } from '@/features/vehicles/domain/vehicleUtils';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -85,6 +87,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const [customer, setCustomer] = useState<CustomerRow | null>(null);
   const [summary, setSummary] = useState<CustomerFinancialSummary | null>(null);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
+  const [debts, setDebts] = useState<DebtOverview[]>([]);
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -101,19 +104,31 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
         setStatus('missing');
         return;
       }
-      const [financial, customerVehicles] = await Promise.all([
+      const [financial, customerVehicles, customerDebts] = await Promise.all([
         repositories.customers.getFinancialSummary(workspace.id, customerId),
         repositories.vehicles.listByCustomer(workspace.id, customerId, { status: 'all' }),
+        repositories.debts.listOverview(workspace.id, {
+          customerId,
+          timezone: workspace.timezone,
+        }),
       ]);
       if (requestVersion.current !== version) return;
       setCustomer(record);
       setSummary(financial);
       setVehicles(customerVehicles);
+      setDebts(customerDebts);
       setStatus('ready');
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [customerId, repositories.customers, repositories.vehicles, workspace.id]);
+  }, [
+    customerId,
+    repositories.customers,
+    repositories.debts,
+    repositories.vehicles,
+    workspace.id,
+    workspace.timezone,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -280,7 +295,14 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             }
             variant="secondary"
           />
-          <Button disabled fullWidth label="Novo fiado — em breve" onPress={() => undefined} />
+          <Button
+            disabled={isArchived}
+            fullWidth
+            label={isArchived ? 'Novo fiado — restaure o cliente' : 'Novo fiado'}
+            onPress={() =>
+              router.push({ pathname: '/debts/new', params: { customerId: customer.id } })
+            }
+          />
           <Button
             fullWidth
             label={isArchived ? 'Adicionar veículo — restaure o cliente' : 'Adicionar veículo'}
@@ -294,7 +316,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
           <Button
             disabled
             fullWidth
-            label="Registrar pagamento — em breve"
+            label="Registrar pagamento — indisponível"
             onPress={() => undefined}
           />
           <Button
@@ -307,6 +329,54 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             variant="outline"
           />
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <SectionHeader
+          action={
+            <Button
+              disabled={isArchived}
+              label="Adicionar"
+              onPress={() =>
+                router.push({ pathname: '/debts/new', params: { customerId: customer.id } })
+              }
+              size="sm"
+              variant="outline"
+            />
+          }
+          description={`${debts.length} ${debts.length === 1 ? 'fiado vinculado' : 'fiados vinculados'}`}
+          title="Fiados"
+        />
+        {debts.length ? (
+          <View style={styles.debtList}>
+            {debts.map((debt) => (
+              <DebtListItem
+                debt={debt}
+                key={debt.id}
+                onPress={() => router.push({ pathname: '/debts/[id]', params: { id: debt.id } })}
+              />
+            ))}
+          </View>
+        ) : (
+          <EmptyState
+            action={
+              isArchived
+                ? undefined
+                : {
+                    label: 'Registrar fiado',
+                    onPress: () =>
+                      router.push({ pathname: '/debts/new', params: { customerId: customer.id } }),
+                  }
+            }
+            description={
+              isArchived
+                ? 'Restaure o cliente para registrar um novo fiado.'
+                : 'Os fiados deste cliente aparecerão aqui.'
+            }
+            icon={ReceiptText}
+            title="Nenhum fiado cadastrado"
+          />
+        )}
       </View>
 
       <View style={styles.section}>
@@ -417,4 +487,5 @@ const styles = StyleSheet.create({
   infoRow: { gap: 2 },
   actions: { gap: 10 },
   vehicleList: { gap: 10 },
+  debtList: { gap: 10 },
 });

@@ -33,6 +33,7 @@ export function calculateDebtStatus(input: {
 }
 
 export function toDebtBadgeStatus(status: DebtStatusResult): DebtBadgeStatus {
+  if (status.financialStatus === 'canceled') return 'canceled';
   if (status.isOverdue) return 'overdue';
   if (status.financialStatus === 'partially_paid') return 'partial';
   if (status.financialStatus === 'paid') return 'paid';

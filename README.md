@@ -20,7 +20,7 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes e veículos foram implementados**. Clientes e veículos possuem cadastro, busca, edição, detalhes, arquivamento, restauração e auditoria offline. Os fluxos financeiros visuais continuam estruturais.
+Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos e fiados foram implementados**. Fiados possuem cadastro, busca, filtros, edição, detalhes, cancelamento auditado e integração aos perfis, todos offline. O registro de pagamentos pela interface permanece planejado para o Prompt 08.
 
 ## Stack
 
@@ -132,6 +132,7 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Banco de dados](docs/DATABASE.md)
 - [Módulo de clientes](docs/CUSTOMERS.md)
 - [Módulo de veículos](docs/VEHICLES.md)
+- [Módulo de fiados](docs/DEBTS.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Navegação](docs/NAVIGATION.md)
@@ -140,4 +141,4 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 
 ## Status
 
-**Prompt 06 — Veículos:** implementação concluída e protegida por testes locais. Cadastro vinculado a cliente, consulta, pesquisa, edição, placas brasileiras, duplicidades, arquivamento, restauração e auditoria funcionam sobre SQLite. A validação manual em Android/iOS permanece pendente; fiados visuais são a próxima etapa. Autenticação e sincronização continuam fora do escopo.
+**Prompt 07 — Fiados:** implementação concluída e protegida por testes locais. Cadastro vinculado a cliente/veículo, consulta, pesquisa, filtros, edição, cancelamento, saldos derivados e integração aos perfis funcionam sobre SQLite. A validação manual em Android/iOS permanece pendente; pagamentos pela interface são a próxima etapa. Autenticação e sincronização continuam fora do escopo.

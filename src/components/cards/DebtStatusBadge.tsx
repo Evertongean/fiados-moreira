@@ -1,6 +1,6 @@
 import { Badge, type BadgeVariant } from '@/components/ui/Badge';
 
-export type DebtStatus = 'pending' | 'overdue' | 'partial' | 'paid';
+export type DebtStatus = 'pending' | 'overdue' | 'partial' | 'paid' | 'canceled';
 
 export interface DebtStatusBadgeProps {
   status: DebtStatus;
@@ -11,6 +11,7 @@ const statusConfig: Record<DebtStatus, { label: string; variant: BadgeVariant }>
   overdue: { label: 'Atrasado', variant: 'destructive' },
   partial: { label: 'Parcialmente pago', variant: 'info' },
   paid: { label: 'Quitado', variant: 'success' },
+  canceled: { label: 'Cancelado', variant: 'outline' },
 };
 
 export function DebtStatusBadge({ status }: DebtStatusBadgeProps) {

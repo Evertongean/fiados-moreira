@@ -149,3 +149,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - A pesquisa no perfil do cliente normaliza texto e placa em memória após consulta isolada por workspace, adequada ao volume inicial.
 - `DebtService` revalida o veículo dentro da transação e rejeita veículo arquivado ou pertencente a outro cliente, sem depender da interface futura.
 - A lista do perfil e os detalhes recarregam no foco; React Hook Form mantém estado do formulário e SQLite permanece a única fonte persistente.
+
+## Decisões do Prompt 07
+
+- `DebtService` coordena criação, edição e cancelamento transacionais com auditoria e identificadores de operação reutilizáveis em reenvios da interface.
+- `DebtRepository` oferece projeções agregadas por workspace; totais e situação são produzidos pelas funções financeiras do domínio, não pelas telas.
+- Pesquisa por cliente, descrição e placa normaliza texto em memória depois da consulta isolada por workspace, sem migration prematura.
+- Cliente é imutável na edição; veículo pode ser removido ou trocado somente por outro ativo do mesmo cliente. As validações são repetidas dentro da transação.
+- Perfis de cliente e veículo consultam seus fiados reais e recarregam no foco. SQLite continua como fonte operacional única, sem Zustand ou cache paralelo.
+- O schema do Prompt 04 já atendia ao módulo; nenhuma migration ou dependência foi adicionada.

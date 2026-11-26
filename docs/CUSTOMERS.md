@@ -131,4 +131,4 @@ Os testes SQLite usam `node:sqlite`, banco isolado e o SQL versionado real. Eles
 - Não há autenticação, criptografia do arquivo, backup, sync ou Supabase.
 - Testes manuais Android/iOS, TalkBack/VoiceOver e telas pequenas continuam pendentes.
 - A busca em memória deve ser medida antes de volumes muito altos.
-- Veículos estão conectados pelo Prompt 06; fiados, pagamentos e histórico visual continuam nos Prompts 07 a 09.
+- Veículos e fiados estão conectados pelos Prompts 06 e 07. Pagamentos e histórico visual completo continuam nos Prompts 08 e 09.

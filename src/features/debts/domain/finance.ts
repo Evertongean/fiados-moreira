@@ -47,6 +47,17 @@ export function calculateDebtSummary(
     if (payment.reversed) reversedCents = safeAdd(reversedCents, payment.amountCents);
   }
 
+  return calculateDebtSummaryFromTotals(originalCents, grossPaidCents, reversedCents);
+}
+
+export function calculateDebtSummaryFromTotals(
+  originalCents: number,
+  grossPaidCents: number,
+  reversedCents: number,
+): DebtFinancialSummary {
+  assertMoney(originalCents, false);
+  assertMoney(grossPaidCents);
+  assertMoney(reversedCents);
   const netPaidCents = grossPaidCents - reversedCents;
   const pendingCents = originalCents - netPaidCents;
   if (netPaidCents < 0 || pendingCents < 0) {

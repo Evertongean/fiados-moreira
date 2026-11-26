@@ -29,7 +29,7 @@ src/utils/plate.ts                       validação, normalização e apresenta
 - `/vehicles/[id]/edit`: preserva proprietário, UUID, criação e vínculos financeiros.
 - Perfil do cliente: lista veículos ativos e arquivados, pesquisa por placa, marca ou modelo, apresenta estado vazio e permite adicionar veículo quando o cliente está ativo.
 
-Não foi criada aba inferior. O botão de novo fiado permanece desabilitado até o Prompt 07.
+Não foi criada aba inferior. O perfil lista seus fiados e abre um novo lançamento com cliente e veículo preenchidos quando ambos estão ativos.
 
 ## Validação e normalização
 

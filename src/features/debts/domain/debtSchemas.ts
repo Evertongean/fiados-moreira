@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { MAX_CURRENCY_CENTS } from '@/utils/currency';
 
+import { parseCivilDate } from './debtUtils';
+
 const date = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -17,6 +19,7 @@ const date = z
 const optionalText = z
   .string()
   .trim()
+  .max(1000)
   .transform((value) => value || null)
   .nullable()
   .optional();
@@ -47,6 +50,35 @@ export const cancelDebtSchema = z.object({
   canceledAt: z.iso.datetime().optional(),
 });
 
+const formDate = (optional = false) =>
+  z
+    .string()
+    .refine(
+      (value) => (optional && !value.trim()) || parseCivilDate(value) !== null,
+      'Informe uma data válida no formato DD/MM/AAAA.',
+    );
+
+export const debtFormSchema = z.object({
+  customerId: z.string().uuid('Selecione um cliente.'),
+  vehicleId: z.union([z.literal(''), z.string().uuid('Selecione um veículo válido.')]),
+  description: z.string().trim().min(1, 'Informe o serviço ou produto.').max(500),
+  totalCents: z
+    .number()
+    .nullable()
+    .pipe(
+      z
+        .number({ error: 'Informe o valor total.' })
+        .int()
+        .positive('Informe um valor maior que zero.')
+        .max(MAX_CURRENCY_CENTS),
+    ),
+  serviceDate: formDate(),
+  dueDate: formDate(true),
+  notes: z.string().max(1000, 'As observações devem ter no máximo 1000 caracteres.'),
+});
+
 export type CreateDebtInput = z.input<typeof createDebtSchema>;
 export type UpdateDebtInput = z.input<typeof updateDebtSchema>;
 export type CancelDebtInput = z.input<typeof cancelDebtSchema>;
+export type DebtFormValues = z.input<typeof debtFormSchema>;
+export type DebtFormOutput = z.output<typeof debtFormSchema>;

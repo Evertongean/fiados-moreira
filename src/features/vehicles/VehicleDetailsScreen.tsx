@@ -1,6 +1,6 @@
 import type { CustomerRow, VehicleRow } from '@/database/schema';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Archive, Car, Pencil, RotateCcw, UserRound } from 'lucide-react-native';
+import { Archive, Car, Pencil, ReceiptText, RotateCcw, UserRound } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -19,6 +19,8 @@ import {
   useToast,
 } from '@/components/ui';
 import { VEHICLE_TYPE_LABELS } from '@/features/vehicles/domain/vehicleUtils';
+import { DebtListItem } from '@/features/debts/components/DebtListItem';
+import type { DebtOverview } from '@/features/debts/domain/debtTypes';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useTheme } from '@/hooks/useTheme';
 import { formatBrazilianPlate } from '@/utils/plate';
@@ -70,6 +72,7 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
   const { workspace, repositories, services } = useDatabase();
   const [vehicle, setVehicle] = useState<VehicleRow | null>(null);
   const [owner, setOwner] = useState<CustomerRow | null>(null);
+  const [debts, setDebts] = useState<DebtOverview[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
@@ -85,7 +88,12 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
         setStatus('missing');
         return;
       }
-      const customer = await repositories.customers.findById(workspace.id, record.customerId);
+      const [customer, vehicleDebts] = await Promise.all([
+        repositories.customers.findById(workspace.id, record.customerId),
+        repositories.debts.listByVehicle(workspace.id, vehicleId, {
+          timezone: workspace.timezone,
+        }),
+      ]);
       if (requestVersion.current !== version) return;
       if (!customer) {
         setStatus('error');
@@ -93,11 +101,19 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
       }
       setVehicle(record);
       setOwner(customer);
+      setDebts(vehicleDebts);
       setStatus('ready');
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [repositories.customers, repositories.vehicles, vehicleId, workspace.id]);
+  }, [
+    repositories.customers,
+    repositories.debts,
+    repositories.vehicles,
+    vehicleId,
+    workspace.id,
+    workspace.timezone,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -240,7 +256,55 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
           variant="warning"
         />
       ) : null}
-      <Button disabled fullWidth label="Novo fiado — em breve" onPress={() => undefined} />
+      <View style={styles.section}>
+        <SectionHeader
+          action={
+            <Button
+              disabled={isArchived || Boolean(owner.archivedAt)}
+              label="Adicionar"
+              onPress={() =>
+                router.push({
+                  pathname: '/debts/new',
+                  params: { customerId: owner.id, vehicleId: vehicle.id },
+                })
+              }
+              size="sm"
+              variant="outline"
+            />
+          }
+          description={`${debts.length} ${debts.length === 1 ? 'fiado vinculado' : 'fiados vinculados'}`}
+          title="Fiados"
+        />
+        {debts.length ? (
+          <View style={styles.debtList}>
+            {debts.map((debt) => (
+              <DebtListItem
+                debt={debt}
+                key={debt.id}
+                onPress={() => router.push({ pathname: '/debts/[id]', params: { id: debt.id } })}
+              />
+            ))}
+          </View>
+        ) : (
+          <EmptyState
+            action={
+              isArchived || owner.archivedAt
+                ? undefined
+                : {
+                    label: 'Registrar fiado',
+                    onPress: () =>
+                      router.push({
+                        pathname: '/debts/new',
+                        params: { customerId: owner.id, vehicleId: vehicle.id },
+                      }),
+                  }
+            }
+            description="Os fiados vinculados a este veículo aparecerão aqui."
+            icon={ReceiptText}
+            title="Nenhum fiado cadastrado"
+          />
+        )}
+      </View>
       <Button
         fullWidth
         icon={isArchived ? RotateCcw : Archive}
@@ -276,4 +340,5 @@ const styles = StyleSheet.create({
   infoRow: { gap: 2 },
   owner: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   ownerCopy: { flex: 1, gap: 2 },
+  debtList: { gap: 10 },
 });

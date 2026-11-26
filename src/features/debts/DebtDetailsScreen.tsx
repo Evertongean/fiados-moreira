@@ -1,26 +1,200 @@
-import { MessageCircle, Pencil, ReceiptText, WalletCards } from 'lucide-react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import {
+  Ban,
+  CalendarDays,
+  Car,
+  CircleDollarSign,
+  Pencil,
+  ReceiptText,
+  UserRound,
+  WalletCards,
+} from 'lucide-react-native';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { BalanceCard, DebtStatusBadge, PaymentListItem, StatCard } from '@/components/cards';
 import { RouteState } from '@/components/layouts/RouteState';
 import { PageHeader, SectionHeader } from '@/components/navigation';
-import { Alert, Button, Card, EmptyState, Screen } from '@/components/ui';
+import {
+  Alert,
+  AppText,
+  Button,
+  Card,
+  EmptyState,
+  LoadingState,
+  Screen,
+  TextArea,
+  useToast,
+} from '@/components/ui';
+import type { DebtOverview, DebtPaymentDetails } from '@/features/debts/domain/debtTypes';
+import { formatCivilDate, formatVehicleLabel } from '@/features/debts/domain/debtUtils';
+import { toDebtBadgeStatus } from '@/features/debts/domain/status';
+import { useDatabase } from '@/hooks/useDatabase';
+import { useTheme } from '@/hooks/useTheme';
+import { formatBRLCents } from '@/utils/currency';
 import { getRouteId } from '@/utils/routes';
+import { createUuid } from '@/utils/uuid';
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: 'Dinheiro',
+  pix: 'Pix',
+  debit_card: 'Cartão de débito',
+  credit_card: 'Cartão de crédito',
+  bank_transfer: 'Transferência',
+  other: 'Outro',
+};
+
+function formatInstant(value: string, timezone: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: timezone }).format(date);
+}
+
+function InfoRow({ label, value }: { label: string; value: string | null }) {
+  if (!value) return null;
+  return (
+    <View style={styles.infoRow}>
+      <AppText color="textMuted" variant="caption">
+        {label}
+      </AppText>
+      <AppText selectable variant="bodySmall">
+        {value}
+      </AppText>
+    </View>
+  );
+}
 
 export function DebtDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const debtId = getRouteId(id);
-  const router = useRouter();
-
   if (!debtId) {
     return (
       <RouteState
         description="O identificador recebido não é válido."
+        headerTitle="Fiado"
         kind="invalid"
         title="Fiado inválido"
       />
     );
   }
+  return <DebtDetailsContent debtId={debtId} />;
+}
+
+function DebtDetailsContent({ debtId }: { debtId: string }) {
+  const router = useRouter();
+  const { tokens } = useTheme();
+  const { showToast } = useToast();
+  const { workspace, repositories, services } = useDatabase();
+  const [debt, setDebt] = useState<DebtOverview | null>(null);
+  const [payments, setPayments] = useState<DebtPaymentDetails[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [cancelOperationId, setCancelOperationId] = useState(createUuid);
+  const requestVersion = useRef(0);
+
+  const load = useCallback(async () => {
+    const version = ++requestVersion.current;
+    setStatus('loading');
+    try {
+      const record = await repositories.debts.findOverview(
+        workspace.id,
+        debtId,
+        workspace.timezone,
+      );
+      if (requestVersion.current !== version) return;
+      if (!record) {
+        setStatus('missing');
+        return;
+      }
+      const history = await repositories.debts.listPayments(workspace.id, debtId);
+      if (requestVersion.current !== version) return;
+      setDebt(record);
+      setPayments(history);
+      setStatus('ready');
+    } catch {
+      if (requestVersion.current === version) setStatus('error');
+    }
+  }, [debtId, repositories.debts, workspace.id, workspace.timezone]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return () => {
+        requestVersion.current += 1;
+      };
+    }, [load]),
+  );
+
+  const cancel = async () => {
+    if (!cancelReason.trim() || isCanceling) return;
+    setIsCanceling(true);
+    try {
+      await services.debts.cancel(workspace.id, debtId, {
+        reason: cancelReason,
+        operationId: cancelOperationId,
+      });
+      showToast({ title: 'Fiado cancelado com sucesso.', variant: 'success' });
+      setCancelOpen(false);
+      setCancelReason('');
+      setCancelOperationId(createUuid());
+      await load();
+    } catch (error) {
+      const hasPayments =
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'CONSTRAINT_VIOLATION';
+      showToast({
+        title: hasPayments
+          ? 'Este fiado possui pagamentos válidos e não pode ser cancelado.'
+          : 'Não foi possível cancelar o fiado.',
+        variant: hasPayments ? 'warning' : 'error',
+      });
+    } finally {
+      setIsCanceling(false);
+    }
+  };
+
+  if (status === 'loading') {
+    return (
+      <Screen>
+        <LoadingState fullScreen label="Carregando fiado…" />
+      </Screen>
+    );
+  }
+  if (status === 'missing') {
+    return (
+      <RouteState
+        description="Este fiado não existe ou pertence a outro workspace."
+        headerTitle="Fiado"
+        kind="notFound"
+        title="Fiado não encontrado"
+      />
+    );
+  }
+  if (status === 'error' || !debt) {
+    return (
+      <Screen contentContainerStyle={styles.page}>
+        <PageHeader fallbackRoute="/debts" title="Detalhes do fiado" />
+        <EmptyState
+          action={{ label: 'Tentar novamente', onPress: () => void load() }}
+          description="Não foi possível consultar os dados locais."
+          icon={ReceiptText}
+          title="Não foi possível carregar o fiado."
+        />
+      </Screen>
+    );
+  }
+
+  const vehicleLabel = formatVehicleLabel({
+    brand: debt.vehicleBrand,
+    model: debt.vehicleModel,
+    plate: debt.vehiclePlate,
+  });
+  const isCanceled = debt.status.financialStatus === 'canceled';
 
   return (
     <Screen contentContainerStyle={styles.page} scroll>
@@ -28,59 +202,222 @@ export function DebtDetailsScreen() {
         fallbackRoute="/debts"
         rightAction={
           <Button
+            disabled={isCanceled}
             icon={Pencil}
             label="Editar"
-            onPress={() => router.push({ pathname: '/debts/[id]/edit', params: { id: debtId } })}
+            onPress={() => router.push({ pathname: '/debts/[id]/edit', params: { id: debt.id } })}
             size="sm"
             variant="ghost"
           />
         }
         title="Detalhes do fiado"
       />
-      <Alert
-        description="Nenhum cálculo ou registro financeiro está ativo nesta etapa."
-        title="Dados indisponíveis"
-      />
-      <Card variant="outlined">
-        <SectionHeader
-          description="Cliente, veículo e descrição do serviço"
-          title="Informações do lançamento"
+      {isCanceled ? (
+        <Alert
+          description={`Motivo: ${debt.cancellationReason ?? 'Não informado'}`}
+          title="Fiado cancelado"
+          variant="warning"
         />
-      </Card>
-      <Card variant="outlined">
-        <SectionHeader
-          description="Valor original, valor pago e saldo pendente"
-          title="Resumo financeiro"
+      ) : debt.status.isOverdue ? (
+        <Alert
+          description="O vencimento passou e ainda existe saldo pendente."
+          title="Fiado atrasado"
+          variant="error"
         />
-      </Card>
-      <Card variant="outlined">
-        <SectionHeader
-          description="Vencimento e situação serão derivados pelas regras de negócio"
-          title="Situação da dívida"
-        />
-      </Card>
+      ) : null}
+
       <View style={styles.section}>
-        <SectionHeader title="Histórico de pagamentos" />
-        <EmptyState
-          description="Pagamentos válidos e estornos aparecerão nesta seção."
-          icon={ReceiptText}
-          title="Sem pagamentos"
+        <SectionHeader title="Resumo financeiro" />
+        <BalanceCard
+          description={`${debt.summary.paidPercentage.toFixed(0)}% do valor original pago`}
+          icon={CircleDollarSign}
+          title="Saldo pendente"
+          valueCents={debt.summary.pendingCents}
         />
+        <View style={styles.stats}>
+          <StatCard
+            icon={ReceiptText}
+            label="Valor original"
+            style={styles.stat}
+            value={formatBRLCents(debt.summary.originalCents)}
+          />
+          <StatCard
+            icon={WalletCards}
+            label="Valor pago"
+            style={styles.stat}
+            value={formatBRLCents(debt.summary.netPaidCents)}
+            variant="success"
+          />
+        </View>
       </View>
-      <Button
-        icon={WalletCards}
-        label="Registrar pagamento"
-        onPress={() => router.push({ pathname: '/debts/[id]/payment', params: { id: debtId } })}
-      />
+
+      <Card variant="outlined">
+        <View style={styles.info}>
+          <SectionHeader title="Informações do lançamento" />
+          <InfoRow label="Descrição" value={debt.description} />
+          <InfoRow label="Data do serviço" value={formatCivilDate(debt.serviceDate)} />
+          <InfoRow label="Vencimento" value={formatCivilDate(debt.dueDate) ?? 'Sem vencimento'} />
+          <InfoRow label="Observações" value={debt.notes} />
+          <View style={styles.statusRow}>
+            <DebtStatusBadge status={toDebtBadgeStatus(debt.status)} />
+            {debt.status.isOverdue && debt.status.financialStatus === 'partially_paid' ? (
+              <AppText color="destructive" variant="caption">
+                Parcial e atrasado
+              </AppText>
+            ) : null}
+          </View>
+        </View>
+      </Card>
+
+      <View style={styles.section}>
+        <SectionHeader title="Vínculos" />
+        <Card
+          accessibilityLabel={`Abrir cliente ${debt.customerName}`}
+          onPress={() =>
+            router.push({ pathname: '/customers/[id]', params: { id: debt.customerId } })
+          }
+          variant="outlined"
+        >
+          <View style={styles.linkRow}>
+            <UserRound color={tokens.colors.primary} size={22} />
+            <View style={styles.linkCopy}>
+              <AppText weight="semibold">{debt.customerName}</AppText>
+              <AppText color="textMuted" variant="caption">
+                Abrir perfil do cliente
+              </AppText>
+            </View>
+          </View>
+        </Card>
+        {debt.vehicleId && vehicleLabel ? (
+          <Card
+            accessibilityLabel={`Abrir veículo ${vehicleLabel}`}
+            onPress={() =>
+              router.push({ pathname: '/vehicles/[id]', params: { id: debt.vehicleId as string } })
+            }
+            variant="outlined"
+          >
+            <View style={styles.linkRow}>
+              <Car color={tokens.colors.primary} size={22} />
+              <View style={styles.linkCopy}>
+                <AppText weight="semibold">{vehicleLabel}</AppText>
+                <AppText color="textMuted" variant="caption">
+                  Abrir perfil do veículo
+                </AppText>
+              </View>
+            </View>
+          </Card>
+        ) : null}
+      </View>
+
+      <View style={styles.section}>
+        <SectionHeader
+          description={`${payments.length} ${payments.length === 1 ? 'registro' : 'registros'}`}
+          title="Pagamentos"
+        />
+        {payments.length ? (
+          <Card variant="outlined">
+            {payments.map((payment) => (
+              <PaymentListItem
+                amountCents={payment.amountCents}
+                dateLabel={formatInstant(payment.paidAt, workspace.timezone)}
+                description={
+                  payment.reversedAt
+                    ? `Estornado${payment.reversalReason ? `: ${payment.reversalReason}` : ''}`
+                    : (payment.notes ?? undefined)
+                }
+                key={payment.id}
+                method={PAYMENT_METHOD_LABELS[payment.paymentMethod] ?? payment.paymentMethod}
+              />
+            ))}
+          </Card>
+        ) : (
+          <EmptyState
+            description="Os pagamentos aparecerão aqui em modo de leitura."
+            icon={ReceiptText}
+            title="Sem pagamentos"
+          />
+        )}
+      </View>
+
       <Button
         disabled
-        icon={MessageCircle}
-        label="Cobrar pelo WhatsApp — indisponível"
+        fullWidth
+        icon={WalletCards}
+        label="Registrar pagamento — indisponível"
         onPress={() => undefined}
-        variant="outline"
       />
+
+      {!isCanceled && debt.summary.netPaidCents > 0 ? (
+        <Alert
+          description="Trate os pagamentos válidos antes de cancelar este fiado."
+          title="Cancelamento indisponível"
+          variant="warning"
+        />
+      ) : null}
+      {!isCanceled && debt.summary.netPaidCents === 0 ? (
+        cancelOpen ? (
+          <Card variant="outlined">
+            <View style={styles.cancelBox}>
+              <SectionHeader
+                description="A justificativa ficará registrada na auditoria."
+                title="Cancelar fiado"
+              />
+              <TextArea
+                editable={!isCanceling}
+                label="Justificativa *"
+                maxLength={500}
+                onChangeText={setCancelReason}
+                placeholder="Informe o motivo do cancelamento"
+                value={cancelReason}
+              />
+              <View style={styles.cancelActions}>
+                <Button
+                  disabled={isCanceling}
+                  label="Voltar"
+                  onPress={() => setCancelOpen(false)}
+                  variant="ghost"
+                />
+                <Button
+                  disabled={!cancelReason.trim()}
+                  label="Confirmar cancelamento"
+                  loading={isCanceling}
+                  onPress={() => void cancel()}
+                  variant="destructive"
+                />
+              </View>
+            </View>
+          </Card>
+        ) : (
+          <Button
+            fullWidth
+            icon={Ban}
+            label="Cancelar fiado"
+            onPress={() => setCancelOpen(true)}
+            variant="destructive"
+          />
+        )
+      ) : null}
+      <View style={styles.dateNote}>
+        <CalendarDays color={tokens.colors.textMuted} size={16} />
+        <AppText color="textMuted" variant="caption">
+          Criado em {formatInstant(debt.createdAt, workspace.timezone)}
+        </AppText>
+      </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({ page: { gap: 18, paddingBottom: 40 }, section: { gap: 10 } });
+const styles = StyleSheet.create({
+  page: { gap: 20, paddingBottom: 40 },
+  section: { gap: 12 },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  stat: { minWidth: 148, flexGrow: 1, flexBasis: 148 },
+  info: { gap: 14 },
+  infoRow: { gap: 2 },
+  statusRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
+  linkRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  linkCopy: { flex: 1, gap: 2 },
+  cancelBox: { gap: 14 },
+  cancelActions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 },
+  dateNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+});
