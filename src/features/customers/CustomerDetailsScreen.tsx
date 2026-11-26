@@ -10,6 +10,7 @@ import {
   ReceiptText,
   RotateCcw,
   UserRound,
+  WalletCards,
 } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -91,6 +92,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [paymentSelectionOpen, setPaymentSelectionOpen] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const requestVersion = useRef(0);
 
@@ -176,6 +178,17 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const visibleVehicles = vehicleSearch.trim()
     ? vehicles.filter((vehicle) => vehicleMatchesQuery(vehicle, vehicleSearch))
     : vehicles;
+  const payableDebts = debts.filter(
+    (debt) => debt.status.financialStatus !== 'canceled' && debt.summary.pendingCents > 0,
+  );
+  const requestPayment = () => {
+    const onlyDebt = payableDebts[0];
+    if (payableDebts.length === 1 && onlyDebt) {
+      router.push({ pathname: '/debts/[id]/payment', params: { id: onlyDebt.id } });
+      return;
+    }
+    if (payableDebts.length > 1) setPaymentSelectionOpen((value) => !value);
+  };
   const mutateArchive = async () => {
     setIsMutating(true);
     try {
@@ -314,10 +327,11 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             variant="secondary"
           />
           <Button
-            disabled
+            disabled={!payableDebts.length}
             fullWidth
-            label="Registrar pagamento — indisponível"
-            onPress={() => undefined}
+            icon={WalletCards}
+            label={payableDebts.length ? 'Registrar pagamento' : 'Nenhum fiado com saldo pendente'}
+            onPress={requestPayment}
           />
           <Button
             fullWidth
@@ -329,6 +343,25 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             variant="outline"
           />
         </View>
+        {paymentSelectionOpen && payableDebts.length > 1 ? (
+          <Card variant="highlighted">
+            <View style={styles.paymentSelection}>
+              <SectionHeader
+                description="Escolha o fiado que receberá o pagamento."
+                title="Selecionar fiado"
+              />
+              {payableDebts.map((debt) => (
+                <DebtListItem
+                  debt={debt}
+                  key={debt.id}
+                  onPress={() =>
+                    router.push({ pathname: '/debts/[id]/payment', params: { id: debt.id } })
+                  }
+                />
+              ))}
+            </View>
+          </Card>
+        ) : null}
       </View>
 
       <View style={styles.section}>
@@ -486,6 +519,7 @@ const styles = StyleSheet.create({
   info: { gap: 14 },
   infoRow: { gap: 2 },
   actions: { gap: 10 },
+  paymentSelection: { gap: 10 },
   vehicleList: { gap: 10 },
   debtList: { gap: 10 },
 });

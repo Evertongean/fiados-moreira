@@ -1,15 +1,16 @@
-import { CircleDollarSign } from 'lucide-react-native';
-import { StyleSheet, View, type ViewProps } from 'react-native';
+import { CircleDollarSign, RotateCcw } from 'lucide-react-native';
+import { Pressable, StyleSheet, View, type PressableProps } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/hooks/useTheme';
 import { formatBRLCents } from '@/utils/currency';
 
-export interface PaymentListItemProps extends ViewProps {
+export interface PaymentListItemProps extends PressableProps {
   amountCents: number;
   dateLabel: string;
   method: string;
   description?: string;
+  kind?: 'payment' | 'reversal';
 }
 
 export function PaymentListItem({
@@ -17,23 +18,34 @@ export function PaymentListItem({
   dateLabel,
   method,
   description,
+  kind = 'payment',
   style,
   ...props
 }: PaymentListItemProps) {
   const { tokens } = useTheme();
+  const reversed = kind === 'reversal';
+  const color = reversed ? tokens.colors.warning : tokens.colors.success;
+  const Icon = reversed ? RotateCcw : CircleDollarSign;
 
   return (
-    <View style={[styles.container, { borderBottomColor: tokens.colors.border }, style]} {...props}>
+    <Pressable
+      accessibilityRole={props.onPress ? 'button' : undefined}
+      disabled={!props.onPress}
+      style={(state) => [
+        styles.container,
+        { borderBottomColor: tokens.colors.border, opacity: state.pressed ? 0.72 : 1 },
+        typeof style === 'function' ? style(state) : style,
+      ]}
+      {...props}
+    >
       <View
-        style={[
-          styles.icon,
-          { backgroundColor: `${tokens.colors.success}18`, borderRadius: tokens.radius.full },
-        ]}
+        style={[styles.icon, { backgroundColor: `${color}18`, borderRadius: tokens.radius.full }]}
       >
-        <CircleDollarSign color={tokens.colors.success} size={22} />
+        <Icon color={color} size={22} />
       </View>
       <View style={styles.main}>
         <AppText variant="label" weight="semibold">
+          {reversed ? 'Estorno de ' : ''}
           {formatBRLCents(amountCents)}
         </AppText>
         <AppText color="textSecondary" variant="caption">
@@ -45,7 +57,7 @@ export function PaymentListItem({
           </AppText>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 

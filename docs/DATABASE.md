@@ -115,13 +115,15 @@ Serviços financeiros:
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
+O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. Nenhuma migration foi necessária no Prompt 08.
+
 Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro. O módulo de veículos usa `VehicleService` para mutações auditadas e `VehicleRepository` para detalhes, lista por cliente, pesquisa e duplicidade de placa.
 
 Os Prompts 05 a 07 não alteraram o schema nem migrations. O módulo de fiados usa consultas agregadas isoladas por workspace para retornar cliente, veículo, bruto pago, estornos, líquido, saldo e situação derivados pelo domínio. As buscas sem acento normalizam em memória somente os registros já isolados por workspace. Uma coluna indexada de busca será considerada apenas se medições reais justificarem nova migration.
 
 ## Idempotência, concorrência e auditoria
 
-Pagamentos e estornos têm `operation_id` único por workspace. Repetir a mesma operação e os mesmos dados retorna o registro existente; reutilizar o ID com dados diferentes retorna `IDEMPOTENCY_CONFLICT`.
+Pagamentos e estornos têm `operation_id` único por workspace. Repetir a mesma operação e os mesmos dados retorna o registro existente; reutilizar o ID com dados diferentes retorna `IDEMPOTENCY_CONFLICT`. A interface mantém identificador, data e instante da tentativa estáveis durante reenvios.
 
 A fila da conexão mais `BEGIN IMMEDIATE` impede que dois pagamentos concorrentes observem o mesmo saldo livre. Falha em qualquer passo, inclusive auditoria, faz rollback. A auditoria local preserva rastreabilidade, mas não é inviolável; hardening adicional pertence ao Prompt 20.
 

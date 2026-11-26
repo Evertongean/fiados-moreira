@@ -36,41 +36,41 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 
 “Estrutural” significa que a tela, navegação, estados e acessibilidade iniciais existem, mas o módulo ainda não consulta ou persiste dados.
 
-| Tela                  | Rota                      | Responsabilidade                      | Status                   | Funcionalidade definitiva |
-| --------------------- | ------------------------- | ------------------------------------- | ------------------------ | ------------------------- |
-| Dashboard             | `/`                       | Resumo e atalhos sem dados inventados | Estrutural               | Prompt 10                 |
-| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional                | Prompt 05                 |
-| Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional                | Prompt 05                 |
-| Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional                | Prompt 05                 |
-| Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional                | Prompt 05                 |
-| Histórico do cliente  | `/customers/[id]/history` | Linha do tempo futura                 | Estrutural               | Prompt 09                 |
-| Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional                | Prompt 06                 |
-| Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional                | Prompt 06                 |
-| Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional                | Prompt 06                 |
-| Fiados                | `/debts`                  | Pesquisa, filtros e listagem SQLite   | Funcional                | Prompt 07                 |
-| Novo fiado            | `/debts/new`              | Cadastro validado e auditado          | Funcional                | Prompt 07                 |
-| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional                | Prompt 07                 |
-| Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional                | Prompt 07                 |
-| Registrar pagamento   | `/debts/[id]/payment`     | Formulário preliminar                 | Estrutural, desabilitado | Prompt 08                 |
-| Detalhes do pagamento | `/payments/[id]`          | Dados futuros da transação            | Estrutural               | Prompt 08                 |
-| Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar    | Prompt 15                 |
-| Relatórios            | `/reports`                | Entrada e estados indisponíveis       | Estrutural               | Prompt 14                 |
-| Valores a receber     | `/reports/receivables`    | Relatório futuro                      | Estrutural               | Prompt 14                 |
-| Valores recebidos     | `/reports/received`       | Relatório futuro                      | Estrutural               | Prompt 14                 |
-| Fiados atrasados      | `/reports/overdue`        | Relatório futuro                      | Estrutural               | Prompt 14                 |
-| Notificações          | `/notifications`          | Central e estado vazio                | Estrutural               | Prompt 12                 |
-| Ajustes               | `/settings`               | Categorias de configuração            | Estrutural               | Prompt 21                 |
-| Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional                | Prompt 02/03              |
-| Notificações          | `/settings/notifications` | Preferências futuras                  | Estrutural               | Prompt 12/21              |
-| Segurança             | `/settings/security`      | Proteção e biometria futuras          | Estrutural               | Prompt 17/21              |
-| Backup                | `/settings/backup`        | Backup e restauração futuros          | Estrutural               | Prompt 18/21              |
-| Sobre                 | `/settings/about`         | Identidade e versão real              | Implementada             | Prompt 03                 |
-| Galeria               | `/dev/design-system`      | Demonstração do Design System         | Desenvolvimento          | Prompt 02                 |
-| Não encontrada        | qualquer rota inexistente | Retorno seguro ao início              | Implementada             | Prompt 03                 |
+| Tela                  | Rota                      | Responsabilidade                      | Status                | Funcionalidade definitiva |
+| --------------------- | ------------------------- | ------------------------------------- | --------------------- | ------------------------- |
+| Dashboard             | `/`                       | Resumo e atalhos sem dados inventados | Estrutural            | Prompt 10                 |
+| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional             | Prompt 05                 |
+| Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional             | Prompt 05                 |
+| Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional             | Prompt 05                 |
+| Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional             | Prompt 05                 |
+| Histórico do cliente  | `/customers/[id]/history` | Linha do tempo futura                 | Estrutural            | Prompt 09                 |
+| Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional             | Prompt 06                 |
+| Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional             | Prompt 06                 |
+| Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional             | Prompt 06                 |
+| Fiados                | `/debts`                  | Pesquisa, filtros e listagem SQLite   | Funcional             | Prompt 07                 |
+| Novo fiado            | `/debts/new`              | Cadastro validado e auditado          | Funcional             | Prompt 07                 |
+| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional             | Prompt 07                 |
+| Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional             | Prompt 07                 |
+| Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional             | Prompt 08                 |
+| Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional             | Prompt 08                 |
+| Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar | Prompt 15                 |
+| Relatórios            | `/reports`                | Entrada e estados indisponíveis       | Estrutural            | Prompt 14                 |
+| Valores a receber     | `/reports/receivables`    | Relatório futuro                      | Estrutural            | Prompt 14                 |
+| Valores recebidos     | `/reports/received`       | Relatório futuro                      | Estrutural            | Prompt 14                 |
+| Fiados atrasados      | `/reports/overdue`        | Relatório futuro                      | Estrutural            | Prompt 14                 |
+| Notificações          | `/notifications`          | Central e estado vazio                | Estrutural            | Prompt 12                 |
+| Ajustes               | `/settings`               | Categorias de configuração            | Estrutural            | Prompt 21                 |
+| Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional             | Prompt 02/03              |
+| Notificações          | `/settings/notifications` | Preferências futuras                  | Estrutural            | Prompt 12/21              |
+| Segurança             | `/settings/security`      | Proteção e biometria futuras          | Estrutural            | Prompt 17/21              |
+| Backup                | `/settings/backup`        | Backup e restauração futuros          | Estrutural            | Prompt 18/21              |
+| Sobre                 | `/settings/about`         | Identidade e versão real              | Implementada          | Prompt 03                 |
+| Galeria               | `/dev/design-system`      | Demonstração do Design System         | Desenvolvimento       | Prompt 02                 |
+| Não encontrada        | qualquer rota inexistente | Retorno seguro ao início              | Implementada          | Prompt 03                 |
 
 ## Rotas dinâmicas e parâmetros
 
-Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A criação de fiado pode receber `customerId` e `vehicleId` validados para preencher vínculos vindos dos perfis. A interface mostra um estado amigável em vez de lançar erro. Nenhum objeto de cliente, veículo, fiado, pagamento ou valor financeiro viaja pela URL.
+Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A criação de fiado pode receber `customerId` e `vehicleId` validados para preencher vínculos vindos dos perfis. O pagamento recebe apenas o identificador do fiado e seus detalhes recebem apenas o identificador do pagamento; valores financeiros nunca viajam pela URL. A interface mostra um estado amigável em vez de lançar erro.
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
 

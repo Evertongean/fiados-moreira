@@ -30,12 +30,21 @@ export class PaymentReversalRepository {
     input: ReversePaymentInput,
   ): Promise<PaymentReversalRow> {
     const id = createUuid();
+    const createdAt = new Date().toISOString();
     try {
       await this.executor.run(
         `insert into payment_reversals
-         (id, workspace_id, payment_id, operation_id, reason, reversed_at)
-         values (?, ?, ?, ?, ?, ?)`,
-        [id, workspaceId, input.paymentId, input.operationId, input.reason, input.reversedAt],
+         (id, workspace_id, payment_id, operation_id, reason, reversed_at, created_at)
+         values (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          workspaceId,
+          input.paymentId,
+          input.operationId,
+          input.reason,
+          input.reversedAt,
+          createdAt,
+        ],
       );
       return (await this.findByPaymentId(workspaceId, input.paymentId)) as PaymentReversalRow;
     } catch (error) {

@@ -8,6 +8,7 @@ import {
   registerPaymentSchema,
   type RegisterPaymentInput,
 } from '@/features/payments/domain/paymentSchemas';
+import { calculateRemainingAfterPayment } from '@/features/debts/domain/finance';
 
 function isSamePayment(current: PaymentRow, input: ReturnType<typeof registerPaymentSchema.parse>) {
   return (
@@ -50,14 +51,7 @@ export class PaymentService {
       if (!debt) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Fiado não encontrado.');
       if (debt.canceledAt) throw new AppDatabaseError('DEBT_CANCELED', 'O fiado está cancelado.');
       const summary = await debts.getFinancialSummary(workspaceId, debt.id);
-      if (summary.isPaid)
-        throw new AppDatabaseError('DEBT_ALREADY_PAID', 'O fiado já está quitado.');
-      if (value.data.amountCents > summary.pendingCents) {
-        throw new AppDatabaseError(
-          'PAYMENT_EXCEEDS_BALANCE',
-          'O pagamento é maior que o saldo pendente.',
-        );
-      }
+      calculateRemainingAfterPayment(summary, value.data.amountCents);
 
       const payment = await payments.insertValidated(workspaceId, value.data);
       await audit.record(workspaceId, {

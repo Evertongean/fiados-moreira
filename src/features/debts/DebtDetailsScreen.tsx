@@ -29,27 +29,15 @@ import {
 import type { DebtOverview, DebtPaymentDetails } from '@/features/debts/domain/debtTypes';
 import { formatCivilDate, formatVehicleLabel } from '@/features/debts/domain/debtUtils';
 import { toDebtBadgeStatus } from '@/features/debts/domain/status';
+import {
+  formatPaymentInstant,
+  PAYMENT_METHOD_LABELS,
+} from '@/features/payments/domain/paymentUtils';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useTheme } from '@/hooks/useTheme';
 import { formatBRLCents } from '@/utils/currency';
 import { getRouteId } from '@/utils/routes';
 import { createUuid } from '@/utils/uuid';
-
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  cash: 'Dinheiro',
-  pix: 'Pix',
-  debit_card: 'Cartão de débito',
-  credit_card: 'Cartão de crédito',
-  bank_transfer: 'Transferência',
-  other: 'Outro',
-};
-
-function formatInstant(value: string, timezone: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeZone: timezone }).format(date);
-}
 
 function InfoRow({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
@@ -195,6 +183,36 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
     plate: debt.vehiclePlate,
   });
   const isCanceled = debt.status.financialStatus === 'canceled';
+  const paymentTimeline = payments
+    .flatMap((payment) => [
+      {
+        key: `payment-${payment.id}`,
+        paymentId: payment.id,
+        eventAt: payment.paidAt,
+        amountCents: payment.amountCents,
+        kind: 'payment' as const,
+        method:
+          PAYMENT_METHOD_LABELS[payment.paymentMethod as keyof typeof PAYMENT_METHOD_LABELS] ??
+          payment.paymentMethod,
+        description: payment.reversalId
+          ? 'Pagamento posteriormente estornado'
+          : (payment.notes ?? undefined),
+      },
+      ...(payment.reversedAt
+        ? [
+            {
+              key: `reversal-${payment.reversalId}`,
+              paymentId: payment.id,
+              eventAt: payment.reversedAt,
+              amountCents: payment.amountCents,
+              kind: 'reversal' as const,
+              method: 'Estorno integral',
+              description: payment.reversalReason ?? undefined,
+            },
+          ]
+        : []),
+    ])
+    .sort((first, second) => second.eventAt.localeCompare(first.eventAt));
 
   return (
     <Screen contentContainerStyle={styles.page} scroll>
@@ -234,6 +252,26 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
           title="Saldo pendente"
           valueCents={debt.summary.pendingCents}
         />
+        <View
+          accessibilityLabel={`${debt.summary.paidPercentage.toFixed(0)}% do fiado pago`}
+          accessibilityRole="progressbar"
+          accessibilityValue={{
+            min: 0,
+            max: 100,
+            now: Math.round(debt.summary.paidPercentage),
+          }}
+          style={[styles.progressTrack, { backgroundColor: tokens.colors.surfaceSecondary }]}
+        >
+          <View
+            style={[
+              styles.progressFill,
+              {
+                backgroundColor: tokens.colors.success,
+                width: `${Math.min(100, debt.summary.paidPercentage)}%`,
+              },
+            ]}
+          />
+        </View>
         <View style={styles.stats}>
           <StatCard
             icon={ReceiptText}
@@ -311,28 +349,29 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
 
       <View style={styles.section}>
         <SectionHeader
-          description={`${payments.length} ${payments.length === 1 ? 'registro' : 'registros'}`}
-          title="Pagamentos"
+          description={`${paymentTimeline.length} ${paymentTimeline.length === 1 ? 'evento' : 'eventos'}`}
+          title="Histórico de pagamentos"
         />
-        {payments.length ? (
+        {paymentTimeline.length ? (
           <Card variant="outlined">
-            {payments.map((payment) => (
+            {paymentTimeline.map((event) => (
               <PaymentListItem
-                amountCents={payment.amountCents}
-                dateLabel={formatInstant(payment.paidAt, workspace.timezone)}
-                description={
-                  payment.reversedAt
-                    ? `Estornado${payment.reversalReason ? `: ${payment.reversalReason}` : ''}`
-                    : (payment.notes ?? undefined)
+                accessibilityLabel={`Abrir ${event.kind === 'reversal' ? 'estorno' : 'pagamento'} de ${formatBRLCents(event.amountCents)}`}
+                amountCents={event.amountCents}
+                dateLabel={formatPaymentInstant(event.eventAt, workspace.timezone)}
+                description={event.description}
+                key={event.key}
+                kind={event.kind}
+                method={event.method}
+                onPress={() =>
+                  router.push({ pathname: '/payments/[id]', params: { id: event.paymentId } })
                 }
-                key={payment.id}
-                method={PAYMENT_METHOD_LABELS[payment.paymentMethod] ?? payment.paymentMethod}
               />
             ))}
           </Card>
         ) : (
           <EmptyState
-            description="Os pagamentos aparecerão aqui em modo de leitura."
+            description="Pagamentos e estornos confirmados aparecerão aqui."
             icon={ReceiptText}
             title="Sem pagamentos"
           />
@@ -340,11 +379,17 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
       </View>
 
       <Button
-        disabled
+        disabled={isCanceled || debt.summary.isPaid}
         fullWidth
         icon={WalletCards}
-        label="Registrar pagamento — indisponível"
-        onPress={() => undefined}
+        label={
+          isCanceled
+            ? 'Pagamento indisponível — fiado cancelado'
+            : debt.summary.isPaid
+              ? 'Fiado quitado'
+              : 'Registrar pagamento'
+        }
+        onPress={() => router.push({ pathname: '/debts/[id]/payment', params: { id: debt.id } })}
       />
 
       {!isCanceled && debt.summary.netPaidCents > 0 ? (
@@ -400,7 +445,7 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
       <View style={styles.dateNote}>
         <CalendarDays color={tokens.colors.textMuted} size={16} />
         <AppText color="textMuted" variant="caption">
-          Criado em {formatInstant(debt.createdAt, workspace.timezone)}
+          Criado em {formatPaymentInstant(debt.createdAt, workspace.timezone)}
         </AppText>
       </View>
     </Screen>
@@ -420,4 +465,6 @@ const styles = StyleSheet.create({
   cancelBox: { gap: 14 },
   cancelActions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 },
   dateNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  progressTrack: { height: 10, overflow: 'hidden', borderRadius: 999 },
+  progressFill: { height: '100%', borderRadius: 999 },
 });

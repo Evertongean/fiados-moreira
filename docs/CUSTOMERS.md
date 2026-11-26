@@ -32,7 +32,7 @@ Nenhuma migration foi necessária: os campos e índices da tabela `customers` cr
 - `/customers/[id]/edit`: edição com o mesmo formulário e preservação de UUID, criação e vínculos.
 - `/customers/[id]/history`: continua explicitamente estrutural até o Prompt 09.
 
-Veículos são listados e pesquisados no perfil, com acesso ao cadastro e aos detalhes implementados no Prompt 06. Novo fiado e pagamentos permanecem integrações futuras desabilitadas, sem simulação de sucesso.
+Veículos e fiados são listados no perfil. O Prompt 08 habilitou o registro de pagamento: havendo um fiado aberto, ele é selecionado diretamente; havendo vários, o usuário escolhe qual dívida receberá o valor.
 
 ## Campos e validação
 
@@ -131,4 +131,4 @@ Os testes SQLite usam `node:sqlite`, banco isolado e o SQL versionado real. Eles
 - Não há autenticação, criptografia do arquivo, backup, sync ou Supabase.
 - Testes manuais Android/iOS, TalkBack/VoiceOver e telas pequenas continuam pendentes.
 - A busca em memória deve ser medida antes de volumes muito altos.
-- Veículos e fiados estão conectados pelos Prompts 06 e 07. Pagamentos e histórico visual completo continuam nos Prompts 08 e 09.
+- Veículos, fiados e pagamentos estão conectados pelos Prompts 06 a 08. A linha do tempo consolidada do cliente continua no Prompt 09.

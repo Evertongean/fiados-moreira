@@ -28,6 +28,7 @@ export interface DebtPaymentDetails {
   paymentMethod: string;
   paidAt: string;
   notes: string | null;
+  reversalId: string | null;
   reversedAt: string | null;
   reversalReason: string | null;
 }

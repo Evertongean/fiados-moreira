@@ -19,8 +19,10 @@ Fiados também aparecem nos perfis do cliente e do veículo. Esses perfis abrem 
 
 Nenhuma migration foi necessária: a tabela `debts`, as FKs compostas, pagamentos, estornos e auditoria já cobriam o módulo.
 
-## Limites desta etapa
+## Integração com pagamentos
 
-O histórico de pagamentos é somente leitura. O botão **Registrar pagamento — indisponível** permanece desabilitado até o Prompt 08. Notificações, WhatsApp, Supabase e sincronização não fazem parte deste módulo.
+O Prompt 08 habilitou **Registrar pagamento** em fiados com saldo e adicionou progresso, total líquido pago e histórico cronológico de pagamentos e estornos. Cada evento abre os detalhes do pagamento; fiados quitados ou cancelados não oferecem nova cobrança. Perfis de clientes e veículos recarregam os saldos derivados ao receber foco.
+
+Notificações, WhatsApp, Supabase e sincronização não fazem parte deste módulo.
 
 A suíte automatizada cobre criação e edição idempotentes, cancelamento, busca, filtros, vencimento, dinheiro, vínculos e isolamento por workspace. A validação manual em Android e iOS continua pendente.

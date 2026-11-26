@@ -158,3 +158,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Cliente é imutável na edição; veículo pode ser removido ou trocado somente por outro ativo do mesmo cliente. As validações são repetidas dentro da transação.
 - Perfis de cliente e veículo consultam seus fiados reais e recarregam no foco. SQLite continua como fonte operacional única, sem Zustand ou cache paralelo.
 - O schema do Prompt 04 já atendia ao módulo; nenhuma migration ou dependência foi adicionada.
+
+## Decisões do Prompt 08
+
+- `PaymentService` e `PaymentReversalService` permanecem como únicas portas de mutação: saldo, duplicidade e elegibilidade são revalidados dentro de `BEGIN IMMEDIATE`.
+- A interface gera `operationId` e instante estáveis durante retentativas, pede confirmação explícita e só informa sucesso depois da transação e auditoria concluírem.
+- O formulário usa React Hook Form, Zod e `CurrencyInput`; a prévia chama a mesma função pura usada pelo serviço para validar saldo e pagamento.
+- Detalhes e histórico são projeções de leitura isoladas por workspace. Pagamentos e estornos continuam registros imutáveis, ligados ao fiado e cliente originais.
+- Perfis e detalhes recarregam SQLite ao receber foco, portanto pagamentos e estornos atualizam saldos sem cache financeiro paralelo.
+- O schema existente já possuía pagamentos, estornos, índices, FKs e auditoria; nenhuma migration ou dependência foi necessária.

@@ -27,8 +27,10 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Cadastro, edição, detalhes, pesquisa, filtros, cancelamento e saldos derivados.
   - [x] Vínculos com clientes/veículos, auditoria, idempotência e testes SQLite isolados.
   - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
-- [ ] **Prompt 08 — Pagamentos**
-  - [ ] Pagamentos parciais/totais, saldo, quitação e estorno.
+- [ ] **Prompt 08 — Pagamentos** (implementação concluída; aceite mobile pendente)
+  - [x] Pagamentos parciais/totais, saldo, quitação, detalhes e histórico cronológico.
+  - [x] Estorno integral, confirmação, auditoria, idempotência e testes SQLite isolados.
+  - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 09 — Histórico financeiro**
   - [ ] Linha do tempo auditável por cliente.
 - [ ] **Prompt 10 — Dashboard**

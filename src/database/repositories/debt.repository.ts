@@ -184,7 +184,7 @@ export class DebtRepository {
   listPayments(workspaceId: string, debtId: string): Promise<DebtPaymentDetails[]> {
     return this.executor.all<DebtPaymentDetails>(
       `select p.id, p.amount_cents as amountCents, p.payment_method as paymentMethod,
-       p.paid_at as paidAt, p.notes, r.reversed_at as reversedAt,
+       p.paid_at as paidAt, p.notes, r.id as reversalId, r.reversed_at as reversedAt,
        r.reason as reversalReason
        from payments p left join payment_reversals r
        on r.workspace_id = p.workspace_id and r.payment_id = p.id

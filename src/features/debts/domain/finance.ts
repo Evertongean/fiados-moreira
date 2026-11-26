@@ -77,3 +77,20 @@ export function calculateDebtSummaryFromTotals(
     isPaid: pendingCents === 0,
   };
 }
+
+export function calculateRemainingAfterPayment(
+  summary: DebtFinancialSummary,
+  amountCents: number,
+): number {
+  assertMoney(amountCents, false);
+  if (summary.isPaid) {
+    throw new AppDatabaseError('DEBT_ALREADY_PAID', 'O fiado já está quitado.');
+  }
+  if (amountCents > summary.pendingCents) {
+    throw new AppDatabaseError(
+      'PAYMENT_EXCEEDS_BALANCE',
+      'O pagamento é maior que o saldo pendente.',
+    );
+  }
+  return summary.pendingCents - amountCents;
+}

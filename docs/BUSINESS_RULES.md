@@ -50,6 +50,7 @@ saldo(D) = valor_original(D) - soma(pagamentos válidos de D)
 6. Estorno exige motivo, data, usuário/origem e referência ao pagamento original.
 7. Pagamentos estornados não entram no cálculo do saldo, mas permanecem no histórico.
 8. Mutação repetida com o mesmo `operation_id` deve retornar o mesmo resultado, sem duplicar o pagamento.
+9. Cada pagamento aceita no máximo um estorno integral; estorno parcial não existe nesta etapa.
 
 ## Situação do fiado
 

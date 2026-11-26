@@ -6,10 +6,12 @@ import { join } from 'node:path';
 import { CustomerRepository } from '@/database/repositories/customer.repository';
 import { DebtRepository } from '@/database/repositories/debt.repository';
 import { PaymentRepository } from '@/database/repositories/payment.repository';
+import { PaymentReversalRepository } from '@/database/repositories/payment-reversal.repository';
 import { VehicleRepository } from '@/database/repositories/vehicle.repository';
 import { WorkspaceRepository } from '@/database/repositories/workspace.repository';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
+import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 
 import { createTestDatabase } from './createTestDatabase';
 
@@ -42,6 +44,12 @@ describe('offline persistence', () => {
       paymentMethod: 'cash',
       paidAt: '2026-01-02T12:00:00.000Z',
     });
+    const reversal = await new PaymentReversalService(database).reverse(workspace.id, {
+      operationId: randomUUID(),
+      paymentId: payment.id,
+      reason: 'Correção persistente',
+      reversedAt: '2026-01-03T12:00:00.000Z',
+    });
     database.close();
 
     const reopened = await createTestDatabase(path);
@@ -52,8 +60,11 @@ describe('offline persistence', () => {
     expect(await new DebtRepository(reopened).findById(workspace.id, debt.id)).not.toBeNull();
     expect(await new PaymentRepository(reopened).findById(workspace.id, payment.id)).not.toBeNull();
     expect(
+      await new PaymentReversalRepository(reopened).findByPaymentId(workspace.id, payment.id),
+    ).toMatchObject({ id: reversal.id, reason: 'Correção persistente' });
+    expect(
       (await new DebtRepository(reopened).getFinancialSummary(workspace.id, debt.id)).pendingCents,
-    ).toBe(15_000);
+    ).toBe(20_000);
     reopened.close();
     rmSync(directory, { recursive: true, force: true });
   });

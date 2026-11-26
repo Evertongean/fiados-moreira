@@ -1,1 +1,1 @@
-export { PaymentFormScreen as default } from '@/features/debts/PaymentFormScreen';
+export { PaymentFormScreen as default } from '@/features/payments/PaymentFormScreen';
