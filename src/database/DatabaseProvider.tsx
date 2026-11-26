@@ -13,6 +13,7 @@ import { CustomerService } from '@/features/customers/services/CustomerService';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
+import { VehicleService } from '@/features/vehicles/services/VehicleService';
 
 import {
   initializeDatabase,
@@ -43,6 +44,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
   };
   services: {
     customers: CustomerService;
+    vehicles: VehicleService;
     debts: DebtService;
     payments: PaymentService;
     reversals: PaymentReversalService;
@@ -89,6 +91,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
       },
       services: {
         customers: new CustomerService(executor),
+        vehicles: new VehicleService(executor),
         debts: new DebtService(executor),
         payments: new PaymentService(executor),
         reversals: new PaymentReversalService(executor),

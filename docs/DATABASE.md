@@ -2,7 +2,7 @@
 
 ## Estado da implementação
 
-O Prompt 04 implementou a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. O Prompt 05 conectou o CRUD de clientes ao banco. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline.
+O Prompt 04 implementou a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. Os Prompts 05 e 06 conectaram os CRUDs de clientes e veículos ao banco. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline.
 
 Não existe Supabase, autenticação, worker de sincronização, backup definitivo nem criptografia própria do arquivo nesta etapa.
 
@@ -115,9 +115,9 @@ Serviços financeiros:
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
-Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro.
+Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro. O módulo de veículos usa `VehicleService` para mutações auditadas e `VehicleRepository` para detalhes, lista por cliente, pesquisa e duplicidade de placa.
 
-O Prompt 05 não alterou o schema nem migrations. A busca sem acento normaliza em memória somente os registros do workspace e filtro selecionados. Uma coluna indexada de busca será considerada apenas se medições reais justificarem nova migration.
+Os Prompts 05 e 06 não alteraram o schema nem migrations. As buscas sem acento normalizam em memória somente os registros já isolados por workspace e filtro. Uma coluna indexada de busca será considerada apenas se medições reais justificarem nova migration.
 
 ## Idempotência, concorrência e auditoria
 

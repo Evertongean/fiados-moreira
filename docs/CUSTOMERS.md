@@ -32,7 +32,7 @@ Nenhuma migration foi necessária: os campos e índices da tabela `customers` cr
 - `/customers/[id]/edit`: edição com o mesmo formulário e preservação de UUID, criação e vínculos.
 - `/customers/[id]/history`: continua explicitamente estrutural até o Prompt 09.
 
-Veículos, novo fiado e pagamentos aparecem apenas como integrações futuras desabilitadas. Nenhuma operação desses módulos é simulada.
+Veículos são listados e pesquisados no perfil, com acesso ao cadastro e aos detalhes implementados no Prompt 06. Novo fiado e pagamentos permanecem integrações futuras desabilitadas, sem simulação de sucesso.
 
 ## Campos e validação
 
@@ -131,4 +131,4 @@ Os testes SQLite usam `node:sqlite`, banco isolado e o SQL versionado real. Eles
 - Não há autenticação, criptografia do arquivo, backup, sync ou Supabase.
 - Testes manuais Android/iOS, TalkBack/VoiceOver e telas pequenas continuam pendentes.
 - A busca em memória deve ser medida antes de volumes muito altos.
-- Veículos serão conectados no Prompt 06; fiados, pagamentos e histórico visual continuam nos Prompts 07 a 09.
+- Veículos estão conectados pelo Prompt 06; fiados, pagamentos e histórico visual continuam nos Prompts 07 a 09.

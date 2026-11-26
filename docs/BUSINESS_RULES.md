@@ -11,6 +11,11 @@
 7. Cliente arquivado permanece no histórico e não pode receber novos fiados até ser restaurado.
 8. Cliente com saldo líquido positivo não pode ser arquivado; a verificação e a alteração devem ocorrer na mesma transação.
 9. Cadastro, edição, arquivamento e restauração de cliente geram auditoria atômica e minimizada.
+10. Veículo novo exige cliente ativo do mesmo workspace; o proprietário é preservado durante edições.
+11. Placas opcionais aceitam padrão brasileiro antigo ou Mercosul e são normalizadas em maiúsculas sem pontuação.
+12. Placa duplicada gera aviso, nunca fusão, sobrescrita ou bloqueio automático.
+13. Arquivar veículo preserva seus fiados e eventos; veículo arquivado não pode ser associado a novo fiado.
+14. Cadastro, edição, arquivamento e restauração de veículo geram auditoria atômica e minimizada.
 
 ## Valores monetários
 

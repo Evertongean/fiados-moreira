@@ -19,8 +19,10 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Cadastro, edição, lista, busca, detalhes, duplicidades, arquivamento e restauração.
   - [x] Auditoria, isolamento por workspace, bloqueio com saldo e testes SQLite isolados.
   - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
-- [ ] **Prompt 06 — Veículos**
-  - [ ] Cadastro e vínculo com clientes.
+- [ ] **Prompt 06 — Veículos** (implementação concluída; aceite mobile pendente)
+  - [x] Cadastro, edição, detalhes, pesquisa, duplicidades, arquivamento e restauração.
+  - [x] Vínculo imutável com cliente, auditoria, isolamento por workspace e testes SQLite.
+  - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 07 — Fiados**
   - [ ] Lançamento de serviços/peças, valor e vencimento.
 - [ ] **Prompt 08 — Pagamentos**

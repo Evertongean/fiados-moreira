@@ -1,4 +1,4 @@
-import type { CustomerRow } from '@/database/schema';
+import type { CustomerRow, VehicleRow } from '@/database/schema';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Archive,
@@ -28,9 +28,12 @@ import {
   EmptyState,
   LoadingState,
   Screen,
+  SearchInput,
   useToast,
 } from '@/components/ui';
 import type { CustomerFinancialSummary } from '@/features/customers/domain/customerTypes';
+import { VehicleListItem } from '@/features/vehicles/components/VehicleListItem';
+import { vehicleMatchesQuery } from '@/features/vehicles/domain/vehicleUtils';
 import { useDatabase } from '@/hooks/useDatabase';
 import { formatBRLCents } from '@/utils/currency';
 import { formatBrazilianPhone } from '@/utils/phone';
@@ -81,6 +84,8 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const { workspace, repositories, services } = useDatabase();
   const [customer, setCustomer] = useState<CustomerRow | null>(null);
   const [summary, setSummary] = useState<CustomerFinancialSummary | null>(null);
+  const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
+  const [vehicleSearch, setVehicleSearch] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
@@ -96,15 +101,19 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
         setStatus('missing');
         return;
       }
-      const financial = await repositories.customers.getFinancialSummary(workspace.id, customerId);
+      const [financial, customerVehicles] = await Promise.all([
+        repositories.customers.getFinancialSummary(workspace.id, customerId),
+        repositories.vehicles.listByCustomer(workspace.id, customerId, { status: 'all' }),
+      ]);
       if (requestVersion.current !== version) return;
       setCustomer(record);
       setSummary(financial);
+      setVehicles(customerVehicles);
       setStatus('ready');
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [customerId, repositories.customers, workspace.id]);
+  }, [customerId, repositories.customers, repositories.vehicles, workspace.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -149,6 +158,9 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   }
 
   const isArchived = Boolean(customer.archivedAt);
+  const visibleVehicles = vehicleSearch.trim()
+    ? vehicles.filter((vehicle) => vehicleMatchesQuery(vehicle, vehicleSearch))
+    : vehicles;
   const mutateArchive = async () => {
     setIsMutating(true);
     try {
@@ -270,10 +282,14 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
           />
           <Button disabled fullWidth label="Novo fiado — em breve" onPress={() => undefined} />
           <Button
-            disabled
             fullWidth
-            label="Adicionar veículo — em breve"
-            onPress={() => undefined}
+            label={isArchived ? 'Adicionar veículo — restaure o cliente' : 'Adicionar veículo'}
+            onPress={() =>
+              router.push({ pathname: '/vehicles/new', params: { customerId: customer.id } })
+            }
+            disabled={isArchived}
+            icon={Car}
+            variant="secondary"
           />
           <Button
             disabled
@@ -294,12 +310,67 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
       </View>
 
       <View style={styles.section}>
-        <SectionHeader title="Veículos" />
-        <EmptyState
-          description="O cadastro de veículos será habilitado no Prompt 06."
-          icon={Car}
-          title="Módulo ainda indisponível"
+        <SectionHeader
+          action={
+            <Button
+              disabled={isArchived}
+              label="Adicionar"
+              onPress={() =>
+                router.push({ pathname: '/vehicles/new', params: { customerId: customer.id } })
+              }
+              size="sm"
+              variant="outline"
+            />
+          }
+          description={`${vehicles.length} ${vehicles.length === 1 ? 'veículo vinculado' : 'veículos vinculados'}`}
+          title="Veículos"
         />
+        {vehicles.length ? (
+          <SearchInput
+            onChangeText={setVehicleSearch}
+            placeholder="Buscar placa, marca ou modelo..."
+            value={vehicleSearch}
+          />
+        ) : null}
+        {visibleVehicles.length ? (
+          <View style={styles.vehicleList}>
+            {visibleVehicles.map((vehicle) => (
+              <VehicleListItem
+                key={vehicle.id}
+                onPress={() =>
+                  router.push({ pathname: '/vehicles/[id]', params: { id: vehicle.id } })
+                }
+                vehicle={vehicle}
+              />
+            ))}
+          </View>
+        ) : (
+          <EmptyState
+            action={
+              vehicleSearch.trim()
+                ? { label: 'Limpar pesquisa', onPress: () => setVehicleSearch('') }
+                : isArchived
+                  ? undefined
+                  : {
+                      label: 'Adicionar veículo',
+                      onPress: () =>
+                        router.push({
+                          pathname: '/vehicles/new',
+                          params: { customerId: customer.id },
+                        }),
+                    }
+            }
+            description={
+              vehicleSearch.trim()
+                ? 'Tente pesquisar outra placa, marca ou modelo.'
+                : isArchived
+                  ? 'Restaure o cliente para cadastrar um veículo.'
+                  : 'Cadastre o primeiro veículo deste cliente.'
+            }
+            icon={Car}
+            title={vehicleSearch.trim() ? 'Nenhum veículo encontrado' : 'Nenhum veículo cadastrado'}
+          />
+        )}
       </View>
 
       {isArchived ? (
@@ -345,4 +416,5 @@ const styles = StyleSheet.create({
   info: { gap: 14 },
   infoRow: { gap: 2 },
   actions: { gap: 10 },
+  vehicleList: { gap: 10 },
 });

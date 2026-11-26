@@ -93,4 +93,4 @@ Inclui os RF-01 a RF-15 para um fluxo de uso individual da oficina, com base loc
 
 ## Estado atual
 
-Os Prompts 01 a 05 implementaram fundação Expo, Design System, temas, navegação, infraestrutura local SQLite/Drizzle e o CRUD visual de clientes. O módulo funciona offline, respeita workspace, audita mutações e bloqueia arquivamento com saldo. Veículos, CRUD financeiro visual, relatórios, notificações, autenticação, sincronização e backup permanecem planejados.
+Os Prompts 01 a 06 implementaram fundação Expo, Design System, temas, navegação, infraestrutura local SQLite/Drizzle e os CRUDs visuais de clientes e veículos. Os módulos funcionam offline, respeitam workspace e auditam mutações; clientes com saldo não podem ser arquivados e veículos arquivados não podem entrar em novos fiados. CRUD financeiro visual, relatórios, notificações, autenticação, sincronização e backup permanecem planejados.

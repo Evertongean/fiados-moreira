@@ -2,6 +2,7 @@ import { AppDatabaseError } from '@/database/errors/DatabaseError';
 import { AuditRepository } from '@/database/repositories/audit.repository';
 import { CustomerRepository } from '@/database/repositories/customer.repository';
 import { DebtRepository } from '@/database/repositories/debt.repository';
+import { VehicleRepository } from '@/database/repositories/vehicle.repository';
 import type { DebtRow } from '@/database/schema';
 import type { SqlExecutor } from '@/database/types/executor';
 import {
@@ -31,6 +32,12 @@ export class DebtService {
           'Restaure o cliente antes de registrar um novo fiado.',
         );
       }
+      await this.validateVehicle(
+        transaction,
+        workspaceId,
+        value.data.customerId,
+        value.data.vehicleId,
+      );
       const debt = await new DebtRepository(transaction).insertValidated(workspaceId, value.data);
       await new AuditRepository(transaction).record(workspaceId, {
         entityType: 'debt',
@@ -51,6 +58,14 @@ export class DebtService {
       if (!current) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Fiado não encontrado.');
       if (current.canceledAt)
         throw new AppDatabaseError('DEBT_CANCELED', 'O fiado está cancelado.');
+      if (value.data.vehicleId !== undefined && value.data.vehicleId !== current.vehicleId) {
+        await this.validateVehicle(
+          transaction,
+          workspaceId,
+          current.customerId,
+          value.data.vehicleId,
+        );
+      }
       const summary = await debts.getFinancialSummary(workspaceId, debtId);
       const nextTotal = value.data.totalCents ?? current.totalCents;
       if (nextTotal < summary.netPaidCents) {
@@ -115,5 +130,27 @@ export class DebtService {
       });
       return debt;
     });
+  }
+
+  private async validateVehicle(
+    executor: SqlExecutor,
+    workspaceId: string,
+    customerId: string,
+    vehicleId: string | null | undefined,
+  ): Promise<void> {
+    if (!vehicleId) return;
+    const vehicle = await new VehicleRepository(executor).findById(workspaceId, vehicleId);
+    if (!vehicle || vehicle.customerId !== customerId) {
+      throw new AppDatabaseError(
+        'CONSTRAINT_VIOLATION',
+        'O veículo não pertence ao cliente informado.',
+      );
+    }
+    if (vehicle.archivedAt) {
+      throw new AppDatabaseError(
+        'VEHICLE_ARCHIVED',
+        'Restaure o veículo antes de vinculá-lo a um novo fiado.',
+      );
+    }
   }
 }

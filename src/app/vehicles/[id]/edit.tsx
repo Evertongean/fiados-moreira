@@ -6,7 +6,8 @@ import { getRouteId } from '@/utils/routes';
 
 export default function EditVehicleRoute() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  if (!getRouteId(id)) {
+  const vehicleId = getRouteId(id);
+  if (!vehicleId) {
     return (
       <RouteState
         description="O identificador recebido não é válido."
@@ -15,5 +16,5 @@ export default function EditVehicleRoute() {
       />
     );
   }
-  return <VehicleFormScreen mode="edit" />;
+  return <VehicleFormScreen mode="edit" vehicleId={vehicleId} />;
 }

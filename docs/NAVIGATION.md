@@ -44,9 +44,9 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional                | Prompt 05                 |
 | Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional                | Prompt 05                 |
 | Histórico do cliente  | `/customers/[id]/history` | Linha do tempo futura                 | Estrutural               | Prompt 09                 |
-| Novo veículo          | `/vehicles/new`           | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 06                 |
-| Detalhes do veículo   | `/vehicles/[id]`          | Dados do veículo e vínculo            | Estrutural               | Prompt 06                 |
-| Editar veículo        | `/vehicles/[id]/edit`     | Formulário preliminar                 | Estrutural, sem salvar   | Prompt 06                 |
+| Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional                | Prompt 06                 |
+| Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional                | Prompt 06                 |
+| Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional                | Prompt 06                 |
 | Fiados                | `/debts`                  | Pesquisa, filtros e vazio             | Estrutural               | Prompt 07                 |
 | Novo fiado            | `/debts/new`              | Formulário monetário preliminar       | Estrutural, sem salvar   | Prompt 07                 |
 | Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Estrutural               | Prompt 07                 |
@@ -70,7 +70,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 
 ## Rotas dinâmicas e parâmetros
 
-Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A interface mostra um estado amigável em vez de lançar erro. Nenhum objeto de cliente, veículo, fiado, pagamento ou valor financeiro viaja pela URL.
+Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A interface mostra um estado amigável em vez de lançar erro. Nenhum objeto de cliente, veículo, fiado, pagamento ou valor financeiro viaja pela URL.
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
 
@@ -117,3 +117,5 @@ O Stack raiz concentra providers e será o ponto de composição para um futuro 
 Mudanças na configuração nativa da splash screen só aparecem em um novo development build ou build de produção; o Expo Go não representa integralmente essa configuração.
 
 Os formulários de cliente desabilitam o gesto de retorno e interceptam o botão físico Android quando há conteúdo alterado, oferecendo confirmação antes do descarte. Após criação ou edição confirmada no SQLite, a rota é substituída pelo perfil usando somente o UUID.
+
+Os formulários de veículo seguem a mesma proteção contra descarte. O perfil do cliente abre `/vehicles/new` com apenas `customerId`; cadastro e edição confirmados substituem a rota pelos detalhes usando o UUID do veículo.

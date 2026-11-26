@@ -140,3 +140,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Criação reutiliza um UUID estável durante retentativas. Arquivamento calcula saldo líquido e grava auditoria dentro de `BEGIN IMMEDIATE`.
 - `DebtService` revalida o estado ativo do cliente dentro da transação, impedindo que outro chamador contorne a restrição visual de cliente arquivado.
 - Atualização de tela usa o ciclo de foco do Router e controle simples de versão da busca; Zustand ou cache remoto não foram necessários.
+
+## Decisões do Prompt 06
+
+- `VehicleService` mantém cadastro, edição, arquivamento, restauração e auditoria na camada de domínio; telas continuam sem SQL.
+- O proprietário é obrigatório na criação e imutável na edição. A FK composta existente mantém workspace e cliente consistentes, sem migration nova.
+- Placas antigas e Mercosul são validadas na fronteira e persistidas em maiúsculas sem pontuação. Duplicidade gera aviso, não unicidade artificial.
+- A pesquisa no perfil do cliente normaliza texto e placa em memória após consulta isolada por workspace, adequada ao volume inicial.
+- `DebtService` revalida o veículo dentro da transação e rejeita veículo arquivado ou pertencente a outro cliente, sem depender da interface futura.
+- A lista do perfil e os detalhes recarregam no foco; React Hook Form mantém estado do formulário e SQLite permanece a única fonte persistente.
