@@ -39,6 +39,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Tela                  | Rota                      | Responsabilidade                      | Status                | Funcionalidade definitiva |
 | --------------------- | ------------------------- | ------------------------------------- | --------------------- | ------------------------- |
 | Dashboard             | `/`                       | Indicadores, vencimentos e atividades | Funcional             | Prompt 10                 |
+| Pesquisa global       | `/search`                 | Busca agrupada e filtros offline      | Funcional             | Prompt 11                 |
 | Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional             | Prompt 05                 |
 | Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional             | Prompt 05                 |
 | Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional             | Prompt 05                 |
@@ -74,11 +75,11 @@ Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
 
-O dashboard abre `/debts` com filtros validados `open`, `due_today` ou `overdue`. A ação de pagamento acrescenta apenas o modo de seleção e nunca transporta valor financeiro. O indicador de clientes devedores abre `/customers` com o filtro local `with_debt`; parâmetros desconhecidos retornam aos filtros padrão.
+O dashboard abre `/search` pelo botão acessível no cabeçalho. Resultados transportam apenas o UUID para as rotas de detalhes. O dashboard também abre `/debts` com filtros validados `open`, `due_today` ou `overdue`. A ação de pagamento acrescenta apenas o modo de seleção e nunca transporta valor financeiro. O indicador de clientes devedores abre `/customers` com o filtro local `with_debt`; parâmetros desconhecidos retornam aos filtros padrão.
 
 ## Cabeçalhos e layouts
 
-- `AppHeader`: identidade da seção e acesso à central de notificações.
+- `AppHeader`: identidade da seção e acessos opcionais à pesquisa global e à central de notificações.
 - `PageHeader`: retorno previsível, título, subtítulo e ação contextual.
 - `SectionHeader`: hierarquia de conteúdo dentro de telas.
 - `FloatingActionButton`: ação principal acessível nas listas adequadas.

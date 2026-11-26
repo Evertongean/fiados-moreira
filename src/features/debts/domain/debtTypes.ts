@@ -12,6 +12,14 @@ export interface DebtListOptions {
   referenceDate?: Date;
   customerId?: string;
   vehicleId?: string;
+  overdue?: 'all' | 'overdue' | 'not_overdue';
+  dateField?: 'created' | 'due';
+  startDate?: string;
+  endDate?: string;
+  minAmountCents?: number;
+  maxAmountCents?: number;
+  dueDate?: 'all' | 'with_due_date' | 'without_due_date';
+  sort?: 'newest' | 'oldest' | 'amount_desc' | 'amount_asc' | 'due_asc' | 'due_desc';
 }
 
 export interface DebtOverview extends DebtRow {

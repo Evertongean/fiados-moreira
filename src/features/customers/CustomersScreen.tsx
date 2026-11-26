@@ -1,4 +1,3 @@
-import type { CustomerRow } from '@/database/schema';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowDownAZ, UserPlus, Users } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,6 +17,8 @@ import {
 import type {
   CustomerSortOrder,
   CustomerStatusFilter,
+  CustomerDebtFilter,
+  CustomerListEntry,
 } from '@/features/customers/domain/customerTypes';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useTheme } from '@/hooks/useTheme';
@@ -34,19 +35,36 @@ const SORTS: readonly { value: CustomerSortOrder; label: string }[] = [
   { value: 'name_desc', label: 'Nome Z–A' },
   { value: 'newest', label: 'Mais recentes' },
   { value: 'oldest', label: 'Mais antigos' },
+  { value: 'balance_desc', label: 'Maior saldo' },
+  { value: 'balance_asc', label: 'Menor saldo' },
+];
+
+const DEBT_FILTERS: readonly { value: CustomerDebtFilter; label: string }[] = [
+  { value: 'all', label: 'Todos os saldos' },
+  { value: 'with_debt', label: 'Com dívida' },
+  { value: 'without_debt', label: 'Sem dívida' },
+  { value: 'overdue', label: 'Com atraso' },
 ];
 
 export function CustomersScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ financial?: string | string[] }>();
   const outstandingOnly = getSingleParam(params.financial) === 'with_debt';
+  const routeDebtFilter: CustomerDebtFilter = outstandingOnly ? 'with_debt' : 'all';
   const { tokens } = useTheme();
   const { workspace, repositories } = useDatabase();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<CustomerStatusFilter>('active');
   const [sort, setSort] = useState<CustomerSortOrder>('name_asc');
-  const [customers, setCustomers] = useState<CustomerRow[]>([]);
+  const [debtSelection, setDebtSelection] = useState<{
+    routeDebtFilter: CustomerDebtFilter;
+    value: CustomerDebtFilter;
+  } | null>(null);
+  const debtFilter =
+    debtSelection?.routeDebtFilter === routeDebtFilter ? debtSelection.value : routeDebtFilter;
+  const setDebtFilter = (value: CustomerDebtFilter) => setDebtSelection({ routeDebtFilter, value });
+  const [customers, setCustomers] = useState<CustomerListEntry[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const requestVersion = useRef(0);
@@ -61,12 +79,16 @@ export function CustomersScreen() {
     setStatus((current) => (current === 'ready' ? current : 'loading'));
     try {
       const [rows, count] = await Promise.all([
-        repositories.customers.list(workspace.id, {
-          query: debouncedSearch,
-          status: filter,
-          sort,
-          outstandingOnly,
-        }),
+        repositories.customers.listAdvanced(
+          workspace.id,
+          {
+            query: debouncedSearch,
+            status: filter,
+            sort,
+            debt: debtFilter,
+          },
+          workspace.timezone,
+        ),
         repositories.customers.countActive(workspace.id),
       ]);
       if (requestVersion.current !== version) return;
@@ -76,7 +98,15 @@ export function CustomersScreen() {
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [debouncedSearch, filter, outstandingOnly, repositories.customers, sort, workspace.id]);
+  }, [
+    debouncedSearch,
+    debtFilter,
+    filter,
+    repositories.customers,
+    sort,
+    workspace.id,
+    workspace.timezone,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -101,7 +131,7 @@ export function CustomersScreen() {
   return (
     <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
       <AppHeader subtitle="Gerencie os clientes da sua oficina." title="Clientes" />
-      {outstandingOnly ? (
+      {debtFilter === 'with_debt' ? (
         <Alert
           description="A lista mostra somente clientes com pelo menos um saldo pendente."
           title="Clientes com dívidas"
@@ -140,6 +170,21 @@ export function CustomersScreen() {
               onPress={() => setFilter(option.value)}
               size="sm"
               variant={filter === option.value ? 'secondary' : 'outline'}
+            />
+          ))}
+        </ScrollView>
+        <ScrollView
+          contentContainerStyle={styles.controlRow}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          {DEBT_FILTERS.map((option) => (
+            <Button
+              key={option.value}
+              label={option.label}
+              onPress={() => setDebtFilter(option.value)}
+              size="sm"
+              variant={debtFilter === option.value ? 'secondary' : 'outline'}
             />
           ))}
         </ScrollView>
@@ -202,7 +247,7 @@ export function CustomersScreen() {
                 onPress={() =>
                   router.push({ pathname: '/customers/[id]', params: { id: item.id } })
                 }
-                pendingCents={null}
+                pendingCents={item.outstandingCents || null}
               />
             )}
           />

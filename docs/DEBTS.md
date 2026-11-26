@@ -23,6 +23,10 @@ Nenhuma migration foi necessária: a tabela `debts`, as FKs compostas, pagamento
 
 O Prompt 08 habilitou **Registrar pagamento** em fiados com saldo e adicionou progresso, total líquido pago e histórico cronológico de pagamentos e estornos. Cada evento abre os detalhes do pagamento; fiados quitados ou cancelados não oferecem nova cobrança. Perfis de clientes e veículos recarregam os saldos derivados ao receber foco.
 
+## Pesquisa e filtros avançados
+
+Além da situação financeira já existente, a listagem combina condição de atraso, cliente, veículo, período de criação ou vencimento, faixa de valor, presença de vencimento e ordenação por data, saldo ou vencimento. A pesquisa global usa a mesma projeção agregada do `DebtRepository`, sem duplicar regras de saldo ou status.
+
 Notificações, WhatsApp, Supabase e sincronização não fazem parte deste módulo.
 
 A suíte automatizada cobre criação e edição idempotentes, cancelamento, busca, filtros, vencimento, dinheiro, vínculos e isolamento por workspace. A validação manual em Android e iOS continua pendente.

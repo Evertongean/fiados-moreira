@@ -154,7 +154,7 @@ Esses componentes recebem somente propriedades. Não acessam banco, stores, repo
 
 ### Navegação (`src/components/navigation`)
 
-- `AppHeader`: identidade das telas principais e acesso opcional às notificações.
+- `AppHeader`: identidade das telas principais e acessos opcionais à pesquisa global e às notificações.
 - `PageHeader`: retorno com fallback para deep links, título e ação contextual.
 - `SectionHeader`: título, descrição e ação de uma seção interna.
 - `FloatingActionButton`: ação primária de lista com alvo confortável e feedback.

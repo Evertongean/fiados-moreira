@@ -68,7 +68,7 @@ A consulta inicial é isolada por workspace, exclusão lógica e estado de arqui
 
 Essa estratégia é simples e correta para o volume inicial previsto. Se medições futuras mostrarem volume alto, uma coluna normalizada indexada deverá ser adicionada por migration, sem alterar migrations aplicadas.
 
-Ordenações disponíveis: nome A–Z, nome Z–A, mais recentes e mais antigos. A busca tem debounce de 250 ms e uma versão de requisição impede que resultado antigo substitua o novo.
+Ordenações disponíveis: nome A–Z, nome Z–A, mais recentes, mais antigos, maior saldo e menor saldo. Os filtros financeiros separam clientes com dívida, sem dívida ou com saldo atrasado; cancelados e pagamentos estornados seguem as regras financeiras centrais. A busca tem debounce de 250 ms e uma versão de requisição impede que resultado antigo substitua o novo.
 
 ## Arquivamento e restauração
 

@@ -37,8 +37,11 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Indicadores de aberto, atrasado, recebido, vencimentos e clientes devedores.
   - [x] Gráfico de sete dias, listas prioritárias, atividades e atualização offline.
   - [ ] Validar responsividade, pull-to-refresh, retorno do segundo plano e acessibilidade em Android e iOS.
-- [ ] **Prompt 11 — Pesquisa e filtros**
-  - [ ] Busca e filtros consistentes nos módulos.
+- [ ] **Prompt 11 — Pesquisa e filtros** (implementação concluída; aceite mobile pendente)
+  - [x] Pesquisa global offline agrupada, normalizada, limitada e isolada por workspace.
+  - [x] Filtros combináveis para clientes, veículos, fiados e pagamentos, com limpeza rápida.
+  - [x] Filtros financeiros avançados nas listagens de clientes e fiados.
+  - [ ] Validar teclado, painéis extensos, responsividade e acessibilidade em Android e iOS.
 - [ ] **Prompt 12 — Notificações**
   - [ ] Lembretes e permissões com Expo Notifications.
 - [ ] **Prompt 13 — WhatsApp**

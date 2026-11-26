@@ -56,6 +56,8 @@ O cadastro gera UUID antes da primeira tentativa e o reutiliza em reenvios. Repe
 
 ## Testes e limitações
 
+A pesquisa global consulta veículos por placa, marca e modelo e permite combinar tipo, cliente e situação ativa/arquivada. Ela permanece offline, isolada por workspace e abre os detalhes pelo UUID.
+
 Os testes cobrem placas antigas e Mercosul, campos obrigatórios, formulário acessível, criação idempotente, busca, duplicidade, edição, preservação de identidade/proprietário, arquivamento, restauração, auditoria, rollback, isolamento por workspace, persistência SQLite e bloqueio de novo fiado com veículo arquivado.
 
 Permanecem pendentes testes manuais de teclado, telas pequenas, TalkBack/VoiceOver e encerramento/reabertura em Android e iOS. Sincronização, autenticação, backup e criptografia do arquivo continuam fora desta etapa.

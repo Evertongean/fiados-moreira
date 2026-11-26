@@ -144,20 +144,39 @@ export class DebtRepository {
           const matchesPlate = Boolean(plateQuery && debt.vehiclePlate?.includes(plateQuery));
           if (!matchesText && !matchesPlate) return false;
         }
-        if (filter === 'all') return true;
+        let matchesStatus = true;
         if (filter === 'open') {
-          return debt.status.financialStatus !== 'canceled' && debt.summary.pendingCents > 0;
-        }
-        if (filter === 'due_today') {
-          return (
+          matchesStatus =
+            debt.status.financialStatus !== 'canceled' && debt.summary.pendingCents > 0;
+        } else if (filter === 'due_today') {
+          matchesStatus =
             debt.status.financialStatus !== 'canceled' &&
             debt.summary.pendingCents > 0 &&
-            debt.dueDate === getCivilDate(options.referenceDate ?? new Date(), options.timezone)
-          );
+            debt.dueDate === getCivilDate(options.referenceDate ?? new Date(), options.timezone);
+        } else if (filter === 'overdue') {
+          matchesStatus = debt.status.isOverdue;
+        } else if (filter !== 'all') {
+          matchesStatus = debt.status.financialStatus === filter;
         }
-        if (filter === 'overdue') return debt.status.isOverdue;
-        return debt.status.financialStatus === filter;
-      });
+        if (!matchesStatus) return false;
+        if (options.overdue === 'overdue' && !debt.status.isOverdue) return false;
+        if (options.overdue === 'not_overdue' && debt.status.isOverdue) return false;
+        if (options.dueDate === 'with_due_date' && !debt.dueDate) return false;
+        if (options.dueDate === 'without_due_date' && debt.dueDate) return false;
+        if (options.minAmountCents !== undefined && debt.totalCents < options.minAmountCents) {
+          return false;
+        }
+        if (options.maxAmountCents !== undefined && debt.totalCents > options.maxAmountCents) {
+          return false;
+        }
+        const date =
+          options.dateField === 'due'
+            ? debt.dueDate
+            : getCivilDate(new Date(debt.createdAt), options.timezone);
+        if (options.startDate && (!date || date < options.startDate)) return false;
+        return !options.endDate || Boolean(date && date <= options.endDate);
+      })
+      .sort((left, right) => sortDebtOverview(left, right, options.sort ?? 'newest'));
   }
 
   listByVehicle(
@@ -266,4 +285,25 @@ export class DebtRepository {
       }),
     };
   }
+}
+
+function sortDebtOverview(
+  left: DebtOverview,
+  right: DebtOverview,
+  sort: NonNullable<DebtListOptions['sort']>,
+): number {
+  if (sort === 'amount_desc' || sort === 'amount_asc') {
+    const result = left.totalCents - right.totalCents;
+    if (result !== 0) return sort === 'amount_desc' ? -result : result;
+  }
+  if (sort === 'due_asc' || sort === 'due_desc') {
+    if (!left.dueDate && !right.dueDate) return 0;
+    if (!left.dueDate) return 1;
+    if (!right.dueDate) return -1;
+    const result = left.dueDate.localeCompare(right.dueDate);
+    if (result !== 0) return sort === 'due_desc' ? -result : result;
+  }
+  const result = left.createdAt.localeCompare(right.createdAt);
+  if (result !== 0) return sort === 'oldest' ? result : -result;
+  return left.id.localeCompare(right.id);
 }

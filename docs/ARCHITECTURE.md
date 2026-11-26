@@ -176,3 +176,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - O gráfico usa o React Native SVG já instalado. Nenhuma dependência, migration ou serviço remoto foi adicionado.
 - O dashboard recarrega no foco, no retorno do aplicativo, na virada da data civil e por pull-to-refresh; SQLite permanece a única fonte de verdade.
 - Os novos filtros `open` e `due_today` da lista de fiados sustentam a navegação dos indicadores e a seleção segura para registrar pagamento.
+
+## Decisões do Prompt 11
+
+- `GlobalSearchRepository` compõe projeções parametrizadas e isoladas por workspace; clientes e fiados reutilizam as agregações dos repositórios de domínio.
+- A normalização Unicode, de telefone e de placa ocorre após o recorte por workspace. Cada categoria retorna no máximo 20 registros; índices textuais dependem de medição real.
+- Debounce e versionamento impedem que respostas antigas substituam pesquisas rápidas. Nenhum termo sai do aparelho.
+- Filtros de saldo usam somente pagamentos válidos e excluem cancelados; hoje não é atraso. Períodos de pagamento usam `paidAt` na data civil do workspace.
+- Veículos e pagamentos, ainda sem listagens globais próprias, recebem seus filtros no painel da pesquisa.
+- Nenhuma dependência, migration, store global ou integração remota foi adicionada.

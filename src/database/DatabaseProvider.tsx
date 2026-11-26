@@ -25,6 +25,7 @@ import { AuditRepository } from './repositories/audit.repository';
 import { CustomerRepository } from './repositories/customer.repository';
 import { DashboardRepository } from './repositories/dashboard.repository';
 import { DebtRepository } from './repositories/debt.repository';
+import { GlobalSearchRepository } from './repositories/global-search.repository';
 import { PaymentReversalRepository } from './repositories/payment-reversal.repository';
 import { PaymentRepository } from './repositories/payment.repository';
 import { VehicleRepository } from './repositories/vehicle.repository';
@@ -38,6 +39,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     workspaces: WorkspaceRepository;
     customers: CustomerRepository;
     dashboard: DashboardRepository;
+    globalSearch: GlobalSearchRepository;
     vehicles: VehicleRepository;
     debts: DebtRepository;
     payments: PaymentRepository;
@@ -86,6 +88,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         workspaces: new WorkspaceRepository(executor),
         customers: new CustomerRepository(executor),
         dashboard: new DashboardRepository(executor),
+        globalSearch: new GlobalSearchRepository(executor),
         vehicles: new VehicleRepository(executor),
         debts: new DebtRepository(executor),
         payments: new PaymentRepository(executor),

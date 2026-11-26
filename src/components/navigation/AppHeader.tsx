@@ -1,5 +1,5 @@
-import { Bell } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { Bell, Search } from 'lucide-react-native';
+import { useRouter, type Href } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { BrandLogo } from '@/components/brand/BrandLogo';
@@ -10,6 +10,7 @@ export interface AppHeaderProps {
   subtitle?: string;
   showBrand?: boolean;
   showNotifications?: boolean;
+  showSearch?: boolean;
 }
 
 export function AppHeader({
@@ -17,6 +18,7 @@ export function AppHeader({
   subtitle,
   showBrand = false,
   showNotifications = true,
+  showSearch = false,
 }: AppHeaderProps) {
   const router = useRouter();
 
@@ -35,14 +37,24 @@ export function AppHeader({
           ) : null}
         </View>
       </View>
-      {showNotifications ? (
-        <IconButton
-          accessibilityLabel="Abrir notificações"
-          icon={Bell}
-          onPress={() => router.push('/notifications')}
-          variant="ghost"
-        />
-      ) : null}
+      <View style={styles.actions}>
+        {showSearch ? (
+          <IconButton
+            accessibilityLabel="Abrir pesquisa global"
+            icon={Search}
+            onPress={() => router.push('/search' as Href)}
+            variant="ghost"
+          />
+        ) : null}
+        {showNotifications ? (
+          <IconButton
+            accessibilityLabel="Abrir notificações"
+            icon={Bell}
+            onPress={() => router.push('/notifications')}
+            variant="ghost"
+          />
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -57,4 +69,5 @@ const styles = StyleSheet.create({
   },
   copy: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   titleGroup: { flex: 1, gap: 2 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
 });

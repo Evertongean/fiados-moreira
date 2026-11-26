@@ -2,6 +2,7 @@ import { fireEvent, screen } from '@testing-library/react-native';
 
 import NotFoundScreen from '@/app/+not-found';
 import { PageHeader } from '@/components/navigation/PageHeader';
+import { AppHeader } from '@/components/navigation/AppHeader';
 import { CustomersScreen } from '@/features/customers/CustomersScreen';
 import { DebtsScreen } from '@/features/debts/DebtsScreen';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
@@ -15,7 +16,12 @@ const mockRouter = {
 };
 const mockCustomerRepository = {
   list: jest.fn().mockResolvedValue([]),
+  listAdvanced: jest.fn().mockResolvedValue([]),
   countActive: jest.fn().mockResolvedValue(0),
+};
+const mockDebtRepository = { listOverview: jest.fn().mockResolvedValue([]) };
+const mockGlobalSearchRepository = {
+  listFilterOptions: jest.fn().mockResolvedValue({ customers: [], vehicles: [] }),
 };
 
 jest.mock('expo-router', () => ({
@@ -26,9 +32,11 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/hooks/useDatabase', () => ({
   useDatabase: () => ({
-    workspace: { id: 'workspace-test' },
+    workspace: { id: 'workspace-test', timezone: 'America/Fortaleza' },
     repositories: {
       customers: mockCustomerRepository,
+      debts: mockDebtRepository,
+      globalSearch: mockGlobalSearchRepository,
     },
   }),
 }));
@@ -50,6 +58,13 @@ describe('navigation actions', () => {
 
     fireEvent.press(screen.getByRole('button', { name: /Aparência/ }));
     expect(mockRouter.push).toHaveBeenCalledWith('/settings/appearance');
+  });
+
+  it('opens the global search from the dashboard header action', async () => {
+    await renderWithTheme(<AppHeader showSearch title="Fiados Moreira" />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Abrir pesquisa global' }));
+    expect(mockRouter.push).toHaveBeenCalledWith('/search');
   });
 
   it('opens the new debt screen from the debts section', async () => {

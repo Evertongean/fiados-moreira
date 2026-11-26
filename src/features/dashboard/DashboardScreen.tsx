@@ -113,6 +113,7 @@ export function DashboardScreen() {
       <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
         <AppHeader
           showBrand
+          showSearch
           subtitle="Bem-vindo ao controle da sua oficina"
           title="Fiados Moreira"
         />
@@ -160,7 +161,12 @@ export function DashboardScreen() {
         ),
       }}
     >
-      <AppHeader showBrand subtitle="Bem-vindo ao controle da sua oficina" title="Fiados Moreira" />
+      <AppHeader
+        showBrand
+        showSearch
+        subtitle="Bem-vindo ao controle da sua oficina"
+        title="Fiados Moreira"
+      />
 
       {refreshError ? (
         <Alert

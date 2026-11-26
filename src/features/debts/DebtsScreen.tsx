@@ -14,7 +14,14 @@ import {
   SearchInput,
 } from '@/components/ui';
 import { DebtListItem } from '@/features/debts/components/DebtListItem';
+import {
+  countDebtAdvancedFilters,
+  DebtAdvancedFiltersPanel,
+  DEFAULT_DEBT_ADVANCED_FILTERS,
+  type DebtAdvancedFilters,
+} from '@/features/debts/components/DebtAdvancedFiltersPanel';
 import type { DebtListFilter, DebtOverview } from '@/features/debts/domain/debtTypes';
+import type { GlobalSearchFilterOptions } from '@/features/search/domain/searchTypes';
 import { useDatabase } from '@/hooks/useDatabase';
 
 const FILTERS: readonly { value: DebtListFilter; label: string }[] = [
@@ -62,6 +69,14 @@ export function DebtsScreen() {
   const setFilter = (value: DebtListFilter) =>
     setFilterSelection({ routeKey: routeFilterKey, value });
   const [debts, setDebts] = useState<DebtOverview[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<DebtAdvancedFilters>(
+    DEFAULT_DEBT_ADVANCED_FILTERS,
+  );
+  const [filterOptions, setFilterOptions] = useState<GlobalSearchFilterOptions>({
+    customers: [],
+    vehicles: [],
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const requestVersion = useRef(0);
 
@@ -78,6 +93,7 @@ export function DebtsScreen() {
         query: debouncedSearch,
         filter,
         timezone: workspace.timezone,
+        ...advancedFilters,
       });
       if (requestVersion.current !== version) return;
       setDebts(rows);
@@ -85,16 +101,28 @@ export function DebtsScreen() {
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [debouncedSearch, filter, repositories.debts, workspace.id, workspace.timezone]);
+  }, [
+    advancedFilters,
+    debouncedSearch,
+    filter,
+    repositories.debts,
+    workspace.id,
+    workspace.timezone,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
+      void repositories.globalSearch
+        .listFilterOptions(workspace.id)
+        .then(setFilterOptions, () => setFilterOptions({ customers: [], vehicles: [] }));
       void load();
       return () => {
         requestVersion.current += 1;
       };
-    }, [load]),
+    }, [load, repositories.globalSearch, workspace.id]),
   );
+
+  const activeAdvancedFilters = countDebtAdvancedFilters(advancedFilters);
 
   const emptyTitle = search.trim()
     ? 'Nenhum fiado encontrado.'
@@ -146,6 +174,34 @@ export function DebtsScreen() {
           />
         ))}
       </ScrollView>
+      <View style={styles.advancedActions}>
+        <Button
+          label={
+            activeAdvancedFilters
+              ? `Filtros avançados (${activeAdvancedFilters})`
+              : 'Filtros avançados'
+          }
+          onPress={() => setShowAdvancedFilters((value) => !value)}
+          size="sm"
+          variant={showAdvancedFilters || activeAdvancedFilters ? 'secondary' : 'outline'}
+        />
+        {activeAdvancedFilters ? (
+          <Button
+            label="Limpar"
+            onPress={() => setAdvancedFilters(DEFAULT_DEBT_ADVANCED_FILTERS)}
+            size="sm"
+            variant="ghost"
+          />
+        ) : null}
+      </View>
+      <DebtAdvancedFiltersPanel
+        filters={advancedFilters}
+        onChange={setAdvancedFilters}
+        onClear={() => setAdvancedFilters(DEFAULT_DEBT_ADVANCED_FILTERS)}
+        onClose={() => setShowAdvancedFilters(false)}
+        options={filterOptions}
+        visible={showAdvancedFilters}
+      />
       <View style={styles.listArea}>
         {status === 'loading' ? (
           <LoadingState fullScreen label="Carregando fiados…" />
@@ -208,6 +264,7 @@ const styles = StyleSheet.create({
   summary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   summaryCopy: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   filters: { gap: 8 },
+  advancedActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   listArea: { flex: 1, minHeight: 180 },
   list: { gap: 10, paddingBottom: 16 },
   emptyList: { flexGrow: 1, justifyContent: 'center' },

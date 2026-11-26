@@ -67,6 +67,7 @@ function AppBootstrap() {
           <Stack.Screen name="notifications" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="reports" />
+          <Stack.Screen name="search" />
           <Stack.Screen name="dev" />
           <Stack.Screen name="+not-found" options={{ animation: 'fade' }} />
         </Stack>

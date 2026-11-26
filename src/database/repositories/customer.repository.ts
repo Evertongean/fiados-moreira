@@ -10,11 +10,13 @@ import {
 } from '@/features/customers/domain/customerSchemas';
 import type {
   CustomerFinancialSummary,
+  CustomerListEntry,
   CustomerListFilters,
   PotentialDuplicate,
 } from '@/features/customers/domain/customerTypes';
 import { normalizeSearchText } from '@/features/customers/domain/customerUtils';
 import { normalizePhoneSearch, onlyDigits } from '@/utils/phone';
+import { getCivilDate } from '@/utils/date';
 import { createUuid } from '@/utils/uuid';
 
 const SELECT = `select id, workspace_id as workspaceId, name, phone, whatsapp, address, notes,
@@ -31,6 +33,24 @@ function matchesQuery(customer: CustomerRow, query: string): boolean {
       normalizePhoneSearch(onlyDigits(value ?? '')).includes(phoneQuery),
     );
   return nameMatches || phoneMatches;
+}
+
+function sortCustomerEntries(
+  left: CustomerListEntry,
+  right: CustomerListEntry,
+  sort: CustomerListFilters['sort'] = 'name_asc',
+): number {
+  if (sort === 'newest' || sort === 'oldest') {
+    const result = left.createdAt.localeCompare(right.createdAt);
+    if (result !== 0) return sort === 'newest' ? -result : result;
+  }
+  if (sort === 'balance_desc' || sort === 'balance_asc') {
+    const result = left.outstandingCents - right.outstandingCents;
+    if (result !== 0) return sort === 'balance_desc' ? -result : result;
+  }
+  const result = left.name.localeCompare(right.name, 'pt-BR', { sensitivity: 'base' });
+  if (result !== 0) return sort === 'name_desc' ? -result : result;
+  return left.id.localeCompare(right.id);
 }
 
 export class CustomerRepository {
@@ -121,6 +141,51 @@ export class CustomerRepository {
       }
       return direction * left.name.localeCompare(right.name, 'pt-BR', { sensitivity: 'base' });
     });
+  }
+
+  async listAdvanced(
+    workspaceId: string,
+    filters: CustomerListFilters,
+    timezone: string,
+    referenceDate = new Date(),
+  ): Promise<CustomerListEntry[]> {
+    const currentCivilDate = getCivilDate(referenceDate, timezone);
+    const rows = await this.executor.all<CustomerListEntry>(
+      `select c.id, c.workspace_id as workspaceId, c.name, c.phone, c.whatsapp,
+        c.address, c.notes, c.created_at as createdAt, c.updated_at as updatedAt,
+        c.archived_at as archivedAt, c.deleted_at as deletedAt,
+        coalesce(sum(case when balances.pendingCents > 0 then balances.pendingCents else 0 end), 0)
+          as outstandingCents,
+        coalesce(sum(case when balances.pendingCents > 0 and balances.dueDate < ?
+          then balances.pendingCents else 0 end), 0) as overdueCents
+       from customers c
+       left join (
+         select d.id, d.workspace_id as workspaceId, d.customer_id as customerId,
+           d.due_date as dueDate, d.total_cents -
+             coalesce(sum(case when r.id is null then p.amount_cents else 0 end), 0) as pendingCents
+         from debts d
+         left join payments p on p.workspace_id = d.workspace_id and p.debt_id = d.id
+         left join payment_reversals r
+           on r.workspace_id = p.workspace_id and r.payment_id = p.id
+         where d.workspace_id = ? and d.canceled_at is null
+         group by d.id, d.workspace_id, d.customer_id, d.due_date, d.total_cents
+       ) balances on balances.workspaceId = c.workspace_id and balances.customerId = c.id
+       where c.workspace_id = ? and c.deleted_at is null
+       group by c.id, c.workspace_id, c.name, c.phone, c.whatsapp, c.address, c.notes,
+         c.created_at, c.updated_at, c.archived_at, c.deleted_at`,
+      [currentCivilDate, workspaceId, workspaceId],
+    );
+    const status = filters.status ?? 'active';
+    const debtFilter = filters.outstandingOnly ? 'with_debt' : (filters.debt ?? 'all');
+    const filtered = rows.filter((customer) => {
+      if (filters.query?.trim() && !matchesQuery(customer, filters.query)) return false;
+      if (status === 'active' && customer.archivedAt) return false;
+      if (status === 'archived' && !customer.archivedAt) return false;
+      if (debtFilter === 'with_debt' && customer.outstandingCents <= 0) return false;
+      if (debtFilter === 'without_debt' && customer.outstandingCents > 0) return false;
+      return debtFilter !== 'overdue' || customer.overdueCents > 0;
+    });
+    return filtered.sort((left, right) => sortCustomerEntries(left, right, filters.sort));
   }
 
   search(

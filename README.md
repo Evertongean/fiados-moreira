@@ -135,6 +135,7 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Módulo de fiados](docs/DEBTS.md)
 - [Módulo de pagamentos](docs/PAYMENTS.md)
 - [Dashboard financeiro](docs/DASHBOARD.md)
+- [Pesquisa global e filtros](docs/SEARCH.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Navegação](docs/NAVIGATION.md)
@@ -143,4 +144,4 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 
 ## Status
 
-**Prompt 10 — Dashboard financeiro:** implementação concluída e protegida por testes locais. Indicadores, recebimentos dos últimos sete dias, vencimentos, prioridades e atividades usam dados reais do SQLite e respeitam o fuso do workspace. A validação manual em Android/iOS permanece pendente; relatórios completos continuam fora do escopo.
+**Prompt 11 — Pesquisa global e filtros:** implementação concluída e protegida por testes locais. A busca offline agrupa clientes, veículos, fiados e pagamentos, normaliza texto, telefones e placas e combina filtros isolados por workspace. As listagens de clientes e fiados receberam filtros financeiros avançados. A validação manual em Android/iOS permanece pendente.

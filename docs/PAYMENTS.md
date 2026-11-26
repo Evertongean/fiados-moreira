@@ -26,6 +26,8 @@ Nenhuma migration ou dependência foi necessária. O schema do Prompt 04 já con
 
 ## Validação e limites
 
+A pesquisa global consulta pagamentos por cliente, método e descrição do fiado. O painel combina período efetivo de `paidAt`, método, cliente e situação confirmada/estornada; cada resultado abre os detalhes do pagamento sem remover o histórico de estorno.
+
 Os testes cobrem pagamentos parciais e totais, quitação, valores inválidos e excessivos, concorrência, idempotência, estorno único, rollback por falha de auditoria, isolamento por workspace, persistência e o cenário R$ 500,00 → R$ 200,00 → R$ 300,00 → estorno de R$ 300,00.
 
 Comprovantes PDF, integração bancária, processamento real de Pix, Supabase e sincronização permanecem fora do escopo. A validação manual em Android e iOS continua pendente.
