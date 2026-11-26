@@ -2,7 +2,8 @@ import type { DebtRow } from '@/database/schema';
 import type { DebtFinancialSummary } from '@/features/debts/domain/finance';
 import type { DebtStatusResult } from '@/features/debts/domain/status';
 
-export type DebtListFilter = 'all' | 'pending' | 'partially_paid' | 'overdue' | 'paid' | 'canceled';
+export type DebtListFilter =
+  'all' | 'open' | 'pending' | 'partially_paid' | 'due_today' | 'overdue' | 'paid' | 'canceled';
 
 export interface DebtListOptions {
   query?: string;

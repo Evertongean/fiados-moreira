@@ -1,12 +1,20 @@
 import type { CustomerRow } from '@/database/schema';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowDownAZ, UserPlus, Users } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
 import { CustomerListItem } from '@/components/cards';
 import { AppHeader, FloatingActionButton } from '@/components/navigation';
-import { AppText, Button, EmptyState, LoadingState, Screen, SearchInput } from '@/components/ui';
+import {
+  Alert,
+  AppText,
+  Button,
+  EmptyState,
+  LoadingState,
+  Screen,
+  SearchInput,
+} from '@/components/ui';
 import type {
   CustomerSortOrder,
   CustomerStatusFilter,
@@ -30,6 +38,8 @@ const SORTS: readonly { value: CustomerSortOrder; label: string }[] = [
 
 export function CustomersScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ financial?: string | string[] }>();
+  const outstandingOnly = getSingleParam(params.financial) === 'with_debt';
   const { tokens } = useTheme();
   const { workspace, repositories } = useDatabase();
   const [search, setSearch] = useState('');
@@ -55,6 +65,7 @@ export function CustomersScreen() {
           query: debouncedSearch,
           status: filter,
           sort,
+          outstandingOnly,
         }),
         repositories.customers.countActive(workspace.id),
       ]);
@@ -65,7 +76,7 @@ export function CustomersScreen() {
     } catch {
       if (requestVersion.current === version) setStatus('error');
     }
-  }, [debouncedSearch, filter, repositories.customers, sort, workspace.id]);
+  }, [debouncedSearch, filter, outstandingOnly, repositories.customers, sort, workspace.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -90,6 +101,13 @@ export function CustomersScreen() {
   return (
     <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
       <AppHeader subtitle="Gerencie os clientes da sua oficina." title="Clientes" />
+      {outstandingOnly ? (
+        <Alert
+          description="A lista mostra somente clientes com pelo menos um saldo pendente."
+          title="Clientes com dívidas"
+          variant="info"
+        />
+      ) : null}
       <View style={styles.summary}>
         <View style={styles.summaryCopy}>
           <AppText variant="h4">{activeCount}</AppText>
@@ -209,3 +227,7 @@ const styles = StyleSheet.create({
   list: { gap: 10, paddingBottom: 16 },
   emptyList: { flexGrow: 1, justifyContent: 'center' },
 });
+
+function getSingleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}

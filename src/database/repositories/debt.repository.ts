@@ -17,6 +17,7 @@ import { normalizeDebtSearch } from '@/features/debts/domain/debtUtils';
 import { calculateDebtStatus } from '@/features/debts/domain/status';
 import { normalizeBrazilianPlate } from '@/utils/plate';
 import { createUuid } from '@/utils/uuid';
+import { getCivilDate } from '@/utils/date';
 
 const SELECT = `select id, workspace_id as workspaceId, customer_id as customerId,
   vehicle_id as vehicleId, description, total_cents as totalCents, service_date as serviceDate,
@@ -144,6 +145,16 @@ export class DebtRepository {
           if (!matchesText && !matchesPlate) return false;
         }
         if (filter === 'all') return true;
+        if (filter === 'open') {
+          return debt.status.financialStatus !== 'canceled' && debt.summary.pendingCents > 0;
+        }
+        if (filter === 'due_today') {
+          return (
+            debt.status.financialStatus !== 'canceled' &&
+            debt.summary.pendingCents > 0 &&
+            debt.dueDate === getCivilDate(options.referenceDate ?? new Date(), options.timezone)
+          );
+        }
         if (filter === 'overdue') return debt.status.isOverdue;
         return debt.status.financialStatus === filter;
       });

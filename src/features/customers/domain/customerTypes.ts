@@ -7,6 +7,7 @@ export interface CustomerListFilters {
   query?: string;
   status?: CustomerStatusFilter;
   sort?: CustomerSortOrder;
+  outstandingOnly?: boolean;
 }
 
 export type DuplicateMatchReason = 'name' | 'phone' | 'whatsapp';

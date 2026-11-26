@@ -33,8 +33,10 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 09 — Histórico financeiro**
   - [ ] Linha do tempo auditável por cliente.
-- [ ] **Prompt 10 — Dashboard**
-  - [ ] Indicadores de aberto, atrasado, recebido e próximos vencimentos.
+- [ ] **Prompt 10 — Dashboard** (implementação concluída; aceite mobile pendente)
+  - [x] Indicadores de aberto, atrasado, recebido, vencimentos e clientes devedores.
+  - [x] Gráfico de sete dias, listas prioritárias, atividades e atualização offline.
+  - [ ] Validar responsividade, pull-to-refresh, retorno do segundo plano e acessibilidade em Android e iOS.
 - [ ] **Prompt 11 — Pesquisa e filtros**
   - [ ] Busca e filtros consistentes nos módulos.
 - [ ] **Prompt 12 — Notificações**

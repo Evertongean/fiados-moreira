@@ -93,8 +93,20 @@ export class CustomerRepository {
         : status === 'archived'
           ? ' and archived_at is not null'
           : '';
+    const outstandingClause = filters.outstandingOnly
+      ? ` and exists (
+          select 1 from debts d
+          where d.workspace_id = customers.workspace_id and d.customer_id = customers.id
+            and d.canceled_at is null and d.total_cents > coalesce((
+              select sum(case when r.id is null then p.amount_cents else 0 end)
+              from payments p left join payment_reversals r
+                on r.workspace_id = p.workspace_id and r.payment_id = p.id
+              where p.workspace_id = d.workspace_id and p.debt_id = d.id
+            ), 0)
+        )`
+      : '';
     const rows = await this.executor.all<CustomerRow>(
-      `${SELECT} where workspace_id = ? and deleted_at is null${statusClause}`,
+      `${SELECT} where workspace_id = ? and deleted_at is null${statusClause}${outstandingClause}`,
       [workspaceId],
     );
     const filtered = filters.query?.trim()

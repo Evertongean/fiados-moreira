@@ -1,26 +1,38 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Plus, Wallet } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppHeader, FloatingActionButton } from '@/components/navigation';
-import { AppText, Button, EmptyState, LoadingState, Screen, SearchInput } from '@/components/ui';
+import {
+  Alert,
+  AppText,
+  Button,
+  EmptyState,
+  LoadingState,
+  Screen,
+  SearchInput,
+} from '@/components/ui';
 import { DebtListItem } from '@/features/debts/components/DebtListItem';
 import type { DebtListFilter, DebtOverview } from '@/features/debts/domain/debtTypes';
 import { useDatabase } from '@/hooks/useDatabase';
 
 const FILTERS: readonly { value: DebtListFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
+  { value: 'open', label: 'Em aberto' },
   { value: 'pending', label: 'Pendentes' },
   { value: 'partially_paid', label: 'Parcialmente pagos' },
+  { value: 'due_today', label: 'Vencem hoje' },
   { value: 'overdue', label: 'Atrasados' },
   { value: 'paid', label: 'Quitados' },
   { value: 'canceled', label: 'Cancelados' },
 ];
 
 const EMPTY_FILTER_LABELS: Record<Exclude<DebtListFilter, 'all'>, string> = {
+  open: 'em aberto',
   pending: 'pendente',
   partially_paid: 'parcialmente pago',
+  due_today: 'com vencimento hoje',
   overdue: 'atrasado',
   paid: 'quitado',
   canceled: 'cancelado',
@@ -28,10 +40,27 @@ const EMPTY_FILTER_LABELS: Record<Exclude<DebtListFilter, 'all'>, string> = {
 
 export function DebtsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ filter?: string | string[]; mode?: string | string[] }>();
+  const initialFilter = getInitialFilter(params.filter);
+  const paymentSelection = getSingleParam(params.mode) === 'payment';
+  const routeFilter =
+    paymentSelection && ['all', 'paid', 'canceled'].includes(initialFilter)
+      ? 'open'
+      : initialFilter;
+  const routeFilterKey = `${paymentSelection ? 'payment' : 'default'}:${routeFilter}`;
+  const availableFilters = paymentSelection
+    ? FILTERS.filter(({ value }) => !['all', 'paid', 'canceled'].includes(value))
+    : FILTERS;
   const { workspace, repositories } = useDatabase();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [filter, setFilter] = useState<DebtListFilter>('all');
+  const [filterSelection, setFilterSelection] = useState<{
+    routeKey: string;
+    value: DebtListFilter;
+  } | null>(null);
+  const filter = filterSelection?.routeKey === routeFilterKey ? filterSelection.value : routeFilter;
+  const setFilter = (value: DebtListFilter) =>
+    setFilterSelection({ routeKey: routeFilterKey, value });
   const [debts, setDebts] = useState<DebtOverview[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const requestVersion = useRef(0);
@@ -76,6 +105,13 @@ export function DebtsScreen() {
   return (
     <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
       <AppHeader subtitle="Acompanhe dívidas e pagamentos da oficina." title="Fiados" />
+      {paymentSelection ? (
+        <Alert
+          description="Toque em um fiado com saldo para abrir o registro de pagamento."
+          title="Selecione o fiado"
+          variant="info"
+        />
+      ) : null}
       <View style={styles.summary}>
         <View style={styles.summaryCopy}>
           <AppText variant="h4">{debts.length}</AppText>
@@ -100,7 +136,7 @@ export function DebtsScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        {FILTERS.map((option) => (
+        {availableFilters.map((option) => (
           <Button
             key={option.value}
             label={option.label}
@@ -148,7 +184,12 @@ export function DebtsScreen() {
             renderItem={({ item }) => (
               <DebtListItem
                 debt={item}
-                onPress={() => router.push({ pathname: '/debts/[id]', params: { id: item.id } })}
+                onPress={() =>
+                  router.push({
+                    pathname: paymentSelection ? '/debts/[id]/payment' : '/debts/[id]',
+                    params: { id: item.id },
+                  })
+                }
               />
             )}
           />
@@ -171,3 +212,14 @@ const styles = StyleSheet.create({
   list: { gap: 10, paddingBottom: 16 },
   emptyList: { flexGrow: 1, justifyContent: 'center' },
 });
+
+const DEBT_FILTERS = new Set<DebtListFilter>(FILTERS.map(({ value }) => value));
+
+function getSingleParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getInitialFilter(value: string | string[] | undefined): DebtListFilter {
+  const filter = getSingleParam(value) as DebtListFilter | undefined;
+  return filter && DEBT_FILTERS.has(filter) ? filter : 'all';
+}

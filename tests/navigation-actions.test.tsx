@@ -20,6 +20,7 @@ const mockCustomerRepository = {
 
 jest.mock('expo-router', () => ({
   useFocusEffect: (callback: () => void) => require('react').useEffect(callback, [callback]),
+  useLocalSearchParams: () => ({}),
   useRouter: () => mockRouter,
 }));
 

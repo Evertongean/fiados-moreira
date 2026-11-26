@@ -107,7 +107,7 @@ Saldo negativo é erro; não é mascarado com `Math.max`. Os estados financeiros
 
 ## Repositórios e serviços
 
-Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository` e `AuditRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
+Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository`, `AuditRepository` e `DashboardRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
 
 Serviços financeiros:
 
@@ -115,7 +115,7 @@ Serviços financeiros:
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
-O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. Nenhuma migration foi necessária no Prompt 08.
+O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. `DashboardRepository` consolida saldos, recebimentos por período civil, vencimentos e atividades recentes sem N+1. Nenhuma migration foi necessária no Prompt 10.
 
 Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro. O módulo de veículos usa `VehicleService` para mutações auditadas e `VehicleRepository` para detalhes, lista por cliente, pesquisa e duplicidade de placa.
 

@@ -167,3 +167,12 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Detalhes e histórico são projeções de leitura isoladas por workspace. Pagamentos e estornos continuam registros imutáveis, ligados ao fiado e cliente originais.
 - Perfis e detalhes recarregam SQLite ao receber foco, portanto pagamentos e estornos atualizam saldos sem cache financeiro paralelo.
 - O schema existente já possuía pagamentos, estornos, índices, FKs e auditoria; nenhuma migration ou dependência foi necessária.
+
+## Decisões do Prompt 10
+
+- `DashboardRepository` concentra projeções de leitura agregadas e isoladas por workspace; a tela não executa SQL nem replica saldos em store.
+- Saldos usam pagamentos válidos no histórico completo. Fluxos por período registram o pagamento em `paidAt` e o estorno em `reversedAt`, preservando bruto, estornos e líquido como conceitos distintos.
+- Limites mensais e diários são convertidos da data civil do workspace para instantes UTC antes das consultas. Hoje não é atraso.
+- O gráfico usa o React Native SVG já instalado. Nenhuma dependência, migration ou serviço remoto foi adicionado.
+- O dashboard recarrega no foco, no retorno do aplicativo, na virada da data civil e por pull-to-refresh; SQLite permanece a única fonte de verdade.
+- Os novos filtros `open` e `due_today` da lista de fiados sustentam a navegação dos indicadores e a seleção segura para registrar pagamento.

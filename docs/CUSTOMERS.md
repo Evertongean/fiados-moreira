@@ -26,7 +26,7 @@ Nenhuma migration foi necessária: os campos e índices da tabela `customers` cr
 
 ## Telas implementadas
 
-- `/customers`: quantidade real de ativos, busca, filtros de ativos/arquivados/todos, quatro ordenações, estados de carregamento, erro e vazio, lista virtualizada e atualização ao receber foco.
+- `/customers`: quantidade real de ativos, busca, filtros de ativos/arquivados/todos, acesso filtrado a clientes com saldo pelo dashboard, quatro ordenações, estados de carregamento, erro e vazio, lista virtualizada e atualização ao receber foco.
 - `/customers/new`: cadastro rápido ou completo com aviso de alterações não salvas.
 - `/customers/[id]`: perfil, dados cadastrais, resumo financeiro real somente de leitura, arquivamento e restauração.
 - `/customers/[id]/edit`: edição com o mesmo formulário e preservação de UUID, criação e vínculos.

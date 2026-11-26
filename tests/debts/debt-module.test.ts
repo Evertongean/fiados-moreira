@@ -163,6 +163,16 @@ describe('debt module', () => {
       ),
     ).toEqual([overdue.id]);
     expect(
+      (await repository.listOverview(workspace.id, { ...options, filter: 'open' })).map(
+        ({ id }) => id,
+      ),
+    ).toEqual([today.id, overdue.id]);
+    expect(
+      (await repository.listOverview(workspace.id, { ...options, filter: 'due_today' })).map(
+        ({ id }) => id,
+      ),
+    ).toEqual([today.id]);
+    expect(
       (
         await repository.findOverview(
           workspace.id,

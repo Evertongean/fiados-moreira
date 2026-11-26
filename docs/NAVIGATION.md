@@ -24,7 +24,7 @@ As telas principais aparecem nas abas. Formulários e detalhes são empilhados f
 
 | Ordem | Rota         | Título     | Ícone         | Responsabilidade              |
 | ----- | ------------ | ---------- | ------------- | ----------------------------- |
-| 1     | `/`          | Início     | `House`       | Dashboard preliminar          |
+| 1     | `/`          | Início     | `House`       | Dashboard financeiro offline  |
 | 2     | `/customers` | Clientes   | `Users`       | Entrada do módulo de clientes |
 | 3     | `/debts`     | Fiados     | `Wallet`      | Entrada do módulo financeiro  |
 | 4     | `/reports`   | Relatórios | `ChartColumn` | Indicadores e relatórios      |
@@ -38,7 +38,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 
 | Tela                  | Rota                      | Responsabilidade                      | Status                | Funcionalidade definitiva |
 | --------------------- | ------------------------- | ------------------------------------- | --------------------- | ------------------------- |
-| Dashboard             | `/`                       | Resumo e atalhos sem dados inventados | Estrutural            | Prompt 10                 |
+| Dashboard             | `/`                       | Indicadores, vencimentos e atividades | Funcional             | Prompt 10                 |
 | Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional             | Prompt 05                 |
 | Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional             | Prompt 05                 |
 | Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional             | Prompt 05                 |
@@ -73,6 +73,8 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com até 128 caracteres alfanuméricos, hífen ou sublinhado e rejeita arrays, caminhos, espaços, ausência e formatos inseguros. A criação de veículo pode receber somente `customerId` como preferência validada. A criação de fiado pode receber `customerId` e `vehicleId` validados para preencher vínculos vindos dos perfis. O pagamento recebe apenas o identificador do fiado e seus detalhes recebem apenas o identificador do pagamento; valores financeiros nunca viajam pela URL. A interface mostra um estado amigável em vez de lançar erro.
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
+
+O dashboard abre `/debts` com filtros validados `open`, `due_today` ou `overdue`. A ação de pagamento acrescenta apenas o modo de seleção e nunca transporta valor financeiro. O indicador de clientes devedores abre `/customers` com o filtro local `with_debt`; parâmetros desconhecidos retornam aos filtros padrão.
 
 ## Cabeçalhos e layouts
 
