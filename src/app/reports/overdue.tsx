@@ -1,5 +1,5 @@
-import { ReportPlaceholderScreen } from '@/features/reports/ReportPlaceholderScreen';
+import { ReportDetailScreen } from '@/features/reports/ReportDetailScreen';
 
 export default function OverdueReportRoute() {
-  return <ReportPlaceholderScreen title="Fiados atrasados" />;
+  return <ReportDetailScreen kind="overdue" />;
 }

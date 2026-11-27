@@ -44,7 +44,7 @@ export function listCivilDates(startCivilDate: string, endCivilDateExclusive: st
   return dates;
 }
 
-function getCivilRange(
+export function getCivilRange(
   startCivilDate: string,
   endCivilDateExclusive: string,
   timezone: string,

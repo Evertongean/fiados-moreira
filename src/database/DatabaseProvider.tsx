@@ -15,8 +15,10 @@ import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
 import { ReminderService } from '@/features/notifications/services/ReminderService';
+import { ReportExportService } from '@/features/reports/services/ReportExportService';
 import { VehicleService } from '@/features/vehicles/services/VehicleService';
 import { ExpoNotificationGateway } from '@/services/notifications/ExpoNotificationGateway';
+import { ExpoReportFileGateway } from '@/services/reports/ExpoReportFileGateway';
 import { ReactNativeWhatsAppGateway } from '@/services/whatsapp/ReactNativeWhatsAppGateway';
 
 import {
@@ -35,6 +37,7 @@ import { GlobalSearchRepository } from './repositories/global-search.repository'
 import { PaymentReversalRepository } from './repositories/payment-reversal.repository';
 import { PaymentRepository } from './repositories/payment.repository';
 import { ReminderRepository } from './repositories/reminder.repository';
+import { ReportRepository } from './repositories/report.repository';
 import { SettingsRepository } from './repositories/settings.repository';
 import { VehicleRepository } from './repositories/vehicle.repository';
 import { WorkspaceRepository } from './repositories/workspace.repository';
@@ -57,6 +60,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     reminders: ReminderRepository;
     settings: SettingsRepository;
     collections: CollectionRepository;
+    reports: ReportRepository;
   };
   services: {
     customers: CustomerService;
@@ -66,6 +70,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     reversals: PaymentReversalService;
     reminders: ReminderService;
     collections: CollectionService;
+    reportExport: ReportExportService;
   };
 }
 
@@ -123,6 +128,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         reminders: new ReminderRepository(executor),
         settings: settingsRepository,
         collections: collectionRepository,
+        reports: new ReportRepository(executor),
       },
       services: {
         customers: new CustomerService(executor),
@@ -132,6 +138,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         reversals: new PaymentReversalService(executor, reconcileFinancialChange),
         reminders: reminderService,
         collections: collectionService,
+        reportExport: new ReportExportService(new ExpoReportFileGateway()),
       },
     };
   }, [environment, status]);

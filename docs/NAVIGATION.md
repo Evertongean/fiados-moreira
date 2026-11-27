@@ -58,10 +58,10 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional             | Prompt 08                 |
 | Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional             | Prompt 08                 |
 | Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar | Prompt 15                 |
-| Relatórios            | `/reports`                | Entrada e estados indisponíveis       | Estrutural            | Prompt 14                 |
-| Valores a receber     | `/reports/receivables`    | Relatório futuro                      | Estrutural            | Prompt 14                 |
-| Valores recebidos     | `/reports/received`       | Relatório futuro                      | Estrutural            | Prompt 14                 |
-| Fiados atrasados      | `/reports/overdue`        | Relatório futuro                      | Estrutural            | Prompt 14                 |
+| Relatórios            | `/reports`                | Indicadores, gráficos, ranking e CSV  | Funcional             | Prompt 14                 |
+| Valores a receber     | `/reports/receivables`    | Saldos atuais filtráveis              | Funcional             | Prompt 14                 |
+| Valores recebidos     | `/reports/received`       | Pagamentos e estornos por período     | Funcional             | Prompt 14                 |
+| Fiados atrasados      | `/reports/overdue`        | Saldos atuais vencidos                | Funcional             | Prompt 14                 |
 | Notificações          | `/notifications`          | Central, leitura e acesso ao fiado    | Funcional             | Prompt 12                 |
 | Ajustes               | `/settings`               | Categorias de configuração            | Estrutural            | Prompt 21                 |
 | Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional             | Prompt 02/03              |

@@ -29,6 +29,8 @@ A revisão após adicionar React Hook Form, o resolver Zod e declarar `expo-asse
 
 A revisão após adicionar `expo-notifications` 58.1.10 também manteve 20 avisos moderados, nenhum alto ou crítico, nas mesmas cadeias de tooling. A permissão é solicitada apenas por ação contextual; o conteúdo do sistema oculta cliente, serviço e valores por padrão.
 
+A revisão de 2026-11-27 após adicionar `expo-file-system` 58.0.15 e `expo-sharing` 58.0.24 manteve os mesmos 20 avisos moderados, sem achados altos ou críticos e sem cadeia atribuível aos novos módulos. Arquivos de relatório ficam no cache, exigem confirmação antes do compartilhamento e são removidos após a folha nativa encerrar.
+
 Referências: [advisory do Minimatch](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249) e [advisory do Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4).
 
 ## Pendência de tooling

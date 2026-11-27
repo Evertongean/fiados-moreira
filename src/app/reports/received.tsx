@@ -1,5 +1,5 @@
-import { ReportPlaceholderScreen } from '@/features/reports/ReportPlaceholderScreen';
+import { ReportDetailScreen } from '@/features/reports/ReportDetailScreen';
 
 export default function ReceivedReportRoute() {
-  return <ReportPlaceholderScreen title="Valores recebidos" />;
+  return <ReportDetailScreen kind="received" />;
 }

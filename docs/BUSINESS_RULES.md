@@ -115,3 +115,11 @@ As seguintes ações são atômicas: pagamento + auditoria; estorno + auditoria;
 3. Abrir `wa.me` exige ação explícita. Isso não comprova envio nem entrega e o aplicativo nunca dispara mensagens automaticamente.
 4. Tentativas de abertura são registradas separadamente das movimentações financeiras e não alteram saldo, auditoria financeira ou vencimento.
 5. O histórico não persiste mensagem, telefone nem valor. Uma falha de integração não gera tentativa confirmada.
+
+## Relatórios financeiros
+
+1. Valores a receber, atrasos e ranking representam saldos atuais, excluem cancelados e consideram todos os pagamentos válidos e estornos conhecidos.
+2. Recebimentos por período distinguem bruto, estornos e líquido. Pagamento pertence ao período de `paidAt`; estorno pertence ao período de `reversedAt`, mesmo quando o pagamento original ocorreu antes.
+3. O período de movimentação não transforma o saldo atual em posição histórica. Um saldo retroativo só poderá ser apresentado quando todos os eventos necessários puderem ser reconstruídos.
+4. Relatórios de recebimento não representam faturamento total, receita contábil ou lucro da oficina.
+5. Exportar ou compartilhar é somente leitura, exige confirmação e não altera fiados, pagamentos, estornos ou auditoria.

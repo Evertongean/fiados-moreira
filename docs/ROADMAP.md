@@ -54,8 +54,11 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Pré-visualização, edição, cópia, abertura explícita por `wa.me` e histórico de tentativas.
   - [x] Telefones normalizados, isolamento por workspace e ausência de alteração financeira.
   - [ ] Validar abertura, fallback, teclado e acessibilidade em Android e iOS.
-- [ ] **Prompt 14 — Relatórios**
-  - [ ] Relatórios financeiros e filtros por período.
+- [ ] **Prompt 14 — Relatórios** (implementação concluída; aceite mobile pendente)
+  - [x] Central financeira, indicadores, evolução, métodos de pagamento e ranking de clientes.
+  - [x] Relatórios detalhados com filtros combináveis e navegação para os registros.
+  - [x] Exportação CSV protegida, compartilhamento explícito e limpeza do cache temporário.
+  - [ ] Validar responsividade, arquivos e folha de compartilhamento em Android e iOS.
 - [ ] **Prompt 15 — Comprovantes**
   - [ ] Geração e compartilhamento de comprovantes.
 - [ ] **Prompt 16 — Supabase**

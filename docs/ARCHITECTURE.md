@@ -203,3 +203,11 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - `CollectionRepository` agrega pagamentos válidos e estornos por workspace sem N+1. A tabela `collection_attempts` é separada de auditorias e movimentações financeiras e não contém mensagem, telefone ou valor.
 - Modelos ficam em `settings`, isolados por workspace. A mensagem é gerada offline e pode ser revisada ou copiada com Expo Clipboard.
 - A conclusão de `Linking.openURL` registra somente uma tentativa de abertura; envio e entrega não são inferidos.
+
+## Decisões do Prompt 14
+
+- `ReportRepository` produz saldos atuais e movimentações do período em duas consultas agregadas, parametrizadas e isoladas por workspace; componentes não executam SQL.
+- O saldo atual reutiliza a semântica do dashboard: exclui cancelados e subtrai somente pagamentos não estornados. Pagamentos entram no bruto por `paidAt`; estornos entram por `reversedAt` e podem ocorrer em outro período.
+- Períodos são limites civis convertidos para UTC pelo utilitário já usado no dashboard. A interface não apresenta posição atual como saldo histórico retroativo.
+- A evolução usa React Native SVG e agrupa períodos extensos em até 12 blocos preservando os totais. Nenhuma biblioteca de gráficos foi adicionada.
+- CSV é uma transformação pura protegida contra fórmulas. O adaptador Expo cria arquivo no cache, compartilha após confirmação e o remove mesmo em falha; consultas e exportações são somente leitura.

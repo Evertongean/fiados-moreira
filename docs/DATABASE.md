@@ -111,7 +111,7 @@ Saldo negativo é erro; não é mascarado com `Math.max`. Os estados financeiros
 
 ## Repositórios e serviços
 
-Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository`, `AuditRepository`, `CustomerHistoryRepository`, `DashboardRepository`, `GlobalSearchRepository` e `CollectionRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
+Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository`, `AuditRepository`, `CustomerHistoryRepository`, `DashboardRepository`, `GlobalSearchRepository`, `CollectionRepository` e `ReportRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
 
 Serviços financeiros:
 
@@ -119,7 +119,7 @@ Serviços financeiros:
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
-O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. `CustomerHistoryRepository` agrega o resumo atual e combina auditorias de fiados, pagamentos e estornos em uma linha do tempo filtrável e paginada, sem consultas por item. `DashboardRepository` consolida saldos, recebimentos por período civil, vencimentos e atividades recentes sem N+1. `GlobalSearchRepository` agrupa clientes, veículos, fiados e pagamentos, limita cada categoria e delega saldos e status aos repositórios financeiros existentes. `CollectionRepository` calcula saldos válidos em consultas agregadas e persiste tentativas separadas das movimentações financeiras. A migration `0002` adiciona apenas `collection_attempts` e seus índices.
+O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. `CustomerHistoryRepository` agrega o resumo atual e combina auditorias de fiados, pagamentos e estornos em uma linha do tempo filtrável e paginada, sem consultas por item. `DashboardRepository` consolida saldos, recebimentos por período civil, vencimentos e atividades recentes sem N+1. `GlobalSearchRepository` agrupa clientes, veículos, fiados e pagamentos, limita cada categoria e delega saldos e status aos repositórios financeiros existentes. `CollectionRepository` calcula saldos válidos em consultas agregadas e persiste tentativas separadas das movimentações financeiras. `ReportRepository` separa saldos atuais de eventos por período e reutiliza os mesmos limites civis do dashboard. A migration `0002` adiciona apenas `collection_attempts` e seus índices; o Prompt 14 não altera o schema.
 
 Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro. O módulo de veículos usa `VehicleService` para mutações auditadas e `VehicleRepository` para detalhes, lista por cliente, pesquisa e duplicidade de placa.
 
