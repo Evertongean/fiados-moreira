@@ -367,6 +367,15 @@ function CustomerHistoryContent({ customerId }: { customerId: string }) {
             <FinancialTimelineItem
               event={item}
               onPress={() => openEvent(item)}
+              onReceiptPress={
+                item.type === 'payment_registered' && item.paymentId
+                  ? () =>
+                      router.push({
+                        pathname: '/payments/[id]/receipt',
+                        params: { id: item.paymentId as string },
+                      })
+                  : undefined
+              }
               timezone={workspace.timezone}
             />
           )}

@@ -18,3 +18,14 @@ export interface PaymentDetails {
   reversalReason: string | null;
   reversedAt: string | null;
 }
+
+export interface PaymentReceiptDetails extends PaymentDetails {
+  workshopName: string;
+  originalDebtCents: number | null;
+  debtTotalAtPaymentCents: number | null;
+  totalPaidAtPaymentCents: number | null;
+  remainingAtPaymentCents: number | null;
+  vehicleBrand: string | null;
+  vehicleModel: string | null;
+  vehiclePlate: string | null;
+}

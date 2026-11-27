@@ -2,13 +2,13 @@
 
 ## Estado da implementação
 
-O Prompt 08 implementou o fluxo offline de pagamentos sobre o SQLite existente. É possível registrar valores parciais ou totais, quitar fiados, consultar detalhes e histórico e realizar um único estorno integral por pagamento. Saldos e situações de fiados, clientes e veículos são recalculados a partir dos registros confirmados.
+O Prompt 08 implementou o fluxo offline de pagamentos sobre o SQLite existente. É possível registrar valores parciais ou totais, quitar fiados, consultar detalhes e histórico e realizar um único estorno integral por pagamento. O Prompt 15 acrescentou pré-visualização, geração e compartilhamento de comprovantes PDF para pagamentos persistidos. Saldos e situações de fiados, clientes e veículos são recalculados a partir dos registros confirmados.
 
 ## Cadastro e interface
 
 O formulário `/debts/[id]/payment` usa React Hook Form, Zod e o `CurrencyInput` compartilhado. Ele apresenta saldo atual, métodos aceitos, data inicialmente atual, observações, ação **Pagar valor total** e prévia do saldo restante. Uma confirmação resume valor, método e saldo projetado antes da gravação.
 
-O perfil do cliente abre diretamente o único fiado com saldo ou apresenta uma seleção quando existem vários. Nos detalhes do fiado, o progresso e a linha do tempo unem pagamentos e estornos em ordem cronológica. `/payments/[id]` exibe valor, método, data, cliente, fiado, observações e situação.
+O perfil do cliente abre diretamente o único fiado com saldo ou apresenta uma seleção quando existem vários. Nos detalhes do fiado, o progresso e a linha do tempo unem pagamentos e estornos em ordem cronológica. `/payments/[id]` exibe valor, método, data, cliente, fiado, observações, situação e acesso ao comprovante. O histórico do fiado e a linha do tempo financeira do cliente também permitem reemitir o comprovante do pagamento correspondente.
 
 ## Regras e persistência
 
@@ -22,7 +22,7 @@ O perfil do cliente abre diretamente o único fiado com saldo ou apresenta uma s
 - estornos preservam pagamento e auditoria, retirando o valor do líquido pago;
 - consultas e mutações exigem `workspaceId` e respeitam as FKs existentes.
 
-Nenhuma migration ou dependência foi necessária. O schema do Prompt 04 já continha tabelas, constraints e índices para pagamentos, estornos e auditoria.
+Nenhuma migration foi necessária. O schema do Prompt 04 já continha tabelas, constraints e índices para pagamentos, estornos e auditoria. Novos pagamentos registram na auditoria o snapshot de total do fiado, total pago e saldo logo após a operação; isso permite apresentar o saldo histórico sem confundi-lo com o saldo atual.
 
 ## Validação e limites
 
@@ -30,4 +30,4 @@ A pesquisa global consulta pagamentos por cliente, método e descrição do fiad
 
 Os testes cobrem pagamentos parciais e totais, quitação, valores inválidos e excessivos, concorrência, idempotência, estorno único, rollback por falha de auditoria, isolamento por workspace, persistência e o cenário R$ 500,00 → R$ 200,00 → R$ 300,00 → estorno de R$ 300,00.
 
-Comprovantes PDF, integração bancária, processamento real de Pix, Supabase e sincronização permanecem fora do escopo. A validação manual em Android e iOS continua pendente.
+Integração bancária, processamento real de Pix, Supabase e sincronização permanecem fora do escopo. A geração e o compartilhamento nativos de comprovantes ainda precisam de validação manual em Android e iOS.

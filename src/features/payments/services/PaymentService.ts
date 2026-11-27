@@ -54,7 +54,10 @@ export class PaymentService {
       if (!debt) throw new AppDatabaseError('RECORD_NOT_FOUND', 'Fiado não encontrado.');
       if (debt.canceledAt) throw new AppDatabaseError('DEBT_CANCELED', 'O fiado está cancelado.');
       const summary = await debts.getFinancialSummary(workspaceId, debt.id);
-      calculateRemainingAfterPayment(summary, value.data.amountCents);
+      const remainingAtPaymentCents = calculateRemainingAfterPayment(
+        summary,
+        value.data.amountCents,
+      );
 
       const payment = await payments.insertValidated(workspaceId, value.data);
       await audit.record(workspaceId, {
@@ -62,7 +65,13 @@ export class PaymentService {
         entityId: payment.id,
         action: 'payment_registered',
         operationId: payment.operationId,
-        metadata: { debtId: payment.debtId, amountCents: payment.amountCents },
+        metadata: {
+          debtId: payment.debtId,
+          amountCents: payment.amountCents,
+          debtTotalAtPaymentCents: summary.originalCents,
+          totalPaidAtPaymentCents: summary.netPaidCents + payment.amountCents,
+          remainingAtPaymentCents,
+        },
       });
       return payment;
     });

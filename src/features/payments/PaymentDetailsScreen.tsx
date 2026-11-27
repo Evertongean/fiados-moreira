@@ -203,6 +203,17 @@ function PaymentDetailsContent({ paymentId }: { paymentId: string }) {
         </View>
       </Card>
 
+      <Button
+        accessibilityLabel="Visualizar comprovante deste pagamento"
+        fullWidth
+        icon={ReceiptText}
+        label="Visualizar comprovante"
+        onPress={() =>
+          router.push({ pathname: '/payments/[id]/receipt', params: { id: payment.id } })
+        }
+        variant="secondary"
+      />
+
       <Card variant="outlined">
         <View style={styles.info}>
           <SectionHeader title="Informações" />

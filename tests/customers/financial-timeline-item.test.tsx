@@ -36,4 +36,28 @@ describe('FinancialTimelineItem', () => {
     await user.press(screen.getByRole('button', { name: 'Abrir detalhes de alteração do fiado' }));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+
+  it('offers receipt reissuance only when the payment event provides the action', async () => {
+    const user = userEvent.setup();
+    const onReceiptPress = jest.fn();
+    await renderWithTheme(
+      <FinancialTimelineItem
+        event={{
+          ...event,
+          id: 'payment:event-1',
+          type: 'payment_registered',
+          paymentId: 'payment-1',
+          amountCents: 20_000,
+          previousAmountCents: null,
+          status: 'valid',
+        }}
+        onPress={jest.fn()}
+        onReceiptPress={onReceiptPress}
+        timezone="America/Fortaleza"
+      />,
+    );
+
+    await user.press(screen.getByRole('button', { name: 'Visualizar comprovante' }));
+    expect(onReceiptPress).toHaveBeenCalledTimes(1);
+  });
 });

@@ -13,11 +13,13 @@ import { CustomerService } from '@/features/customers/services/CustomerService';
 import { CollectionService } from '@/features/collections/services/CollectionService';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
+import { PaymentReceiptService } from '@/features/payments/services/PaymentReceiptService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
 import { ReminderService } from '@/features/notifications/services/ReminderService';
 import { ReportExportService } from '@/features/reports/services/ReportExportService';
 import { VehicleService } from '@/features/vehicles/services/VehicleService';
 import { ExpoNotificationGateway } from '@/services/notifications/ExpoNotificationGateway';
+import { ExpoPaymentReceiptPdfGateway } from '@/services/receipts/ExpoPaymentReceiptPdfGateway';
 import { ExpoReportFileGateway } from '@/services/reports/ExpoReportFileGateway';
 import { ReactNativeWhatsAppGateway } from '@/services/whatsapp/ReactNativeWhatsAppGateway';
 
@@ -68,6 +70,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     debts: DebtService;
     payments: PaymentService;
     reversals: PaymentReversalService;
+    paymentReceipts: PaymentReceiptService;
     reminders: ReminderService;
     collections: CollectionService;
     reportExport: ReportExportService;
@@ -136,6 +139,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         debts: new DebtService(executor, reconcileFinancialChange),
         payments: new PaymentService(executor, reconcileFinancialChange),
         reversals: new PaymentReversalService(executor, reconcileFinancialChange),
+        paymentReceipts: new PaymentReceiptService(new ExpoPaymentReceiptPdfGateway()),
         reminders: reminderService,
         collections: collectionService,
         reportExport: new ReportExportService(new ExpoReportFileGateway()),

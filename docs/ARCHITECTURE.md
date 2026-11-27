@@ -211,3 +211,11 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Períodos são limites civis convertidos para UTC pelo utilitário já usado no dashboard. A interface não apresenta posição atual como saldo histórico retroativo.
 - A evolução usa React Native SVG e agrupa períodos extensos em até 12 blocos preservando os totais. Nenhuma biblioteca de gráficos foi adicionada.
 - CSV é uma transformação pura protegida contra fórmulas. O adaptador Expo cria arquivo no cache, compartilha após confirmação e o remove mesmo em falha; consultas e exportações são somente leitura.
+
+## Decisões do Prompt 15
+
+- `PaymentRepository.findReceiptDetails` monta uma projeção única, parametrizada e isolada por workspace com pagamento, cliente, fiado, veículo, oficina, estorno e auditorias; não há consulta por item.
+- Novos pagamentos registram no mesmo evento de auditoria o total do fiado, o total pago e o saldo após a operação. Comprovantes antigos omitem essas linhas quando não existe snapshot íntegro, em vez de apresentar o saldo atual como histórico.
+- `PaymentReceiptService` transforma somente pagamentos persistidos em HTML escapado. O identificador `FM-<UUID do pagamento>` é determinístico e permanece igual em reemissões.
+- O adaptador Expo Print gera o PDF no cache local; Expo Sharing abre a folha nativa somente após ação do usuário e Expo FileSystem remove o arquivo temporário após o compartilhamento ou ao sair da tela.
+- A geração é somente leitura, funciona offline e não cria tabela ou migration. Compartilhamento depende dos aplicativos e recursos disponíveis no dispositivo.

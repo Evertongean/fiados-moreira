@@ -59,8 +59,11 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Relatórios detalhados com filtros combináveis e navegação para os registros.
   - [x] Exportação CSV protegida, compartilhamento explícito e limpeza do cache temporário.
   - [ ] Validar responsividade, arquivos e folha de compartilhamento em Android e iOS.
-- [ ] **Prompt 15 — Comprovantes**
-  - [ ] Geração e compartilhamento de comprovantes.
+- [ ] **Prompt 15 — Comprovantes** (implementação concluída; aceite mobile pendente)
+  - [x] Pré-visualização, geração offline e compartilhamento explícito de PDFs.
+  - [x] Reemissão estável, identificação de estornos e snapshots históricos para novos pagamentos.
+  - [x] Escape de HTML, isolamento por workspace e limpeza de arquivos temporários.
+  - [ ] Validar geração, visualização e compartilhamento em dispositivos Android e iOS.
 - [ ] **Prompt 16 — Supabase**
   - [ ] Projeto remoto, PostgreSQL, RLS e adaptador do cliente.
 - [ ] **Prompt 17 — Autenticação e biometria**

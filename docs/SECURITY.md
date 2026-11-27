@@ -31,6 +31,8 @@ A revisão após adicionar `expo-notifications` 58.1.10 também manteve 20 aviso
 
 A revisão de 2026-11-27 após adicionar `expo-file-system` 58.0.15 e `expo-sharing` 58.0.24 manteve os mesmos 20 avisos moderados, sem achados altos ou críticos e sem cadeia atribuível aos novos módulos. Arquivos de relatório ficam no cache, exigem confirmação antes do compartilhamento e são removidos após a folha nativa encerrar.
 
+A revisão de 2026-11-27 após adicionar `expo-print` 58.0.9 também manteve os mesmos 20 avisos moderados, sem achados altos ou críticos e sem cadeia atribuível ao novo módulo. O HTML do comprovante escapa dados persistidos, o PDF fica no cache privado e é removido após o compartilhamento ou ao sair da pré-visualização. A folha nativa só abre por ação explícita.
+
 Referências: [advisory do Minimatch](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249) e [advisory do Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4).
 
 ## Pendência de tooling

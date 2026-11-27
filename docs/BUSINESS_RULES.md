@@ -123,3 +123,11 @@ As seguintes ações são atômicas: pagamento + auditoria; estorno + auditoria;
 3. O período de movimentação não transforma o saldo atual em posição histórica. Um saldo retroativo só poderá ser apresentado quando todos os eventos necessários puderem ser reconstruídos.
 4. Relatórios de recebimento não representam faturamento total, receita contábil ou lucro da oficina.
 5. Exportar ou compartilhar é somente leitura, exige confirmação e não altera fiados, pagamentos, estornos ou auditoria.
+
+## Comprovantes de pagamento
+
+1. Um comprovante só pode ser gerado para um pagamento persistido no mesmo workspace; seu identificador deriva do UUID imutável do pagamento e é preservado nas reemissões.
+2. A geração e o compartilhamento são operações somente leitura e nunca alteram saldo, pagamento, estorno, fiado ou auditoria.
+3. Pagamentos estornados continuam consultáveis, mas o comprovante deve identificá-los claramente como estornados.
+4. Total pago e saldo após a operação só podem ser apresentados como históricos quando houver snapshot íntegro gravado no momento do pagamento. Na ausência desse dado, as linhas são omitidas com aviso explícito.
+5. O documento é um comprovante de pagamento, não uma nota fiscal. Dados opcionais ausentes são omitidos e todo compartilhamento exige ação explícita do usuário.

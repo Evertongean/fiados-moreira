@@ -57,7 +57,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Preparar cobrança     | `/collections/compose`    | Revisão, cópia e abertura do WhatsApp | Funcional             | Prompt 13                 |
 | Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional             | Prompt 08                 |
 | Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional             | Prompt 08                 |
-| Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar | Prompt 15                 |
+| Comprovante           | `/payments/[id]/receipt`  | Prévia, PDF e compartilhamento        | Funcional             | Prompt 15                 |
 | Relatórios            | `/reports`                | Indicadores, gráficos, ranking e CSV  | Funcional             | Prompt 14                 |
 | Valores a receber     | `/reports/receivables`    | Saldos atuais filtráveis              | Funcional             | Prompt 14                 |
 | Valores recebidos     | `/reports/received`       | Pagamentos e estornos por período     | Funcional             | Prompt 14                 |

@@ -357,18 +357,36 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
         {paymentTimeline.length ? (
           <Card variant="outlined">
             {paymentTimeline.map((event) => (
-              <PaymentListItem
-                accessibilityLabel={`Abrir ${event.kind === 'reversal' ? 'estorno' : 'pagamento'} de ${formatBRLCents(event.amountCents)}`}
-                amountCents={event.amountCents}
-                dateLabel={formatPaymentInstant(event.eventAt, workspace.timezone)}
-                description={event.description}
-                key={event.key}
-                kind={event.kind}
-                method={event.method}
-                onPress={() =>
-                  router.push({ pathname: '/payments/[id]', params: { id: event.paymentId } })
-                }
-              />
+              <View key={event.key} style={styles.paymentEvent}>
+                <PaymentListItem
+                  accessibilityLabel={`Abrir ${event.kind === 'reversal' ? 'estorno' : 'pagamento'} de ${formatBRLCents(event.amountCents)}`}
+                  amountCents={event.amountCents}
+                  dateLabel={formatPaymentInstant(event.eventAt, workspace.timezone)}
+                  description={event.description}
+                  kind={event.kind}
+                  method={event.method}
+                  onPress={() =>
+                    router.push({ pathname: '/payments/[id]', params: { id: event.paymentId } })
+                  }
+                />
+                {event.kind === 'payment' ? (
+                  <View style={styles.paymentAction}>
+                    <Button
+                      accessibilityLabel={`Visualizar comprovante do pagamento de ${formatBRLCents(event.amountCents)}`}
+                      icon={ReceiptText}
+                      label="Comprovante"
+                      onPress={() =>
+                        router.push({
+                          pathname: '/payments/[id]/receipt',
+                          params: { id: event.paymentId },
+                        })
+                      }
+                      size="sm"
+                      variant="ghost"
+                    />
+                  </View>
+                ) : null}
+              </View>
             ))}
           </Card>
         ) : (
@@ -492,4 +510,6 @@ const styles = StyleSheet.create({
   dateNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   progressTrack: { height: 10, overflow: 'hidden', borderRadius: 999 },
   progressFill: { height: '100%', borderRadius: 999 },
+  paymentEvent: { paddingBottom: 6 },
+  paymentAction: { alignItems: 'flex-start' },
 });

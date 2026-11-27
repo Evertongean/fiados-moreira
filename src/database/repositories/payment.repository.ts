@@ -2,12 +2,31 @@ import { mapDatabaseError } from '@/database/errors/DatabaseError';
 import type { PaymentRow } from '@/database/schema';
 import type { SqlExecutor } from '@/database/types/executor';
 import type { RegisterPaymentInput } from '@/features/payments/domain/paymentSchemas';
-import type { PaymentDetails } from '@/features/payments/domain/paymentTypes';
+import type {
+  PaymentDetails,
+  PaymentReceiptDetails,
+} from '@/features/payments/domain/paymentTypes';
 import { createUuid } from '@/utils/uuid';
 
 const SELECT = `select id, workspace_id as workspaceId, debt_id as debtId,
   operation_id as operationId, amount_cents as amountCents, payment_method as paymentMethod,
   paid_at as paidAt, notes, created_at as createdAt from payments`;
+
+interface PaymentReceiptRow extends PaymentDetails {
+  workshopName: string;
+  paymentAuditMetadata: string | null;
+  debtCreateMetadata: string | null;
+  vehicleBrand: string | null;
+  vehicleModel: string | null;
+  vehiclePlate: string | null;
+}
+
+interface PaymentReceiptAuditMetadata {
+  debtTotalAtPaymentCents?: unknown;
+  totalPaidAtPaymentCents?: unknown;
+  remainingAtPaymentCents?: unknown;
+  totalCents?: unknown;
+}
 
 export class PaymentRepository {
   constructor(private readonly executor: SqlExecutor) {}
@@ -43,6 +62,75 @@ export class PaymentRepository {
        where p.workspace_id = ? and p.id = ?`,
       [workspaceId, id],
     );
+  }
+
+  async findReceiptDetails(workspaceId: string, id: string): Promise<PaymentReceiptDetails | null> {
+    const row = await this.executor.get<PaymentReceiptRow>(
+      `select p.id, p.workspace_id as workspaceId, p.debt_id as debtId,
+       p.operation_id as operationId, p.amount_cents as amountCents,
+       p.payment_method as paymentMethod, p.paid_at as paidAt, p.notes,
+       p.created_at as createdAt, d.description as debtDescription,
+       d.canceled_at as debtCanceledAt, d.customer_id as customerId,
+       c.name as customerName, w.name as workshopName,
+       v.brand as vehicleBrand, v.model as vehicleModel,
+       v.plate as vehiclePlate, r.id as reversalId, r.reason as reversalReason,
+       r.reversed_at as reversedAt, pa.metadata_json as paymentAuditMetadata,
+       da.metadata_json as debtCreateMetadata
+       from payments p
+       inner join workspaces w on w.id = p.workspace_id
+       inner join debts d on d.workspace_id = p.workspace_id and d.id = p.debt_id
+       inner join customers c on c.workspace_id = d.workspace_id and c.id = d.customer_id
+       left join vehicles v on v.workspace_id = d.workspace_id and v.id = d.vehicle_id
+       left join payment_reversals r
+         on r.workspace_id = p.workspace_id and r.payment_id = p.id
+       left join audit_logs pa
+         on pa.workspace_id = p.workspace_id and pa.entity_type = 'payment'
+         and pa.entity_id = p.id and pa.action = 'payment_registered'
+       left join audit_logs da
+         on da.workspace_id = d.workspace_id and da.entity_type = 'debt'
+         and da.entity_id = d.id and da.action = 'create'
+       where p.workspace_id = ? and p.id = ?`,
+      [workspaceId, id],
+    );
+    if (!row) return null;
+
+    const paymentAudit = parseReceiptAudit(row.paymentAuditMetadata);
+    const debtCreateAudit = parseReceiptAudit(row.debtCreateMetadata);
+    const debtTotalAtPaymentCents = readSafeCents(paymentAudit?.debtTotalAtPaymentCents, false);
+    const totalPaidAtPaymentCents = readSafeCents(paymentAudit?.totalPaidAtPaymentCents, true);
+    const remainingAtPaymentCents = readSafeCents(paymentAudit?.remainingAtPaymentCents, true);
+    const historicalSnapshotValid =
+      debtTotalAtPaymentCents !== null &&
+      totalPaidAtPaymentCents !== null &&
+      remainingAtPaymentCents !== null &&
+      totalPaidAtPaymentCents + remainingAtPaymentCents === debtTotalAtPaymentCents;
+
+    return {
+      id: row.id,
+      workspaceId: row.workspaceId,
+      debtId: row.debtId,
+      operationId: row.operationId,
+      amountCents: row.amountCents,
+      paymentMethod: row.paymentMethod,
+      paidAt: row.paidAt,
+      notes: row.notes,
+      createdAt: row.createdAt,
+      debtDescription: row.debtDescription,
+      debtCanceledAt: row.debtCanceledAt,
+      customerId: row.customerId,
+      customerName: row.customerName,
+      reversalId: row.reversalId,
+      reversalReason: row.reversalReason,
+      reversedAt: row.reversedAt,
+      workshopName: row.workshopName,
+      originalDebtCents: readSafeCents(debtCreateAudit?.totalCents, false),
+      debtTotalAtPaymentCents: historicalSnapshotValid ? debtTotalAtPaymentCents : null,
+      totalPaidAtPaymentCents: historicalSnapshotValid ? totalPaidAtPaymentCents : null,
+      remainingAtPaymentCents: historicalSnapshotValid ? remainingAtPaymentCents : null,
+      vehicleBrand: row.vehicleBrand,
+      vehicleModel: row.vehicleModel,
+      vehiclePlate: row.vehiclePlate,
+    };
   }
 
   listByDebt(workspaceId: string, debtId: string): Promise<PaymentRow[]> {
@@ -85,4 +173,20 @@ export class PaymentRepository {
       throw mapDatabaseError(error);
     }
   }
+}
+
+function parseReceiptAudit(value: string | null): PaymentReceiptAuditMetadata | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === 'object' ? (parsed as PaymentReceiptAuditMetadata) : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSafeCents(value: unknown, allowZero: boolean): number | null {
+  return Number.isSafeInteger(value) && (value as number) >= (allowZero ? 0 : 1)
+    ? (value as number)
+    : null;
 }

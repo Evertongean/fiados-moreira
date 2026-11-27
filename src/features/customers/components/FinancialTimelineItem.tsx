@@ -8,7 +8,7 @@ import {
 } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Badge, Card } from '@/components/ui';
+import { AppText, Badge, Button, Card } from '@/components/ui';
 import type {
   FinancialHistoryEvent,
   FinancialHistoryEventType,
@@ -43,9 +43,15 @@ export interface FinancialTimelineItemProps {
   event: FinancialHistoryEvent;
   timezone: string;
   onPress: () => void;
+  onReceiptPress?: () => void;
 }
 
-export function FinancialTimelineItem({ event, timezone, onPress }: FinancialTimelineItemProps) {
+export function FinancialTimelineItem({
+  event,
+  timezone,
+  onPress,
+  onReceiptPress,
+}: FinancialTimelineItemProps) {
   const { tokens } = useTheme();
   const presentation = EVENT_PRESENTATION[event.type];
   const Icon = presentation.icon;
@@ -62,75 +68,91 @@ export function FinancialTimelineItem({ event, timezone, onPress }: FinancialTim
     event.previousAmountCents !== event.amountCents;
 
   return (
-    <Pressable
-      accessibilityLabel={`Abrir detalhes de ${FINANCIAL_HISTORY_TYPE_LABELS[event.type].toLocaleLowerCase('pt-BR')}`}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => ({ opacity: pressed ? 0.76 : 1 })}
-    >
-      <Card variant="outlined">
-        <View style={styles.row}>
-          <View
-            style={[
-              styles.icon,
-              { backgroundColor: `${color}18`, borderRadius: tokens.radius.full },
-            ]}
-          >
-            <Icon color={color} size={22} />
-          </View>
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <AppText weight="semibold">{FINANCIAL_HISTORY_TYPE_LABELS[event.type]}</AppText>
-              <Badge
-                label={STATUS_LABELS[event.status]}
-                variant={
-                  event.status === 'valid'
-                    ? 'success'
-                    : event.status === 'reversed'
-                      ? 'warning'
-                      : event.status === 'canceled'
-                        ? 'destructive'
-                        : 'outline'
-                }
-              />
+    <View style={styles.container}>
+      <Pressable
+        accessibilityLabel={`Abrir detalhes de ${FINANCIAL_HISTORY_TYPE_LABELS[event.type].toLocaleLowerCase('pt-BR')}`}
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => ({ opacity: pressed ? 0.76 : 1 })}
+      >
+        <Card variant="outlined">
+          <View style={styles.row}>
+            <View
+              style={[
+                styles.icon,
+                { backgroundColor: `${color}18`, borderRadius: tokens.radius.full },
+              ]}
+            >
+              <Icon color={color} size={22} />
             </View>
-            <AppText color="textSecondary" variant="bodySmall">
-              {event.debtDescription}
-            </AppText>
-            {financialChange ? (
-              <AppText color="info" variant="caption">
-                {formatBRLCents(event.previousAmountCents as number)} →{' '}
-                {formatBRLCents(event.amountCents as number)}
+            <View style={styles.content}>
+              <View style={styles.header}>
+                <AppText weight="semibold">{FINANCIAL_HISTORY_TYPE_LABELS[event.type]}</AppText>
+                <Badge
+                  label={STATUS_LABELS[event.status]}
+                  variant={
+                    event.status === 'valid'
+                      ? 'success'
+                      : event.status === 'reversed'
+                        ? 'warning'
+                        : event.status === 'canceled'
+                          ? 'destructive'
+                          : 'outline'
+                  }
+                />
+              </View>
+              <AppText color="textSecondary" variant="bodySmall">
+                {event.debtDescription}
               </AppText>
-            ) : event.amountCents !== null ? (
-              <AppText variant="label">{formatBRLCents(event.amountCents)}</AppText>
-            ) : null}
-            {vehicle ? (
-              <AppText color="textMuted" variant="caption">
-                {vehicle}
-              </AppText>
-            ) : null}
-            {event.note ? (
-              <AppText color="textMuted" numberOfLines={2} variant="caption">
-                {event.note}
-              </AppText>
-            ) : null}
-            <View style={styles.footer}>
-              <AppText color="textMuted" variant="caption">
-                {formatPaymentInstant(event.occurredAt, timezone)}
-              </AppText>
-              <AppText color="textMuted" variant="caption">
-                Fiado {event.debtId.slice(0, 8)}
-              </AppText>
+              {financialChange ? (
+                <AppText color="info" variant="caption">
+                  {formatBRLCents(event.previousAmountCents as number)} →{' '}
+                  {formatBRLCents(event.amountCents as number)}
+                </AppText>
+              ) : event.amountCents !== null ? (
+                <AppText variant="label">{formatBRLCents(event.amountCents)}</AppText>
+              ) : null}
+              {vehicle ? (
+                <AppText color="textMuted" variant="caption">
+                  {vehicle}
+                </AppText>
+              ) : null}
+              {event.note ? (
+                <AppText color="textMuted" numberOfLines={2} variant="caption">
+                  {event.note}
+                </AppText>
+              ) : null}
+              <View style={styles.footer}>
+                <AppText color="textMuted" variant="caption">
+                  {formatPaymentInstant(event.occurredAt, timezone)}
+                </AppText>
+                <AppText color="textMuted" variant="caption">
+                  Fiado {event.debtId.slice(0, 8)}
+                </AppText>
+              </View>
             </View>
           </View>
+        </Card>
+      </Pressable>
+      {onReceiptPress ? (
+        <View style={styles.receiptAction}>
+          <Button
+            accessibilityLabel="Visualizar comprovante"
+            icon={ReceiptText}
+            label="Visualizar comprovante"
+            onPress={onReceiptPress}
+            size="sm"
+            variant="ghost"
+          />
         </View>
-      </Card>
-    </Pressable>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { gap: 2 },
+  receiptAction: { alignItems: 'flex-start' },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   icon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   content: { flex: 1, gap: 5 },
