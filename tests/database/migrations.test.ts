@@ -24,6 +24,7 @@ describe('SQLite migrations and initialization', () => {
         'settings',
         'sync_queue',
         'audit_logs',
+        'collection_attempts',
       ]),
     );
     expect(
@@ -38,6 +39,7 @@ describe('SQLite migrations and initialization', () => {
         'payment_reversals_workspace_payment_unique',
         'debts_workspace_due_date_idx',
         'reminders_workspace_debt_type_scheduled_unique',
+        'collection_attempts_workspace_customer_attempted_idx',
       ]),
     );
     expect(

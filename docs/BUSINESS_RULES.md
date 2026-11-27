@@ -107,3 +107,11 @@ As seguintes ações são atômicas: pagamento + auditoria; estorno + auditoria;
 3. O aplicativo não usa chave administrativa do Supabase.
 4. Mensagens de WhatsApp e comprovantes só são compartilhados após ação explícita do usuário e mostram apenas o necessário.
 5. Biometria protege acesso local, mas não substitui autenticação, autorização nem regras no servidor.
+
+## Cobranças pelo WhatsApp
+
+1. A mensagem só pode ser preparada para saldo positivo de fiado não cancelado; o saldo é revalidado antes da abertura do link.
+2. A cobrança consolidada soma apenas fiados elegíveis do mesmo cliente e workspace, considerando pagamentos válidos e estornos.
+3. Abrir `wa.me` exige ação explícita. Isso não comprova envio nem entrega e o aplicativo nunca dispara mensagens automaticamente.
+4. Tentativas de abertura são registradas separadamente das movimentações financeiras e não alteram saldo, auditoria financeira ou vencimento.
+5. O histórico não persiste mensagem, telefone nem valor. Uma falha de integração não gera tentativa confirmada.

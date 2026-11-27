@@ -4,6 +4,7 @@ import {
   Archive,
   Car,
   History,
+  MessageCircle,
   Pencil,
   ReceiptText,
   RotateCcw,
@@ -31,11 +32,15 @@ import {
 } from '@/components/ui';
 import { CustomerFinancialSummary } from '@/features/customers/components/CustomerFinancialSummary';
 import type { CustomerHistorySummary } from '@/features/customers/domain/customerTypes';
+import { COLLECTION_TEMPLATE_LABELS } from '@/features/collections/domain/collectionMessages';
+import type { CollectionAttempt } from '@/features/collections/domain/collectionTypes';
 import { DebtListItem } from '@/features/debts/components/DebtListItem';
 import type { DebtOverview } from '@/features/debts/domain/debtTypes';
+import { formatPaymentInstant } from '@/features/payments/domain/paymentUtils';
 import { VehicleListItem } from '@/features/vehicles/components/VehicleListItem';
 import { vehicleMatchesQuery } from '@/features/vehicles/domain/vehicleUtils';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useTheme } from '@/hooks/useTheme';
 import { getCivilDate } from '@/utils/date';
 import { formatBrazilianPhone } from '@/utils/phone';
 import { getRouteId } from '@/utils/routes';
@@ -82,11 +87,13 @@ export function CustomerDetailsScreen() {
 function CustomerDetailsContent({ customerId }: { customerId: string }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { tokens } = useTheme();
   const { workspace, repositories, services } = useDatabase();
   const [customer, setCustomer] = useState<CustomerRow | null>(null);
   const [summary, setSummary] = useState<CustomerHistorySummary | null>(null);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [debts, setDebts] = useState<DebtOverview[]>([]);
+  const [collectionAttempts, setCollectionAttempts] = useState<CollectionAttempt[]>([]);
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -104,7 +111,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
         setStatus('missing');
         return;
       }
-      const [financial, customerVehicles, customerDebts] = await Promise.all([
+      const [financial, customerVehicles, customerDebts, attempts] = await Promise.all([
         repositories.customerHistory.getSummary(
           workspace.id,
           customerId,
@@ -115,12 +122,14 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
           customerId,
           timezone: workspace.timezone,
         }),
+        repositories.collections.listAttempts(workspace.id, customerId),
       ]);
       if (requestVersion.current !== version) return;
       setCustomer(record);
       setSummary(financial);
       setVehicles(customerVehicles);
       setDebts(customerDebts);
+      setCollectionAttempts(attempts);
       setStatus('ready');
     } catch {
       if (requestVersion.current === version) setStatus('error');
@@ -129,6 +138,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
     customerId,
     repositories.customers,
     repositories.customerHistory,
+    repositories.collections,
     repositories.debts,
     repositories.vehicles,
     workspace.id,
@@ -317,6 +327,21 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             onPress={requestPayment}
           />
           <Button
+            disabled={!payableDebts.length}
+            fullWidth
+            icon={MessageCircle}
+            label={
+              payableDebts.length ? 'Cobrar saldo total pelo WhatsApp' : 'Nenhum saldo para cobrar'
+            }
+            onPress={() =>
+              router.push({
+                pathname: '/collections/compose',
+                params: { scope: 'customer', id: customer.id },
+              } as never)
+            }
+            variant="outline"
+          />
+          <Button
             fullWidth
             icon={History}
             label="Consultar histórico"
@@ -345,6 +370,43 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
             </View>
           </Card>
         ) : null}
+      </View>
+
+      <View style={styles.section}>
+        <SectionHeader
+          description={
+            collectionAttempts.length
+              ? `Última tentativa em ${formatPaymentInstant(collectionAttempts[0]?.attemptedAt ?? '', workspace.timezone)}`
+              : 'Abrir o WhatsApp registra uma tentativa, não um envio.'
+          }
+          title="Tentativas de cobrança"
+        />
+        {collectionAttempts.length ? (
+          <Card variant="outlined">
+            <View style={styles.collectionHistory}>
+              {collectionAttempts.map((attempt) => (
+                <View key={attempt.id} style={styles.collectionAttempt}>
+                  <MessageCircle color={tokens.colors.primary} size={18} />
+                  <View style={styles.collectionAttemptCopy}>
+                    <AppText variant="bodySmall" weight="semibold">
+                      {COLLECTION_TEMPLATE_LABELS[attempt.templateType]}
+                    </AppText>
+                    <AppText color="textMuted" variant="caption">
+                      {attempt.debtDescription ?? 'Saldo total do cliente'} ·{' '}
+                      {formatPaymentInstant(attempt.attemptedAt, workspace.timezone)}
+                    </AppText>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </Card>
+        ) : (
+          <EmptyState
+            description="As tentativas feitas por este aplicativo aparecerão aqui."
+            icon={MessageCircle}
+            title="Nenhuma tentativa registrada"
+          />
+        )}
       </View>
 
       <View style={styles.section}>
@@ -503,4 +565,7 @@ const styles = StyleSheet.create({
   paymentSelection: { gap: 10 },
   vehicleList: { gap: 10 },
   debtList: { gap: 10 },
+  collectionHistory: { gap: 12 },
+  collectionAttempt: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  collectionAttemptCopy: { flex: 1, gap: 2 },
 });

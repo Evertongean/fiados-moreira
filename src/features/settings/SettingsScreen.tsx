@@ -5,6 +5,7 @@ import {
   Fingerprint,
   Info,
   LockKeyhole,
+  MessageCircle,
   Palette,
   RefreshCw,
 } from 'lucide-react-native';
@@ -40,6 +41,12 @@ export function SettingsScreen() {
           onPress={() => router.push('/settings/notifications')}
           title="Notificações"
           description="Lembretes e avisos"
+        />
+        <SettingsListItem
+          icon={MessageCircle}
+          onPress={() => router.push('/settings/collections' as never)}
+          title="Mensagens de cobrança"
+          description="Modelos para WhatsApp"
         />
       </SettingsSection>
       <SettingsSection title="Segurança">

@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 
 import { auditLogs } from './audit-logs';
+import { collectionAttempts } from './collection-attempts';
 import { customers } from './customers';
 import { debts } from './debts';
 import { paymentReversals } from './payment-reversals';
@@ -21,12 +22,14 @@ export const workspaceRelations = relations(workspaces, ({ many }) => ({
   settings: many(settings),
   syncQueue: many(syncQueue),
   auditLogs: many(auditLogs),
+  collectionAttempts: many(collectionAttempts),
 }));
 
 export const customerRelations = relations(customers, ({ one, many }) => ({
   workspace: one(workspaces, { fields: [customers.workspaceId], references: [workspaces.id] }),
   vehicles: many(vehicles),
   debts: many(debts),
+  collectionAttempts: many(collectionAttempts),
 }));
 
 export const vehicleRelations = relations(vehicles, ({ one, many }) => ({
@@ -41,6 +44,7 @@ export const debtRelations = relations(debts, ({ one, many }) => ({
   vehicle: one(vehicles, { fields: [debts.vehicleId], references: [vehicles.id] }),
   payments: many(payments),
   reminders: many(reminders),
+  collectionAttempts: many(collectionAttempts),
 }));
 
 export const paymentRelations = relations(payments, ({ one }) => ({
@@ -58,4 +62,16 @@ export const reversalRelations = relations(paymentReversals, ({ one }) => ({
 
 export const reminderRelations = relations(reminders, ({ one }) => ({
   debt: one(debts, { fields: [reminders.debtId], references: [debts.id] }),
+}));
+
+export const collectionAttemptRelations = relations(collectionAttempts, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [collectionAttempts.workspaceId],
+    references: [workspaces.id],
+  }),
+  customer: one(customers, {
+    fields: [collectionAttempts.customerId],
+    references: [customers.id],
+  }),
+  debt: one(debts, { fields: [collectionAttempts.debtId], references: [debts.id] }),
 }));

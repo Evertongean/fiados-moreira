@@ -59,32 +59,36 @@ erDiagram
   WORKSPACES ||--o{ PAYMENT_REVERSALS : owns
   WORKSPACES ||--o{ REMINDERS : owns
   WORKSPACES ||--o{ SETTINGS : owns
+  WORKSPACES ||--o{ COLLECTION_ATTEMPTS : owns
   WORKSPACES ||--o{ SYNC_QUEUE : owns
   WORKSPACES ||--o{ AUDIT_LOGS : owns
   CUSTOMERS ||--o{ VEHICLES : has
   CUSTOMERS ||--o{ DEBTS : owes
+  CUSTOMERS ||--o{ COLLECTION_ATTEMPTS : has
   VEHICLES o|--o{ DEBTS : relates
   DEBTS ||--o{ PAYMENTS : receives
   PAYMENTS ||--o| PAYMENT_REVERSALS : may_have
   DEBTS ||--o{ REMINDERS : schedules
+  DEBTS o|--o{ COLLECTION_ATTEMPTS : references
 ```
 
 ## Dicionário de dados
 
 Todos os nomes físicos usam `snake_case`; propriedades TypeScript usam `camelCase`. UUIDs são `TEXT`, valores financeiros são `INTEGER`, instantes são ISO 8601 UTC em `TEXT` e datas civis são `YYYY-MM-DD`.
 
-| Tabela              | Campos principais                                                                   | Integridade e índices relevantes                                                                                               |
-| ------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `workspaces`        | `id`, `name`, `timezone`, `currency`, timestamps                                    | PK UUID; workspace inicial idempotente (`Oficina Moreira`, `BRL`, `America/Fortaleza`)                                         |
-| `customers`         | workspace, nome, telefones, endereço, notas, timestamps de arquivo/exclusão lógica  | FK restritiva; únicos auxiliares `(workspace_id,id)`; índices por nome, telefone e arquivamento                                |
-| `vehicles`          | workspace, cliente, tipo, marca, modelo, ano, placa, cor, notas                     | FK composta workspace/cliente; tipo e ano com `CHECK`; índices por cliente e placa                                             |
-| `debts`             | workspace, cliente, veículo opcional, descrição, `total_cents`, datas, cancelamento | FKs compostas validam workspace e dono do veículo; total positivo/limitado; índices por cliente, datas, cancelamento e veículo |
-| `payments`          | workspace, fiado, `operation_id`, `amount_cents`, método, `paid_at`, notas          | FK composta; operação única por workspace; valor/método com `CHECK`; índices por fiado e período                               |
-| `payment_reversals` | workspace, pagamento, `operation_id`, motivo, `reversed_at`                         | um estorno por pagamento; operação única; FK restritiva                                                                        |
-| `reminders`         | workspace, fiado, tipo, agendamento, estado, ID nativo, entrega e leitura           | enums por `CHECK`; índice de consulta e unicidade workspace/fiado/tipo/horário para impedir duplicidade                        |
-| `settings`          | workspace, chave, JSON, atualização                                                 | PK composta `(workspace_id,key)`; não armazena segredos                                                                        |
-| `sync_queue`        | workspace, entidade, operação, estado, tentativas e erro sanitizado                 | estrutura futura; `CHECK` de enum/tentativas e índice de processamento                                                         |
-| `audit_logs`        | workspace, entidade, ação, operação, metadados minimizados e instante               | operação única quando informada; append-only pelos fluxos normais; índices por entidade e data                                 |
+| Tabela                | Campos principais                                                                   | Integridade e índices relevantes                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `workspaces`          | `id`, `name`, `timezone`, `currency`, timestamps                                    | PK UUID; workspace inicial idempotente (`Oficina Moreira`, `BRL`, `America/Fortaleza`)                                         |
+| `customers`           | workspace, nome, telefones, endereço, notas, timestamps de arquivo/exclusão lógica  | FK restritiva; únicos auxiliares `(workspace_id,id)`; índices por nome, telefone e arquivamento                                |
+| `vehicles`            | workspace, cliente, tipo, marca, modelo, ano, placa, cor, notas                     | FK composta workspace/cliente; tipo e ano com `CHECK`; índices por cliente e placa                                             |
+| `debts`               | workspace, cliente, veículo opcional, descrição, `total_cents`, datas, cancelamento | FKs compostas validam workspace e dono do veículo; total positivo/limitado; índices por cliente, datas, cancelamento e veículo |
+| `payments`            | workspace, fiado, `operation_id`, `amount_cents`, método, `paid_at`, notas          | FK composta; operação única por workspace; valor/método com `CHECK`; índices por fiado e período                               |
+| `payment_reversals`   | workspace, pagamento, `operation_id`, motivo, `reversed_at`                         | um estorno por pagamento; operação única; FK restritiva                                                                        |
+| `reminders`           | workspace, fiado, tipo, agendamento, estado, ID nativo, entrega e leitura           | enums por `CHECK`; índice de consulta e unicidade workspace/fiado/tipo/horário para impedir duplicidade                        |
+| `settings`            | workspace, chave, JSON, atualização                                                 | PK composta `(workspace_id,key)`; não armazena segredos                                                                        |
+| `collection_attempts` | workspace, cliente, fiado opcional, modelo e instante                               | FKs compostas isolam workspace; índices por cliente/fiado e instante; não armazena mensagem, telefone ou valor                 |
+| `sync_queue`          | workspace, entidade, operação, estado, tentativas e erro sanitizado                 | estrutura futura; `CHECK` de enum/tentativas e índice de processamento                                                         |
+| `audit_logs`          | workspace, entidade, ação, operação, metadados minimizados e instante               | operação única quando informada; append-only pelos fluxos normais; índices por entidade e data                                 |
 
 Não há `ON DELETE CASCADE` em relacionamentos financeiros. As FKs compostas impedem associação entre oficinas e, em fiados, associação a veículo de outro cliente.
 
@@ -107,7 +111,7 @@ Saldo negativo é erro; não é mascarado com `Math.max`. Os estados financeiros
 
 ## Repositórios e serviços
 
-Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository`, `AuditRepository`, `CustomerHistoryRepository`, `DashboardRepository` e `GlobalSearchRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
+Repositórios disponíveis: `WorkspaceRepository`, `CustomerRepository`, `VehicleRepository`, `DebtRepository`, `PaymentRepository`, `PaymentReversalRepository`, `AuditRepository`, `CustomerHistoryRepository`, `DashboardRepository`, `GlobalSearchRepository` e `CollectionRepository`. Todos recebem um `SqlExecutor`, usam parâmetros e exigem `workspaceId` nas consultas de domínio.
 
 Serviços financeiros:
 
@@ -115,7 +119,7 @@ Serviços financeiros:
 - `PaymentService`: registra pagamento sob bloqueio transacional, rejeita cancelado/quitado/excesso e grava auditoria;
 - `PaymentReversalService`: cria estorno integral único, preserva o pagamento e grava auditoria.
 
-O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. `CustomerHistoryRepository` agrega o resumo atual e combina auditorias de fiados, pagamentos e estornos em uma linha do tempo filtrável e paginada, sem consultas por item. `DashboardRepository` consolida saldos, recebimentos por período civil, vencimentos e atividades recentes sem N+1. `GlobalSearchRepository` agrupa clientes, veículos, fiados e pagamentos, limita cada categoria e delega saldos e status aos repositórios financeiros existentes. Nenhuma migration foi necessária nos Prompts 08 a 11.
+O módulo visual de pagamentos consome esses serviços sem escrever diretamente nos repositórios. `PaymentRepository.findDetails` consulta pagamento, fiado, cliente e eventual estorno em uma projeção isolada por workspace. `CustomerHistoryRepository` agrega o resumo atual e combina auditorias de fiados, pagamentos e estornos em uma linha do tempo filtrável e paginada, sem consultas por item. `DashboardRepository` consolida saldos, recebimentos por período civil, vencimentos e atividades recentes sem N+1. `GlobalSearchRepository` agrupa clientes, veículos, fiados e pagamentos, limita cada categoria e delega saldos e status aos repositórios financeiros existentes. `CollectionRepository` calcula saldos válidos em consultas agregadas e persiste tentativas separadas das movimentações financeiras. A migration `0002` adiciona apenas `collection_attempts` e seus índices.
 
 Zod valida entradas separadas dos registros de persistência. Telas não executam SQL. O módulo de clientes consome `CustomerService` para mutações transacionais e `CustomerRepository` para leituras, busca, contagens, duplicidades e resumo financeiro. O módulo de veículos usa `VehicleService` para mutações auditadas e `VehicleRepository` para detalhes, lista por cliente, pesquisa e duplicidade de placa.
 

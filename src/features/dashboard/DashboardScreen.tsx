@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   ClockAlert,
   HandCoins,
+  MessageCircle,
   Plus,
   ReceiptText,
   UserPlus,
@@ -368,13 +369,26 @@ export function DashboardScreen() {
         />
         {snapshot.priorityOverdueDebts.length ? (
           snapshot.priorityOverdueDebts.map((debt) => (
-            <DashboardDebtItem
-              key={debt.id}
-              debt={debt}
-              hidden={hidden}
-              onPress={() => router.push({ pathname: '/debts/[id]', params: { id: debt.id } })}
-              overdue
-            />
+            <View key={debt.id} style={styles.overdueItem}>
+              <DashboardDebtItem
+                debt={debt}
+                hidden={hidden}
+                onPress={() => router.push({ pathname: '/debts/[id]', params: { id: debt.id } })}
+                overdue
+              />
+              <Button
+                icon={MessageCircle}
+                label="Cobrar pelo WhatsApp"
+                onPress={() =>
+                  router.push({
+                    pathname: '/collections/compose',
+                    params: { scope: 'debt', id: debt.id },
+                  } as never)
+                }
+                size="sm"
+                variant="outline"
+              />
+            </View>
           ))
         ) : (
           <EmptyState
@@ -436,4 +450,5 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   gridItem: { flexGrow: 1, flexBasis: 150, minWidth: 150 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  overdueItem: { gap: 8 },
 });

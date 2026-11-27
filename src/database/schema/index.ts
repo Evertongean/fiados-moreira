@@ -1,4 +1,5 @@
 export * from './audit-logs';
+export * from './collection-attempts';
 export * from './customers';
 export * from './debts';
 export * from './payment-reversals';

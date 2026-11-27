@@ -196,3 +196,10 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - Filtros de saldo usam somente pagamentos válidos e excluem cancelados; hoje não é atraso. Períodos de pagamento usam `paidAt` na data civil do workspace.
 - Veículos e pagamentos, ainda sem listagens globais próprias, recebem seus filtros no painel da pesquisa.
 - Nenhuma dependência, migration, store global ou integração remota foi adicionada.
+
+## Decisões do Prompt 13
+
+- `CollectionService` revalida saldo e telefone antes de entregar um link oficial `wa.me` ao adaptador de `Linking`; nenhuma tela escreve tentativas diretamente.
+- `CollectionRepository` agrega pagamentos válidos e estornos por workspace sem N+1. A tabela `collection_attempts` é separada de auditorias e movimentações financeiras e não contém mensagem, telefone ou valor.
+- Modelos ficam em `settings`, isolados por workspace. A mensagem é gerada offline e pode ser revisada ou copiada com Expo Clipboard.
+- A conclusão de `Linking.openURL` registra somente uma tentativa de abertura; envio e entrega não são inferidos.

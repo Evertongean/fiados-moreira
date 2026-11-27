@@ -12,6 +12,7 @@ Stack raiz
 ├── debts — formulários, detalhes e pagamento
 ├── payments — detalhes e comprovante
 ├── notifications — central de notificações
+├── collections — preparação explícita de cobrança
 ├── settings — preferências e informações
 ├── reports — relatórios secundários
 ├── dev — ferramentas exclusivas de desenvolvimento
@@ -53,6 +54,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional             | Prompt 07                 |
 | Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional             | Prompt 07                 |
 | Criar lembrete        | `/debts/[id]/reminder`    | Agendamento local personalizado       | Funcional             | Prompt 12                 |
+| Preparar cobrança     | `/collections/compose`    | Revisão, cópia e abertura do WhatsApp | Funcional             | Prompt 13                 |
 | Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional             | Prompt 08                 |
 | Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional             | Prompt 08                 |
 | Comprovante           | `/payments/[id]/receipt`  | Comprovante futuro                    | Estrutural, sem gerar | Prompt 15                 |
@@ -64,6 +66,7 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | Ajustes               | `/settings`               | Categorias de configuração            | Estrutural            | Prompt 21                 |
 | Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional             | Prompt 02/03              |
 | Notificações          | `/settings/notifications` | Permissão, frequência e privacidade   | Funcional             | Prompt 12/21              |
+| Mensagens de cobrança | `/settings/collections`   | Modelos locais de cobrança            | Funcional             | Prompt 13/21              |
 | Segurança             | `/settings/security`      | Proteção e biometria futuras          | Estrutural            | Prompt 17/21              |
 | Backup                | `/settings/backup`        | Backup e restauração futuros          | Estrutural            | Prompt 18/21              |
 | Sobre                 | `/settings/about`         | Identidade e versão real              | Implementada          | Prompt 03                 |

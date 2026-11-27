@@ -27,6 +27,7 @@
     "drizzle-orm": "^0.45.4",
     "expo": "~58.1.0",
     "expo-asset": "~58.0.21",
+    "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.16",
     "expo-crypto": "~58.0.9",
     "expo-font": "~58.0.12",

@@ -15,6 +15,13 @@
       "when": 1795733621494,
       "tag": "0001_nostalgic_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795746198331,
+      "tag": "0002_cooing_genesis",
+      "breakpoints": true
     }
   ]
 }

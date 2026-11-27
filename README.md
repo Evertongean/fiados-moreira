@@ -20,11 +20,11 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos, fiados, pagamentos, histórico financeiro, dashboard, pesquisa e notificações locais foram implementados**. A tela inicial consolida saldos, recebimentos, vencimentos e atividades reais com funcionamento offline.
+Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos, fiados, pagamentos, histórico financeiro, dashboard, pesquisa, notificações locais e cobrança pelo WhatsApp foram implementados**. A tela inicial consolida saldos, recebimentos, vencimentos e atividades reais com funcionamento offline.
 
 ## Stack
 
-- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Expo Notifications, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
+- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Expo Notifications, Expo Clipboard, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
 - Planejado: Zustand, Supabase/PostgreSQL, SecureStore, Local Authentication e EAS Build.
 
 Dependências planejadas serão adicionadas apenas quando houver uso real.
@@ -137,6 +137,7 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Histórico financeiro do cliente](docs/CUSTOMER_HISTORY.md)
 - [Dashboard financeiro](docs/DASHBOARD.md)
 - [Pesquisa global e filtros](docs/SEARCH.md)
+- [Cobrança pelo WhatsApp](docs/WHATSAPP_COLLECTIONS.md)
 - [Regras de negócio](docs/BUSINESS_RULES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Navegação](docs/NAVIGATION.md)
@@ -145,4 +146,4 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 
 ## Status
 
-**Prompt 11 — Pesquisa global e filtros:** implementação concluída e protegida por testes locais. A busca offline agrupa clientes, veículos, fiados e pagamentos, normaliza texto, telefones e placas e combina filtros isolados por workspace. As listagens de clientes e fiados receberam filtros financeiros avançados. A validação manual em Android/iOS permanece pendente.
+**Prompt 13 — Cobrança pelo WhatsApp:** implementação concluída e protegida por testes locais. Mensagens individuais ou consolidadas usam saldos atuais, modelos personalizáveis e abertura explícita por `wa.me`; tentativas são registradas sem texto, telefone, valor ou alegação de envio. A validação manual da integração em Android/iOS permanece pendente.

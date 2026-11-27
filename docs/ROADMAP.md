@@ -49,8 +49,11 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Permissão contextual, canais Android, reconciliação, central e leitura.
   - [x] Cancelamento/reagendamento por quitação, estorno, cancelamento e vencimento.
   - [ ] Validar entrega, navegação, permissões e restrições do SO em development builds Android e iOS.
-- [ ] **Prompt 13 — WhatsApp**
-  - [ ] Preparação de cobrança e compartilhamento explícito.
+- [ ] **Prompt 13 — WhatsApp** (implementação concluída; aceite mobile pendente)
+  - [x] Cobrança individual e do saldo do cliente com saldo revalidado e modelos personalizáveis.
+  - [x] Pré-visualização, edição, cópia, abertura explícita por `wa.me` e histórico de tentativas.
+  - [x] Telefones normalizados, isolamento por workspace e ausência de alteração financeira.
+  - [ ] Validar abertura, fallback, teclado e acessibilidade em Android e iOS.
 - [ ] **Prompt 14 — Relatórios**
   - [ ] Relatórios financeiros e filtros por período.
 - [ ] **Prompt 15 — Comprovantes**

@@ -6,6 +6,7 @@ import {
   Car,
   CircleDollarSign,
   Pencil,
+  MessageCircle,
   ReceiptText,
   UserRound,
   WalletCards,
@@ -400,6 +401,20 @@ function DebtDetailsContent({ debtId }: { debtId: string }) {
         label="Criar lembrete"
         onPress={() => router.push(`/debts/${debt.id}/reminder` as Href)}
         variant="secondary"
+      />
+
+      <Button
+        disabled={isCanceled || debt.summary.isPaid}
+        fullWidth
+        icon={MessageCircle}
+        label="Cobrar pelo WhatsApp"
+        onPress={() =>
+          router.push({
+            pathname: '/collections/compose',
+            params: { scope: 'debt', id: debt.id },
+          } as never)
+        }
+        variant="outline"
       />
 
       {!isCanceled && debt.summary.netPaidCents > 0 ? (

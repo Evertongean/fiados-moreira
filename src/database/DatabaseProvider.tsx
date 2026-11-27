@@ -10,12 +10,14 @@ import { StyleSheet, View } from 'react-native';
 
 import { Alert, Button, LoadingState, Screen } from '@/components/ui';
 import { CustomerService } from '@/features/customers/services/CustomerService';
+import { CollectionService } from '@/features/collections/services/CollectionService';
 import { DebtService } from '@/features/debts/services/DebtService';
 import { PaymentReversalService } from '@/features/payments/services/PaymentReversalService';
 import { PaymentService } from '@/features/payments/services/PaymentService';
 import { ReminderService } from '@/features/notifications/services/ReminderService';
 import { VehicleService } from '@/features/vehicles/services/VehicleService';
 import { ExpoNotificationGateway } from '@/services/notifications/ExpoNotificationGateway';
+import { ReactNativeWhatsAppGateway } from '@/services/whatsapp/ReactNativeWhatsAppGateway';
 
 import {
   initializeDatabase,
@@ -25,6 +27,7 @@ import {
 import { AppDatabaseError } from './errors/DatabaseError';
 import { AuditRepository } from './repositories/audit.repository';
 import { CustomerRepository } from './repositories/customer.repository';
+import { CollectionRepository } from './repositories/collection.repository';
 import { CustomerHistoryRepository } from './repositories/customer-history.repository';
 import { DashboardRepository } from './repositories/dashboard.repository';
 import { DebtRepository } from './repositories/debt.repository';
@@ -53,6 +56,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     audit: AuditRepository;
     reminders: ReminderRepository;
     settings: SettingsRepository;
+    collections: CollectionRepository;
   };
   services: {
     customers: CustomerService;
@@ -61,6 +65,7 @@ export interface DatabaseContextValue extends DatabaseEnvironment {
     payments: PaymentService;
     reversals: PaymentReversalService;
     reminders: ReminderService;
+    collections: CollectionService;
   };
 }
 
@@ -91,6 +96,13 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
     if (status !== 'ready' || !environment) return null;
     const executor = environment.executor;
     const reminderService = new ReminderService(executor, new ExpoNotificationGateway());
+    const collectionRepository = new CollectionRepository(executor);
+    const settingsRepository = new SettingsRepository(executor);
+    const collectionService = new CollectionService(
+      collectionRepository,
+      settingsRepository,
+      new ReactNativeWhatsAppGateway(),
+    );
     const reconcileFinancialChange = async () => {
       await reminderService.reconcile(environment.workspace.id, environment.workspace.timezone);
     };
@@ -109,7 +121,8 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         reversals: new PaymentReversalRepository(executor),
         audit: new AuditRepository(executor),
         reminders: new ReminderRepository(executor),
-        settings: new SettingsRepository(executor),
+        settings: settingsRepository,
+        collections: collectionRepository,
       },
       services: {
         customers: new CustomerService(executor),
@@ -118,6 +131,7 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
         payments: new PaymentService(executor, reconcileFinancialChange),
         reversals: new PaymentReversalService(executor, reconcileFinancialChange),
         reminders: reminderService,
+        collections: collectionService,
       },
     };
   }, [environment, status]);

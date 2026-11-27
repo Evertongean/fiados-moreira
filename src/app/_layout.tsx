@@ -67,6 +67,7 @@ function AppBootstrap() {
             <Stack.Screen name="debts" />
             <Stack.Screen name="payments" />
             <Stack.Screen name="notifications" />
+            <Stack.Screen name="collections" />
             <Stack.Screen name="settings" />
             <Stack.Screen name="reports" />
             <Stack.Screen name="search" />
