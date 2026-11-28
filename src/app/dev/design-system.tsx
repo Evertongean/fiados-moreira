@@ -168,6 +168,7 @@ export default function DesignSystemGallery() {
         <GallerySection title="Botões">
           <View style={styles.stack}>
             <Button icon={Plus} label="Ação principal" onPress={() => undefined} />
+            <Button label="Contorno primário" onPress={() => undefined} variant="primaryOutline" />
             <Button label="Ação secundária" onPress={() => undefined} variant="secondary" />
             <Button label="Contorno" onPress={() => undefined} variant="outline" />
             <Button label="Fantasma" onPress={() => undefined} variant="ghost" />

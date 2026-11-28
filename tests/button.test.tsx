@@ -23,4 +23,16 @@ describe('<Button />', () => {
     fireEvent.press(button);
     expect(onPress).not.toHaveBeenCalled();
   });
+
+  it('uses the themed primary palette in the outlined primary variant', async () => {
+    await renderWithTheme(
+      <Button label="Registrar pagamento" onPress={() => undefined} variant="primaryOutline" />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Registrar pagamento' })).toHaveStyle({
+      backgroundColor: '#FFFFFF',
+      borderColor: '#184D37',
+    });
+    expect(screen.getByText('Registrar pagamento')).toHaveStyle({ color: '#184D37' });
+  });
 });

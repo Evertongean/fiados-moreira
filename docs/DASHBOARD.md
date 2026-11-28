@@ -24,7 +24,8 @@ O início e o fim dos períodos são calculados como instantes UTC correspondent
 
 - os dois cards do resumo apresentam total a receber e total em atraso; o controle do primeiro oculta todos os valores financeiros visíveis na tela;
 - o card de total em atraso abre a lista com o filtro `overdue`;
-- as ações rápidas usam botões para novo cliente, novo fiado e registro de pagamento, com destaque visual para novo fiado;
+- o cabeçalho mantém apenas o acesso às notificações no lado direito;
+- as ações rápidas exibem, lado a lado, botões de mesmo tamanho para novo fiado e registro de pagamento, com destaque visual para novo fiado;
 - **Registrar pagamento** abre a lista apenas com filtros compatíveis e, ao selecionar um fiado, segue para o formulário de pagamento;
 - próximos vencimentos incluem hoje e datas futuras, limitados aos quatro mais próximos;
 - atrasos prioritários são limitados a quatro, ordenados pelo vencimento mais antigo e, em empate, pelo maior saldo;

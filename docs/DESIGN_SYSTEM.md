@@ -122,7 +122,7 @@ Feedbacks de pressão usam opacidade/escala discretas. Haptics é reservado a a�
 ### Base (`src/components/ui`)
 
 - `AppText`: tipografia semântica e acessível.
-- `Button`: `primary`, `secondary`, `outline`, `ghost`, `destructive` e `link`; tamanhos `sm`, `md`, `lg` e `icon`; ícone, largura total, loading e disabled.
+- `Button`: `primary`, `primaryOutline`, `secondary`, `outline`, `ghost`, `destructive` e `link`; tamanhos `sm`, `md`, `lg` e `icon`; ícone, largura total, loading e disabled. A variante `primaryOutline` usa a superfície do tema com borda, ícone e texto na cor primária.
 - `IconButton`: ação somente com ícone, rótulo obrigatório e alvo de 40–56 pontos conforme tamanho.
 - `Input`: label acessível, ajuda, erro, ícones/acessório, foco, senha, teclados nativos, read-only, disabled e ref.
 - `TextArea`: entrada multilinha para observações.

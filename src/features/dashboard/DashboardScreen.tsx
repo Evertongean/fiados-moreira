@@ -10,8 +10,6 @@ import {
   MessageCircle,
   Plus,
   ReceiptText,
-  Search,
-  UserPlus,
   type LucideIcon,
 } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -188,30 +186,18 @@ export function DashboardScreen() {
 
       <View style={styles.section}>
         <SectionHeader title="Ações rápidas" />
-        <View style={styles.actions}>
-          <View style={styles.actionRow}>
-            <View style={styles.halfAction}>
-              <Button
-                accessibilityLabel="Novo cliente"
-                fullWidth
-                icon={UserPlus}
-                label="Novo cliente"
-                onPress={() => router.push('/customers/new')}
-                variant="outline"
-              />
-            </View>
-            <View style={styles.halfAction}>
-              <Button
-                accessibilityLabel="Novo fiado"
-                fullWidth
-                icon={Plus}
-                label="Novo fiado"
-                onPress={() => router.push('/debts/new')}
-                variant="primary"
-              />
-            </View>
+        <View style={styles.actionRow}>
+          <View style={styles.halfAction}>
+            <Button
+              accessibilityLabel="Novo fiado"
+              fullWidth
+              icon={Plus}
+              label="Novo fiado"
+              onPress={() => router.push('/debts/new')}
+              variant="primary"
+            />
           </View>
-          <View style={styles.fullAction}>
+          <View style={styles.halfAction}>
             <Button
               accessibilityLabel="Registrar pagamento"
               fullWidth
@@ -220,7 +206,7 @@ export function DashboardScreen() {
               onPress={() =>
                 router.push({ pathname: '/debts', params: { filter: 'open', mode: 'payment' } })
               }
-              variant="outline"
+              variant="primaryOutline"
             />
           </View>
         </View>
@@ -337,8 +323,8 @@ function DashboardSummaryCard({
       style={[
         styles.summaryCard,
         {
-          backgroundColor: overdue ? tokens.colors.surface : tokens.colors.secondary,
-          borderColor: overdue ? tokens.colors.destructive : tokens.colors.accent,
+          backgroundColor: overdue ? `${tokens.colors.destructive}12` : tokens.colors.secondary,
+          borderColor: overdue ? `${tokens.colors.destructive}40` : tokens.colors.accent,
         },
       ]}
       variant="outlined"
@@ -363,7 +349,7 @@ function DashboardSummaryCard({
             </View>
           ) : null}
         </View>
-        <AppText color={overdue ? 'foreground' : 'primary'} variant="h3">
+        <AppText color={overdue ? 'destructive' : 'primary'} variant="h3">
           {hidden ? 'R$ ••••••' : formatBRLCents(valueCents)}
         </AppText>
         <AppText color="textSecondary" variant="caption">
@@ -390,13 +376,6 @@ function DashboardHeader() {
         </AppText>
       </View>
       <View style={styles.headerActions}>
-        <IconButton
-          accessibilityLabel="Abrir pesquisa global"
-          icon={Search}
-          onPress={() => router.push('/search')}
-          size="sm"
-          variant="ghost"
-        />
         <View style={styles.notificationAction}>
           <IconButton
             accessibilityLabel={
@@ -487,10 +466,8 @@ const styles = StyleSheet.create({
   },
   summaryToggle: { position: 'absolute', right: -8, top: -10, zIndex: 1 },
   summaryTitle: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  actions: { gap: 8 },
   actionRow: { flexDirection: 'row', gap: 8 },
   halfAction: { flex: 1, minWidth: 0 },
-  fullAction: { width: '100%' },
   emptyRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   emptyCopy: { flex: 1, gap: 1 },
   overdueItem: { gap: 8 },

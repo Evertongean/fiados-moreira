@@ -5,7 +5,8 @@ import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } f
 import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/hooks/useTheme';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link';
+export type ButtonVariant =
+  'primary' | 'primaryOutline' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'link';
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
@@ -73,10 +74,13 @@ export function Button({
           ) : null}
           <AppText
             color="foreground"
-            style={{
-              color: palette.foreground,
-              textDecorationLine: variant === 'link' ? 'underline' : 'none',
-            }}
+            style={[
+              styles.label,
+              {
+                color: palette.foreground,
+                textDecorationLine: variant === 'link' ? 'underline' : 'none',
+              },
+            ]}
             variant="button"
           >
             {label}
@@ -95,6 +99,8 @@ function getButtonPalette(
   colors: ReturnType<typeof useTheme>['tokens']['colors'],
 ) {
   switch (variant) {
+    case 'primaryOutline':
+      return { background: colors.surface, foreground: colors.primary, border: colors.primary };
     case 'secondary':
       return { background: colors.secondary, foreground: colors.primary, border: 'transparent' };
     case 'outline':
@@ -126,11 +132,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   content: {
+    flexShrink: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
+  label: { flexShrink: 1, textAlign: 'center' },
   fullWidth: { width: '100%' },
   link: { minHeight: 40, paddingHorizontal: 8 },
 });
