@@ -107,6 +107,8 @@ As seguintes ações são atômicas: pagamento + auditoria; estorno + auditoria;
 3. O aplicativo não usa chave administrativa do Supabase.
 4. Mensagens de WhatsApp e comprovantes só são compartilhados após ação explícita do usuário e mostram apenas o necessário.
 5. Biometria protege acesso local, mas não substitui autenticação, autorização nem regras no servidor.
+6. No PostgreSQL, tabelas financeiras não aceitam escrita direta pelo cliente autenticado; mutações usam RPCs transacionais, idempotentes e auditadas com isolamento por workspace.
+7. A publishable key pode existir no bundle somente porque RLS e privilégios mínimos protegem os dados. Chaves `service_role`, secretas ou credenciais PostgreSQL nunca pertencem ao aplicativo.
 
 ## Cobranças pelo WhatsApp
 

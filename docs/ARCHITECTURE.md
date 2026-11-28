@@ -53,9 +53,11 @@ Expo SQLite e Drizzle ORM foram introduzidos no Prompt 04. Migrations são incre
 
 A tabela `sync_queue` está modelada, mas propositalmente não recebe eventos até existir consumidor no Prompt 19. O banco local não é apagado automaticamente em falhas de migration.
 
-## Integração futura com Supabase
+## Integração com Supabase
 
-O Supabase fornecerá autenticação e PostgreSQL. O cliente móvel utilizará somente a chave pública anon e políticas Row Level Security. Regras críticas também serão protegidas no servidor/banco. Chaves administrativas permanecerão fora do app.
+O schema PostgreSQL, o cliente móvel opcional e as políticas Row Level Security estão versionados desde o Prompt 16. O app usa somente URL pública e publishable key; chaves administrativas permanecem fora do bundle. RPCs transacionais revalidam operações financeiras no servidor, mas ainda não são chamadas pelos repositórios locais.
+
+SQLite continua sendo a fonte de verdade operacional. Sem credenciais ou internet, o cliente remoto não é criado e nenhum fluxo local é afetado. Autenticação pertence ao Prompt 17 e sincronização/outbox ao Prompt 19; esta etapa não envia dados automaticamente.
 
 ## Estratégia de sincronização
 
@@ -219,3 +221,13 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 - `PaymentReceiptService` transforma somente pagamentos persistidos em HTML escapado. O identificador `FM-<UUID do pagamento>` é determinístico e permanece igual em reemissões.
 - O adaptador Expo Print gera o PDF no cache local; Expo Sharing abre a folha nativa somente após ação do usuário e Expo FileSystem remove o arquivo temporário após o compartilhamento ou ao sair da tela.
 - A geração é somente leitura, funciona offline e não cria tabela ou migration. Compartilhamento depende dos aplicativos e recursos disponíveis no dispositivo.
+
+## Decisões do Prompt 16
+
+- `src/services/supabase` centraliza configuração, cliente tipado e diagnóstico de disponibilidade sem participar da inicialização SQLite.
+- URL e publishable key são públicas por definição; `service_role`, chaves secretas e credenciais PostgreSQL são proibidas no aplicativo.
+- O schema remoto preserva UUIDs e centavos e adiciona `workspace_members` ligado a `auth.users`; `sync_queue` e identificadores nativos de notificações permanecem apenas no dispositivo.
+- RLS protege todas as tabelas expostas. Dados financeiros são somente leitura pelas APIs de tabela; criação/alteração de fiados, pagamentos, estornos e cancelamentos passam por RPCs auditadas e idempotentes.
+- RPCs financeiras usam `SECURITY DEFINER`, `search_path` vazio, validação explícita de membro e bloqueio `FOR UPDATE` para revalidar saldo sob concorrência.
+- A pilha Supabase local completa foi validada com reaplicação das migrations, lint PostgreSQL, pgTAP, geração de tipos e smoke test da Data API com isolamento RLS.
+- Nenhuma migration foi aplicada em projeto remoto e nenhuma sincronização foi habilitada. Consulte `docs/SUPABASE.md` para o mapeamento e os comandos locais.

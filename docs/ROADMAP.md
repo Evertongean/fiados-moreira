@@ -64,8 +64,14 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Reemissão estável, identificação de estornos e snapshots históricos para novos pagamentos.
   - [x] Escape de HTML, isolamento por workspace e limpeza de arquivos temporários.
   - [ ] Validar geração, visualização e compartilhamento em dispositivos Android e iOS.
-- [ ] **Prompt 16 — Supabase**
-  - [ ] Projeto remoto, PostgreSQL, RLS e adaptador do cliente.
+- [x] **Prompt 16 — Supabase** (infraestrutura e validação local concluídas)
+  - [x] Cliente opcional tipado, configuração Expo e funcionamento sem credenciais/rede.
+  - [x] Migrations PostgreSQL, mapeamento SQLite, constraints, índices e entidades persistentes.
+  - [x] RLS, membros por workspace, menor privilégio e RPCs financeiras auditadas/idempotentes.
+  - [x] Testes contratuais Jest e testes pgTAP versionados para schema, RLS e integridade financeira.
+  - [x] Reaplicar migrations, executar lint e pgTAP na pilha Supabase local completa.
+  - [x] Validar a Data API local, RPC de criação de workspace, isolamento RLS e bloqueio anônimo.
+  - [ ] Configurar projeto hospedado e credenciais públicas em etapa autorizada; nenhuma migration remota foi aplicada.
 - [ ] **Prompt 17 — Autenticação e biometria**
   - [ ] Sessão, proteção local e recuperação segura.
 - [ ] **Prompt 18 — Backup e restauração**

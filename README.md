@@ -20,12 +20,12 @@ O controle informal de serviços e peças vendidos a prazo dificulta saber quem 
 
 Cadastro de clientes e veículos; fiados com serviços e peças; pagamentos parciais e totais; saldo automático; histórico financeiro; vencimentos e lembretes; cobrança pelo WhatsApp; dashboard e relatórios; comprovantes; autenticação e biometria; backup, restauração e sincronização; tema claro/escuro e configurações.
 
-Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle e os módulos de clientes, veículos, fiados, pagamentos, histórico financeiro, dashboard, pesquisa, notificações locais, cobrança pelo WhatsApp, relatórios financeiros e comprovantes de pagamento foram implementados**. A tela inicial e os relatórios consolidam saldos, recebimentos, vencimentos e atividades reais com funcionamento offline.
+Nesta etapa, **a fundação técnica, o Design System, a navegação, a infraestrutura local SQLite/Drizzle, os módulos funcionais até comprovantes e a infraestrutura inicial Supabase/PostgreSQL foram implementados**. SQLite permanece como fonte operacional offline; não há autenticação nem sincronização automática nesta etapa.
 
 ## Stack
 
-- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Expo Notifications, Expo Clipboard, Expo Print/FileSystem/Sharing, React Hook Form, Zod, Jest 30, React Native Testing Library, ESLint e Prettier.
-- Planejado: Zustand, Supabase/PostgreSQL, SecureStore, Local Authentication e EAS Build.
+- Implementado: React Native 0.88, Expo SDK 58, TypeScript estrito, Expo Router, NativeWind 4/Tailwind CSS 3, Lucide React Native, React Native SVG/Reanimated, Inter/Expo Font, AsyncStorage para aparência, Expo SQLite, Drizzle ORM/Kit, Expo Crypto, Expo Notifications, Expo Clipboard, Expo Print/FileSystem/Sharing, React Hook Form, Zod, Supabase JS/PostgreSQL versionado, Jest 30, pgTAP, React Native Testing Library, ESLint e Prettier.
+- Planejado: Zustand, autenticação/sincronização Supabase, SecureStore, Local Authentication e EAS Build.
 
 Dependências planejadas serão adicionadas apenas quando houver uso real.
 
@@ -49,9 +49,11 @@ fiados-moreira/
 │   ├── database/          # Conexão, schema, repositórios e provider SQLite
 │   ├── features/          # Telas, domínio e serviços financeiros
 │   ├── hooks/             # Hooks compartilhados, tema e banco
+│   ├── services/          # Integrações externas, incluindo cliente Supabase opcional
 │   ├── theme/             # Tokens e sistema global de temas
 │   └── utils/             # Moeda, iniciais e composição de classes
 ├── drizzle/               # Migrations SQL e metadados versionados
+├── supabase/              # Configuração, migrations PostgreSQL e testes pgTAP
 ├── tests/                 # Testes unitários, componentes e SQLite real isolado
 ├── drizzle.config.ts
 ├── .env.example
@@ -93,23 +95,28 @@ O produto é exclusivamente mobile. Não há alvo web configurado.
 
 ## Scripts
 
-| Script                 | Finalidade                                           |
-| ---------------------- | ---------------------------------------------------- |
-| `npm start`            | Inicia o servidor Expo.                              |
-| `npm run start:clear`  | Inicia o Expo limpando o cache do bundler.           |
-| `npm run android`      | Abre o projeto no Android.                           |
-| `npm run ios`          | Abre o projeto no iOS (requer macOS para simulador). |
-| `npm test`             | Executa os testes automatizados uma vez.             |
-| `npm run test:watch`   | Executa os testes em modo interativo.                |
-| `npm run typecheck`    | Verifica tipos sem gerar arquivos.                   |
-| `npm run lint`         | Executa o ESLint pela CLI do Expo.                   |
-| `npm run format`       | Formata arquivos com Prettier.                       |
-| `npm run format:check` | Verifica a formatação.                               |
-| `npm run doctor`       | Executa o Expo Doctor.                               |
-| `npm run db:generate`  | Gera migration versionada a partir do schema.        |
-| `npm run db:check`     | Verifica o histórico de migrations Drizzle.          |
-| `npm run db:test`      | Executa testes de persistência e domínio.            |
-| `npm run validate`     | Executa tipos, lint, formatação e testes.            |
+| Script                      | Finalidade                                           |
+| --------------------------- | ---------------------------------------------------- |
+| `npm start`                 | Inicia o servidor Expo.                              |
+| `npm run start:clear`       | Inicia o Expo limpando o cache do bundler.           |
+| `npm run android`           | Abre o projeto no Android.                           |
+| `npm run ios`               | Abre o projeto no iOS (requer macOS para simulador). |
+| `npm test`                  | Executa os testes automatizados uma vez.             |
+| `npm run test:watch`        | Executa os testes em modo interativo.                |
+| `npm run typecheck`         | Verifica tipos sem gerar arquivos.                   |
+| `npm run lint`              | Executa o ESLint pela CLI do Expo.                   |
+| `npm run format`            | Formata arquivos com Prettier.                       |
+| `npm run format:check`      | Verifica a formatação.                               |
+| `npm run doctor`            | Executa o Expo Doctor.                               |
+| `npm run db:generate`       | Gera migration versionada a partir do schema.        |
+| `npm run db:check`          | Verifica o histórico de migrations Drizzle.          |
+| `npm run db:test`           | Executa testes de persistência e domínio.            |
+| `npm run supabase:start`    | Inicia a pilha Supabase local via Docker.            |
+| `npm run supabase:db:reset` | Reaplica migrations no banco Supabase local.         |
+| `npm run supabase:db:lint`  | Analisa o schema PostgreSQL local.                   |
+| `npm run supabase:test`     | Executa os testes pgTAP locais.                      |
+| `npm run supabase:types`    | Regenera tipagens do schema PostgreSQL local.        |
+| `npm run validate`          | Executa tipos, lint, formatação e testes.            |
 
 ## Design System e temas
 
@@ -123,7 +130,7 @@ Consulte [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) antes de implementar uma
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env` somente quando a integração com Supabase for iniciada. Não há conexão externa configurada nesta etapa. Nunca use uma chave `service_role` no aplicativo.
+Copie `.env.example` para `.env` e configure a URL pública e a publishable key somente quando houver um projeto Supabase. Sem essas variáveis, o app continua offline e o cliente remoto não é criado. Nunca use `service_role`, `sb_secret_*` ou credenciais PostgreSQL no aplicativo. Consulte [docs/SUPABASE.md](docs/SUPABASE.md).
 
 ## Documentação
 
@@ -145,7 +152,8 @@ Copie `.env.example` para `.env` somente quando a integração com Supabase for 
 - [Navegação](docs/NAVIGATION.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Segurança e dependências](docs/SECURITY.md)
+- [Supabase e PostgreSQL](docs/SUPABASE.md)
 
 ## Status
 
-**Prompt 15 — Comprovantes de pagamento:** implementação concluída e protegida por testes locais. Pagamentos persistidos possuem pré-visualização, PDF offline, compartilhamento explícito e reemissão pelo mesmo identificador; estornos e limitações de saldo histórico são apresentados sem alterar os registros financeiros. A validação manual de geração e compartilhamento em Android/iOS permanece pendente.
+**Prompt 16 — Supabase:** infraestrutura e validação local concluídas, incluindo pilha completa, Data API, migrations reproduzíveis, RLS e RPCs financeiras. SQLite continua sendo a fonte de verdade e nenhuma informação é enviada à nuvem automaticamente. Projeto hospedado, autenticação e sincronização permanecem pendentes.

@@ -23,6 +23,13 @@ ios/
 *.keystore
 credentials.json
 
+# Supabase local state and secrets (migrations/config remain versioned)
+supabase/.branches/
+supabase/.temp/
+supabase/.env.keys
+supabase/.env.local
+supabase/.env.*.local
+
 # Local databases and persistence
 *.db
 *.db-journal

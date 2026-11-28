@@ -4,7 +4,7 @@
 
 O Prompt 04 implementou a infraestrutura local com Expo SQLite 58, Drizzle ORM 0.45 e migrations versionadas. Os Prompts 05 a 07 conectaram os módulos de clientes, veículos e fiados ao banco. O banco persistente chama-se `fiados-moreira.db`, vive no armazenamento privado do aplicativo e é a fonte operacional offline.
 
-Não existe Supabase, autenticação, worker de sincronização, backup definitivo nem criptografia própria do arquivo nesta etapa.
+A infraestrutura Supabase/PostgreSQL está versionada separadamente em `supabase/`, mas não substitui este banco nem recebe dados automaticamente. Ainda não existem autenticação, worker de sincronização, backup definitivo ou criptografia própria do arquivo. Consulte `docs/SUPABASE.md` para o mapeamento remoto.
 
 ## Arquitetura
 
@@ -94,7 +94,7 @@ Não há `ON DELETE CASCADE` em relacionamentos financeiros. As FKs compostas im
 
 ## Identificadores e tempo
 
-IDs e identificadores de operação são UUID v4 criptograficamente seguros gerados por `expo-crypto`. Eles funcionam offline e são compatíveis com o futuro PostgreSQL. O workspace é criado uma única vez na inicialização.
+IDs e identificadores de operação são UUID v4 criptograficamente seguros gerados por `expo-crypto`. Eles funcionam offline e são preservados no schema PostgreSQL. O workspace é criado uma única vez na inicialização.
 
 Instantes usam `new Date().toISOString()` (UTC). `service_date` e `due_date` são datas civis sem horário. A condição de atraso calcula a data civil atual com o fuso do workspace e aceita uma data de referência injetável para testes.
 
@@ -141,7 +141,7 @@ Retenção, anonimização e exclusão de dados pessoais serão tratadas na etap
 
 ## Sincronização futura
 
-`sync_queue` existe apenas como estrutura: nenhum registro é gerado enquanto não houver consumidor no Prompt 19. SQLite e Supabase não sincronizam automaticamente. A implementação futura deverá importar os registros locais preexistentes, deduplicar pagamentos, resolver conflitos explicitamente, revalidar finanças no servidor e aplicar autenticação/RLS.
+`sync_queue` existe apenas como estrutura: nenhum registro é gerado enquanto não houver consumidor no Prompt 19. SQLite e Supabase não sincronizam automaticamente. O schema remoto já possui RLS e RPCs financeiras; a implementação futura deverá autenticar, importar registros locais preexistentes, deduplicar pagamentos e resolver conflitos explicitamente.
 
 ## Segurança e limitações
 

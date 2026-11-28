@@ -33,6 +33,8 @@ A revisão de 2026-11-27 após adicionar `expo-file-system` 58.0.15 e `expo-shar
 
 A revisão de 2026-11-27 após adicionar `expo-print` 58.0.9 também manteve os mesmos 20 avisos moderados, sem achados altos ou críticos e sem cadeia atribuível ao novo módulo. O HTML do comprovante escapa dados persistidos, o PDF fica no cache privado e é removido após o compartilhamento ou ao sair da pré-visualização. A folha nativa só abre por ação explícita.
 
+A revisão de 2026-11-27 após adicionar `@supabase/supabase-js` 2.119.2 e `react-native-url-polyfill` 4.0.0 manteve os mesmos 20 avisos moderados no `npm audit --omit=dev`, sem achados altos/críticos nem cadeia runtime atribuível às novas dependências. O pacote `supabase` 3.4.0 é somente ferramenta de desenvolvimento. A publishable key é pública e protegida por RLS; chaves secretas, `service_role` e senhas PostgreSQL continuam proibidas no bundle.
+
 Referências: [advisory do Minimatch](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249) e [advisory do Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4).
 
 ## Pendência de tooling

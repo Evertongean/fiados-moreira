@@ -1,0 +1,2 @@
+-- Intencionalmente vazio.
+-- Dados pessoais ou financeiros reais nunca devem ser incluídos no seed versionado.
