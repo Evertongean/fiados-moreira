@@ -216,7 +216,7 @@ function CustomerHistoryContent({ customerId }: { customerId: string }) {
   if (contextStatus === 'error' || !customer || !summary) {
     return (
       <Screen contentContainerStyle={styles.page}>
-        <PageHeader fallbackRoute="/customers" title="Histórico financeiro" />
+        <PageHeader fallbackRoute="/debts" title="Histórico financeiro" />
         <EmptyState
           action={{ label: 'Tentar novamente', onPress: () => void loadContext() }}
           description="Não foi possível consultar os dados financeiros locais."
@@ -237,7 +237,7 @@ function CustomerHistoryContent({ customerId }: { customerId: string }) {
 
   return (
     <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
-      <PageHeader fallbackRoute="/customers" title="Histórico financeiro" />
+      <PageHeader fallbackRoute="/debts" title="Histórico financeiro" />
       <View style={styles.listArea}>
         <FlatList
           contentContainerStyle={styles.list}

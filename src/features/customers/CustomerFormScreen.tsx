@@ -82,7 +82,7 @@ export function CustomerFormScreen({ mode, customerId }: CustomerFormScreenProps
 
   const leave = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/customers');
+    else router.replace('/debts');
   };
 
   const requestLeave = () => {

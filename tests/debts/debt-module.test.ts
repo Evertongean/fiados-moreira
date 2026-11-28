@@ -63,6 +63,77 @@ describe('debt module', () => {
     database.close();
   });
 
+  it('creates a new customer with the first debt atomically and reuses the customer', async () => {
+    const database = await createTestDatabase();
+    const workspace = await new WorkspaceRepository(database).initializeLocal();
+    const service = new DebtService(database);
+    const customerId = randomUUID();
+    const operationId = randomUUID();
+    const customerInput = {
+      name: 'Cliente Integrado',
+      phone: '(84) 99999-1111',
+      whatsapp: '(84) 99999-1111',
+      address: 'Rua do Teste, 20',
+      notes: null,
+    };
+    const debtInput = {
+      description: 'Primeiro serviço',
+      totalCents: 25_000,
+      serviceDate: '2026-11-27',
+      dueDate: null,
+      notes: null,
+    };
+
+    const first = await service.createWithNewCustomer(
+      workspace.id,
+      customerInput,
+      debtInput,
+      customerId,
+      operationId,
+    );
+    expect(
+      (
+        await service.createWithNewCustomer(
+          workspace.id,
+          customerInput,
+          debtInput,
+          customerId,
+          operationId,
+        )
+      ).id,
+    ).toBe(first.id);
+    expect(await new CustomerRepository(database).findById(workspace.id, customerId)).toMatchObject(
+      {
+        name: 'Cliente Integrado',
+        phone: '+5584999991111',
+        whatsapp: '+5584999991111',
+      },
+    );
+
+    await service.create(workspace.id, {
+      customerId,
+      description: 'Segundo serviço',
+      totalCents: 10_000,
+      serviceDate: '2026-11-27',
+    });
+    expect(await new DebtRepository(database).list(workspace.id)).toHaveLength(2);
+
+    const rolledBackCustomerId = randomUUID();
+    await expect(
+      service.createWithNewCustomer(
+        workspace.id,
+        { name: 'Cliente com rollback' },
+        { ...debtInput, vehicleId: randomUUID() },
+        rolledBackCustomerId,
+        randomUUID(),
+      ),
+    ).rejects.toMatchObject({ code: 'CONSTRAINT_VIOLATION' });
+    expect(
+      await new CustomerRepository(database).findById(workspace.id, rolledBackCustomerId),
+    ).toBeNull();
+    database.close();
+  });
+
   it('rejects invalid money and a vehicle from another customer', async () => {
     const database = await createTestDatabase();
     const workspace = await new WorkspaceRepository(database).initializeLocal();

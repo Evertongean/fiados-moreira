@@ -20,7 +20,7 @@ export default function TabsLayout() {
           fontSize: 11,
           lineHeight: 15,
         },
-        tabBarItemStyle: { minHeight: 56, paddingVertical: 5 },
+        tabBarItemStyle: { flex: 1, minHeight: 56, paddingVertical: 5 },
         tabBarStyle: {
           backgroundColor: tokens.colors.surface,
           borderTopColor: tokens.colors.border,

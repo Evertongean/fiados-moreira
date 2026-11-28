@@ -12,6 +12,7 @@ import { DebtForm } from '@/features/debts/components/DebtForm';
 import {
   debtFormSchema,
   type CreateDebtInput,
+  type CreateDebtWithoutCustomerInput,
   type DebtFormOutput,
   type DebtFormValues,
 } from '@/features/debts/domain/debtSchemas';
@@ -30,6 +31,7 @@ export interface DebtFormScreenProps {
 function friendlyError(error: unknown): string {
   const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
   if (code === 'CUSTOMER_ARCHIVED') return 'Restaure o cliente antes de registrar um fiado.';
+  if (code === 'CUSTOMER_VALIDATION_ERROR') return 'Revise os dados do cliente.';
   if (code === 'VEHICLE_ARCHIVED') return 'O veículo selecionado está arquivado.';
   if (code === 'CONSTRAINT_VIOLATION') return 'O veículo selecionado não pertence ao cliente.';
   if (code === 'INVALID_AMOUNT') return 'O valor não pode ser menor que o total já pago.';
@@ -48,11 +50,10 @@ export function DebtFormScreen({
   const { showToast } = useToast();
   const { workspace, repositories, services } = useDatabase();
   const [operationId] = useState(createUuid);
+  const [newCustomerId] = useState(createUuid);
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'empty' | 'error'>(
-    'loading',
-  );
+  const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [isSaving, setIsSaving] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const isEdit = mode === 'edit';
@@ -67,6 +68,7 @@ export function DebtFormScreen({
   } = useForm<DebtFormValues, unknown, DebtFormOutput>({
     defaultValues: {
       customerId: '',
+      customer: { name: '', phone: '', address: '' },
       vehicleId: '',
       description: '',
       totalCents: null,
@@ -123,6 +125,11 @@ export function DebtFormScreen({
           initializedCustomer.current = owner.id;
           reset({
             customerId: owner.id,
+            customer: {
+              name: owner.name,
+              phone: owner.whatsapp ?? owner.phone ?? '',
+              address: owner.address ?? '',
+            },
             vehicleId: debt.vehicleId ?? '',
             description: debt.description,
             totalCents: debt.totalCents,
@@ -139,19 +146,19 @@ export function DebtFormScreen({
         });
         if (!active) return;
         setCustomers(activeCustomers);
-        if (!activeCustomers.length) {
-          setStatus('empty');
-          return;
-        }
-        const preferred = activeCustomers.some((item) => item.id === initialCustomerId)
-          ? initialCustomerId
-          : activeCustomers.length === 1
-            ? activeCustomers[0]?.id
-            : '';
+        const preferredCustomer = activeCustomers.find((item) => item.id === initialCustomerId);
+        const preferred = preferredCustomer?.id ?? '';
         initializedCustomer.current = preferred ?? '';
         reset({
           customerId: preferred ?? '',
-          vehicleId: initialVehicleId ?? '',
+          customer: preferredCustomer
+            ? {
+                name: preferredCustomer.name,
+                phone: preferredCustomer.whatsapp ?? preferredCustomer.phone ?? '',
+                address: preferredCustomer.address ?? '',
+              }
+            : { name: '', phone: '', address: '' },
+          vehicleId: preferred ? (initialVehicleId ?? '') : '',
           description: '',
           totalCents: null,
           serviceDate: formatCivilDate(getCivilDate(new Date(), workspace.timezone)) ?? '',
@@ -208,8 +215,7 @@ export function DebtFormScreen({
     const serviceDate = parseCivilDate(values.serviceDate);
     const dueDate = values.dueDate.trim() ? parseCivilDate(values.dueDate) : null;
     if (!serviceDate || (values.dueDate.trim() && !dueDate) || values.totalCents === null) return;
-    const input: CreateDebtInput = {
-      customerId: values.customerId,
+    const debtInput: CreateDebtWithoutCustomerInput = {
       vehicleId: values.vehicleId || null,
       description: values.description,
       totalCents: values.totalCents,
@@ -224,16 +230,34 @@ export function DebtFormScreen({
             workspace.id,
             debtId as string,
             {
-              vehicleId: input.vehicleId,
-              description: input.description,
-              totalCents: input.totalCents,
-              serviceDate: input.serviceDate,
-              dueDate: input.dueDate,
-              notes: input.notes,
+              vehicleId: debtInput.vehicleId,
+              description: debtInput.description,
+              totalCents: debtInput.totalCents,
+              serviceDate: debtInput.serviceDate,
+              dueDate: debtInput.dueDate,
+              notes: debtInput.notes,
             },
             operationId,
           )
-        : await services.debts.create(workspace.id, input, operationId);
+        : values.customerId
+          ? await services.debts.create(
+              workspace.id,
+              { ...debtInput, customerId: values.customerId } satisfies CreateDebtInput,
+              operationId,
+            )
+          : await services.debts.createWithNewCustomer(
+              workspace.id,
+              {
+                name: values.customer.name,
+                phone: values.customer.phone,
+                whatsapp: values.customer.phone,
+                address: values.customer.address,
+                notes: null,
+              },
+              debtInput,
+              newCustomerId,
+              operationId,
+            );
       reset(values);
       showToast({
         title: isEdit ? 'Fiado atualizado com sucesso!' : 'Fiado cadastrado com sucesso!',
@@ -264,19 +288,6 @@ export function DebtFormScreen({
       />
     );
   }
-  if (status === 'empty') {
-    return (
-      <Screen contentContainerStyle={styles.page}>
-        <Header onBack={requestLeave} title="Novo fiado" />
-        <EmptyState
-          action={{ label: 'Cadastrar cliente', onPress: () => router.push('/customers/new') }}
-          description="Cadastre um cliente ativo antes de lançar um fiado."
-          icon={ReceiptText}
-          title="Nenhum cliente disponível"
-        />
-      </Screen>
-    );
-  }
   if (status === 'error') {
     return (
       <Screen contentContainerStyle={styles.page}>
@@ -301,7 +312,11 @@ export function DebtFormScreen({
     <Screen contentContainerStyle={styles.page} keyboardAware scroll>
       <Header
         onBack={requestLeave}
-        subtitle="Valores são salvos em centavos e a operação é auditada localmente."
+        subtitle={
+          isEdit
+            ? 'Valores são salvos em centavos e a operação é auditada localmente.'
+            : 'Selecione um cliente existente ou cadastre-o junto com o fiado.'
+        }
         title={isEdit ? 'Editar fiado' : 'Novo fiado'}
       />
       <Alert
@@ -315,6 +330,7 @@ export function DebtFormScreen({
         customers={customers}
         disabled={isSaving}
         errors={errors}
+        setValue={setValue}
         vehicles={vehicles}
       />
       <View style={styles.actions}>

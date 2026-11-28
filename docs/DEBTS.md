@@ -4,6 +4,8 @@
 
 O Prompt 07 implementou o fluxo offline de fiados sobre o SQLite existente. A aba permite cadastrar, listar, pesquisar por cliente, descrição ou placa e filtrar por pendente, parcialmente pago, atrasado, quitado ou cancelado. Cadastro e edição usam React Hook Form, Zod e o `CurrencyInput` compartilhado.
 
+O novo fiado reúne dados do cliente e do lançamento. Clientes ativos podem ser encontrados por nome ou telefone e têm seus dados preenchidos ao serem selecionados. Se nenhum cadastro for selecionado, o cliente é criado automaticamente com o fiado na mesma transação; falhas revertem ambas as gravações. A entidade de clientes, seus UUIDs e todos os fiados e pagamentos relacionados permanecem inalterados.
+
 Fiados também aparecem nos perfis do cliente e do veículo. Esses perfis abrem o cadastro com os vínculos preenchidos; clientes e veículos arquivados permanecem no histórico, mas não podem receber novos lançamentos.
 
 ## Regras e persistência

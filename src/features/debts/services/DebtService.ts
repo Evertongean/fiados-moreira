@@ -5,12 +5,15 @@ import { DebtRepository } from '@/database/repositories/debt.repository';
 import { VehicleRepository } from '@/database/repositories/vehicle.repository';
 import type { DebtRow } from '@/database/schema';
 import type { SqlExecutor } from '@/database/types/executor';
+import type { CreateCustomerInput } from '@/features/customers/domain/customerSchemas';
+import { CustomerService } from '@/features/customers/services/CustomerService';
 import {
   cancelDebtSchema,
   createDebtSchema,
   updateDebtSchema,
   type CancelDebtInput,
   type CreateDebtInput,
+  type CreateDebtWithoutCustomerInput,
   type UpdateDebtInput,
 } from '@/features/debts/domain/debtSchemas';
 
@@ -50,55 +53,25 @@ export class DebtService {
   ): Promise<DebtRow> {
     const value = createDebtSchema.safeParse(input);
     if (!value.success) throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do fiado inválidos.');
+    const debt = await this.executor.transaction((transaction) =>
+      this.createValidated(transaction, workspaceId, value.data, operationId),
+    );
+    await this.notifyFinancialChange(workspaceId, debt.id);
+    return debt;
+  }
+
+  async createWithNewCustomer(
+    workspaceId: string,
+    customerInput: CreateCustomerInput,
+    debtInput: CreateDebtWithoutCustomerInput,
+    customerId: string,
+    operationId?: string,
+  ): Promise<DebtRow> {
+    const value = createDebtSchema.safeParse({ ...debtInput, customerId });
+    if (!value.success) throw new AppDatabaseError('VALIDATION_ERROR', 'Dados do fiado inválidos.');
     const debt = await this.executor.transaction(async (transaction) => {
-      const audit = new AuditRepository(transaction);
-      if (operationId) {
-        const previous = await audit.findByOperationId(workspaceId, operationId);
-        if (previous) {
-          const existing = await new DebtRepository(transaction).findById(
-            workspaceId,
-            previous.entityId,
-          );
-          if (
-            previous.action === 'create' &&
-            previous.entityType === 'debt' &&
-            existing &&
-            debtMatchesCreate(existing, value.data)
-          ) {
-            return existing;
-          }
-          throw new AppDatabaseError(
-            'IDEMPOTENCY_CONFLICT',
-            'A operação já foi usada com outros dados.',
-          );
-        }
-      }
-      const customer = await new CustomerRepository(transaction).findById(
-        workspaceId,
-        value.data.customerId,
-      );
-      if (!customer) throw new AppDatabaseError('CUSTOMER_NOT_FOUND', 'Cliente não encontrado.');
-      if (customer.archivedAt) {
-        throw new AppDatabaseError(
-          'CUSTOMER_ARCHIVED',
-          'Restaure o cliente antes de registrar um novo fiado.',
-        );
-      }
-      await this.validateVehicle(
-        transaction,
-        workspaceId,
-        value.data.customerId,
-        value.data.vehicleId,
-      );
-      const debt = await new DebtRepository(transaction).insertValidated(workspaceId, value.data);
-      await audit.record(workspaceId, {
-        entityType: 'debt',
-        entityId: debt.id,
-        action: 'create',
-        operationId,
-        metadata: { totalCents: debt.totalCents },
-      });
-      return debt;
+      await new CustomerService(transaction).create(workspaceId, customerInput, customerId);
+      return this.createValidated(transaction, workspaceId, value.data, operationId);
     });
     await this.notifyFinancialChange(workspaceId, debt.id);
     return debt;
@@ -246,6 +219,57 @@ export class DebtService {
         'Restaure o veículo antes de vinculá-lo a um novo fiado.',
       );
     }
+  }
+
+  private async createValidated(
+    transaction: SqlExecutor,
+    workspaceId: string,
+    input: CreateDebtInput,
+    operationId?: string,
+  ): Promise<DebtRow> {
+    const audit = new AuditRepository(transaction);
+    if (operationId) {
+      const previous = await audit.findByOperationId(workspaceId, operationId);
+      if (previous) {
+        const existing = await new DebtRepository(transaction).findById(
+          workspaceId,
+          previous.entityId,
+        );
+        if (
+          previous.action === 'create' &&
+          previous.entityType === 'debt' &&
+          existing &&
+          debtMatchesCreate(existing, input)
+        ) {
+          return existing;
+        }
+        throw new AppDatabaseError(
+          'IDEMPOTENCY_CONFLICT',
+          'A operação já foi usada com outros dados.',
+        );
+      }
+    }
+    const customer = await new CustomerRepository(transaction).findById(
+      workspaceId,
+      input.customerId,
+    );
+    if (!customer) throw new AppDatabaseError('CUSTOMER_NOT_FOUND', 'Cliente não encontrado.');
+    if (customer.archivedAt) {
+      throw new AppDatabaseError(
+        'CUSTOMER_ARCHIVED',
+        'Restaure o cliente antes de registrar um novo fiado.',
+      );
+    }
+    await this.validateVehicle(transaction, workspaceId, input.customerId, input.vehicleId);
+    const debt = await new DebtRepository(transaction).insertValidated(workspaceId, input);
+    await audit.record(workspaceId, {
+      entityType: 'debt',
+      entityId: debt.id,
+      action: 'create',
+      operationId,
+      metadata: { totalCents: debt.totalCents },
+    });
+    return debt;
   }
 
   private async notifyFinancialChange(workspaceId: string, debtId: string): Promise<void> {

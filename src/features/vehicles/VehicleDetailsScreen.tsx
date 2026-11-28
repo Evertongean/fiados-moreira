@@ -146,7 +146,7 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
   if (status === 'error' || !vehicle || !owner) {
     return (
       <Screen contentContainerStyle={styles.page}>
-        <PageHeader fallbackRoute="/customers" title="Detalhes do veículo" />
+        <PageHeader fallbackRoute="/debts" title="Detalhes do veículo" />
         <EmptyState
           action={{ label: 'Tentar novamente', onPress: () => void load() }}
           description="Não foi possível consultar os dados locais."
@@ -185,7 +185,7 @@ function VehicleDetailsContent({ vehicleId }: { vehicleId: string }) {
   return (
     <Screen contentContainerStyle={styles.page} scroll>
       <PageHeader
-        fallbackRoute="/customers"
+        fallbackRoute="/debts"
         rightAction={
           <Button
             icon={Pencil}

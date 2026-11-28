@@ -7,7 +7,7 @@ export interface PageHeaderProps {
   title: string;
   subtitle?: string;
   rightAction?: ReactNode;
-  fallbackRoute?: '/' | '/customers' | '/debts' | '/reports' | '/settings';
+  fallbackRoute?: '/' | '/debts' | '/reports' | '/settings';
 }
 
 export function PageHeader({ title, subtitle, rightAction, fallbackRoute = '/' }: PageHeaderProps) {

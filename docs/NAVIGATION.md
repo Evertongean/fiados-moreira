@@ -6,7 +6,7 @@ A navegação do Fiados Moreira usa Expo Router com rotas em `src/app`, um `Stac
 
 ```text
 Stack raiz
-├── (tabs) — cinco seções principais, com estado preservado
+├── (tabs) — quatro seções principais, com estado preservado
 ├── customers — formulários, detalhes e histórico
 ├── vehicles — formulários e detalhes
 ├── debts — formulários, detalhes e pagamento
@@ -23,13 +23,12 @@ As telas principais aparecem nas abas. Formulários e detalhes são empilhados f
 
 ## Abas principais
 
-| Ordem | Rota         | Título     | Ícone         | Responsabilidade              |
-| ----- | ------------ | ---------- | ------------- | ----------------------------- |
-| 1     | `/`          | Início     | `House`       | Dashboard financeiro offline  |
-| 2     | `/customers` | Clientes   | `Users`       | Entrada do módulo de clientes |
-| 3     | `/debts`     | Fiados     | `Wallet`      | Entrada do módulo financeiro  |
-| 4     | `/reports`   | Relatórios | `ChartColumn` | Indicadores e relatórios      |
-| 5     | `/settings`  | Ajustes    | `Settings`    | Preferências e gerenciamento  |
+| Ordem | Rota        | Título     | Ícone         | Responsabilidade             |
+| ----- | ----------- | ---------- | ------------- | ---------------------------- |
+| 1     | `/`         | Início     | `House`       | Dashboard financeiro offline |
+| 2     | `/debts`    | Fiados     | `Wallet`      | Entrada do módulo financeiro |
+| 3     | `/reports`  | Relatórios | `ChartColumn` | Indicadores e relatórios     |
+| 4     | `/settings` | Ajustes    | `Settings`    | Preferências e gerenciamento |
 
 As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segura fornecida pelo navegador, labels acessíveis e ocultação ao abrir o teclado. A personalização permanece sobre o navigator fornecido pelo Expo Router; não existe barra manual paralela.
 
@@ -41,7 +40,6 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 | --------------------- | ------------------------- | ------------------------------------- | --------------- | ------------------------- |
 | Dashboard             | `/`                       | Indicadores, vencimentos e atividades | Funcional       | Prompt 10                 |
 | Pesquisa global       | `/search`                 | Busca agrupada e filtros offline      | Funcional       | Prompt 11                 |
-| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional       | Prompt 05                 |
 | Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional       | Prompt 05                 |
 | Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional       | Prompt 05                 |
 | Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional       | Prompt 05                 |
@@ -79,7 +77,7 @@ Rotas dinâmicas recebem apenas `id`. `getRouteId` aceita uma string simples com
 
 Com `experiments.typedRoutes` ativo no `app.json`, rotas estáticas usam literais tipados e rotas dinâmicas usam o formato `{ pathname, params }`. Os tipos são gerados pelo Expo CLI em `.expo/types` e não são versionados.
 
-O dashboard abre `/search` pelo botão acessível no cabeçalho. Resultados transportam apenas o UUID para as rotas de detalhes. O dashboard também abre `/debts` com filtros validados `open`, `due_today` ou `overdue`. A ação de pagamento acrescenta apenas o modo de seleção e nunca transporta valor financeiro. O indicador de clientes devedores abre `/customers` com o filtro local `with_debt`; parâmetros desconhecidos retornam aos filtros padrão.
+Resultados da pesquisa e dos relatórios transportam apenas o UUID para as rotas de detalhes. O dashboard abre `/debts` com filtros validados `open`, `due_today` ou `overdue`; a ação de pagamento acrescenta somente o modo de seleção e nunca transporta valor financeiro. Não existe mais uma rota de listagem de clientes nas abas: a criação necessária ao lançamento acontece em `/debts/new`, enquanto perfil, edição e histórico continuam disponíveis pelos registros relacionados.
 
 ## Cabeçalhos e layouts
 
@@ -123,6 +121,6 @@ O Stack raiz concentra providers e será o ponto de composição para um futuro 
 
 O ícone e a splash screen usam o logotipo oficial em `assets/brand/logo-fiadosmoreira.png`. Mudanças nessa configuração nativa só aparecem em um novo development build ou build de produção; o Expo Go não representa integralmente essa configuração.
 
-Os formulários de cliente desabilitam o gesto de retorno e interceptam o botão físico Android quando há conteúdo alterado, oferecendo confirmação antes do descarte. Após criação ou edição confirmada no SQLite, a rota é substituída pelo perfil usando somente o UUID.
+Os formulários de cliente desabilitam o gesto de retorno e interceptam o botão físico Android quando há conteúdo alterado, oferecendo confirmação antes do descarte. Após criação ou edição confirmada no SQLite, a rota é substituída pelo perfil usando somente o UUID. Sem histórico de navegação, telas de cliente e veículo retornam para Fiados, pois Clientes não é mais uma aba.
 
 Os formulários de veículo seguem a mesma proteção contra descarte. O perfil do cliente abre `/vehicles/new` com apenas `customerId`; cadastro e edição confirmados substituem a rota pelos detalhes usando o UUID do veículo.

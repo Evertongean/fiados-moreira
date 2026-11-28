@@ -2,7 +2,7 @@
 
 ## Objetivo e estado
 
-O módulo de clientes é o primeiro fluxo visual conectado ao SQLite local. Ele permite cadastrar, listar, pesquisar, consultar, editar, arquivar e restaurar clientes sem conexão com a internet. O SQLite continua sendo a fonte de verdade; as telas não mantêm uma cópia persistente em store nem executam SQL.
+O módulo de clientes mantém a entidade e todo o histórico no SQLite local, sem depender de uma aba própria. O cadastro necessário ao lançamento foi incorporado ao novo fiado, e perfis relacionados continuam permitindo consultar, editar, arquivar e restaurar clientes sem conexão com a internet. O SQLite continua sendo a fonte de verdade; as telas não mantêm uma cópia persistente em store nem executam SQL.
 
 A implementação está protegida por testes unitários, de componente e integração com SQLite real isolado. A validação manual do adaptador Expo SQLite, teclado, acessibilidade e persistência após encerramento do processo em Android/iOS permanece necessária antes de usar dados reais.
 
@@ -27,13 +27,14 @@ Nenhuma migration foi necessária: os campos e índices da tabela `customers` cr
 
 ## Telas implementadas
 
-- `/customers`: quantidade real de ativos, busca, filtros de ativos/arquivados/todos, acesso filtrado a clientes com saldo pelo dashboard, quatro ordenações, estados de carregamento, erro e vazio, lista virtualizada e atualização ao receber foco.
 - `/customers/new`: cadastro rápido ou completo com aviso de alterações não salvas.
 - `/customers/[id]`: perfil, dados cadastrais, resumo financeiro real somente de leitura, arquivamento e restauração.
 - `/customers/[id]/edit`: edição com o mesmo formulário e preservação de UUID, criação e vínculos.
 - `/customers/[id]/history`: resumo atual, filtros e linha do tempo paginada de fiados, pagamentos, estornos, alterações e cancelamentos.
 
 Veículos e fiados são listados no perfil. O Prompt 08 habilitou o registro de pagamento: havendo um fiado aberto, ele é selecionado diretamente; havendo vários, o usuário escolhe qual dívida receberá o valor.
+
+A antiga rota `/customers` deixou de compor a navegação inferior. Em `/debts/new`, o usuário pode pesquisar clientes ativos por nome ou telefone; a seleção preenche os dados cadastrados. Quando nenhum cliente é selecionado, nome, telefone/WhatsApp e endereço são persistidos junto com o primeiro fiado em uma única transação. As rotas de detalhes, edição e histórico permanecem para preservar o gerenciamento contextual e todos os vínculos existentes.
 
 ## Campos e validação
 

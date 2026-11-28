@@ -117,7 +117,7 @@ Jest 30, `jest-expo` e React Native Testing Library foram antecipados no Prompt 
 
 ## Decisões do Prompt 03
 
-- O Expo Router compõe um Stack raiz, cinco JavaScript Tabs e stacks secundários por domínio. Detalhes e formulários ficam fora das tabs para aproveitar a tela inteira.
+- O Expo Router compõe um Stack raiz, quatro JavaScript Tabs e stacks secundários por domínio. Detalhes e formulários ficam fora das tabs para aproveitar a tela inteira.
 - Arquivos em `src/app` permanecem finos; as estruturas visuais foram distribuídas em `src/features/<feature>` e os elementos compartilhados em `src/components/navigation`.
 - Cabeçalhos customizados reutilizam o Design System e o cabeçalho nativo não é montado em paralelo.
 - Rotas dinâmicas transportam apenas identificadores validados e oferecem fallback seguro para acesso direto inválido.

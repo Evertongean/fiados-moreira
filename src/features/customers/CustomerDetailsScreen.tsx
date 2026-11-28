@@ -176,7 +176,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   if (status === 'error' || !customer || !summary) {
     return (
       <Screen contentContainerStyle={styles.page}>
-        <PageHeader fallbackRoute="/customers" title="Perfil do cliente" />
+        <PageHeader fallbackRoute="/debts" title="Perfil do cliente" />
         <EmptyState
           action={{ label: 'Tentar novamente', onPress: () => void load() }}
           description="Não foi possível consultar os dados locais."
@@ -236,7 +236,7 @@ function CustomerDetailsContent({ customerId }: { customerId: string }) {
   return (
     <Screen contentContainerStyle={styles.page} scroll>
       <PageHeader
-        fallbackRoute="/customers"
+        fallbackRoute="/debts"
         rightAction={
           <Button
             icon={Pencil}

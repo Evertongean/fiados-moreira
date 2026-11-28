@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { customerFormSchema } from '@/features/customers/domain/customerSchemas';
 import { MAX_CURRENCY_CENTS } from '@/utils/currency';
 
 import { parseCivilDate } from './debtUtils';
@@ -58,8 +59,15 @@ const formDate = (optional = false) =>
       'Informe uma data válida no formato DD/MM/AAAA.',
     );
 
+const embeddedCustomerFormSchema = customerFormSchema.pick({
+  name: true,
+  phone: true,
+  address: true,
+});
+
 export const debtFormSchema = z.object({
-  customerId: z.string().uuid('Selecione um cliente.'),
+  customerId: z.union([z.literal(''), z.string().uuid('Selecione um cliente válido.')]),
+  customer: embeddedCustomerFormSchema,
   vehicleId: z.union([z.literal(''), z.string().uuid('Selecione um veículo válido.')]),
   description: z.string().trim().min(1, 'Informe o serviço ou produto.').max(500),
   totalCents: z
@@ -78,6 +86,7 @@ export const debtFormSchema = z.object({
 });
 
 export type CreateDebtInput = z.input<typeof createDebtSchema>;
+export type CreateDebtWithoutCustomerInput = Omit<CreateDebtInput, 'customerId'>;
 export type UpdateDebtInput = z.input<typeof updateDebtSchema>;
 export type CancelDebtInput = z.input<typeof cancelDebtSchema>;
 export type DebtFormValues = z.input<typeof debtFormSchema>;

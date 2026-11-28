@@ -16,11 +16,11 @@ jest.mock('expo-router', () => {
 });
 
 describe('<TabsLayout />', () => {
-  it('renders exactly the five main tabs', async () => {
+  it('renders exactly the four main tabs', async () => {
     await renderWithTheme(<TabsLayout />);
 
-    expect(screen.getAllByTestId(/^tab-screen-/)).toHaveLength(5);
-    for (const name of ['Início', 'Clientes', 'Fiados', 'Relatórios', 'Ajustes']) {
+    expect(screen.getAllByTestId(/^tab-screen-/)).toHaveLength(4);
+    for (const name of ['Início', 'Fiados', 'Relatórios', 'Ajustes']) {
       expect(screen.getByLabelText(name)).toBeOnTheScreen();
     }
   });

@@ -77,7 +77,7 @@ export function VehicleFormScreen({ mode, vehicleId, initialCustomerId }: Vehicl
 
   const leave = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/customers');
+    else router.replace('/debts');
   };
 
   const requestLeave = () => {

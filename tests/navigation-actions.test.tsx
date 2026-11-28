@@ -3,7 +3,6 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import NotFoundScreen from '@/app/+not-found';
 import { PageHeader } from '@/components/navigation/PageHeader';
 import { AppHeader } from '@/components/navigation/AppHeader';
-import { CustomersScreen } from '@/features/customers/CustomersScreen';
 import { DebtsScreen } from '@/features/debts/DebtsScreen';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { renderWithTheme } from './render';
@@ -13,11 +12,6 @@ const mockRouter = {
   canGoBack: jest.fn(() => true),
   push: jest.fn(),
   replace: jest.fn(),
-};
-const mockCustomerRepository = {
-  list: jest.fn().mockResolvedValue([]),
-  listAdvanced: jest.fn().mockResolvedValue([]),
-  countActive: jest.fn().mockResolvedValue(0),
 };
 const mockDebtRepository = { listOverview: jest.fn().mockResolvedValue([]) };
 const mockGlobalSearchRepository = {
@@ -34,7 +28,6 @@ jest.mock('@/hooks/useDatabase', () => ({
   useDatabase: () => ({
     workspace: { id: 'workspace-test', timezone: 'America/Fortaleza' },
     repositories: {
-      customers: mockCustomerRepository,
       debts: mockDebtRepository,
       globalSearch: mockGlobalSearchRepository,
     },
@@ -44,13 +37,6 @@ jest.mock('@/hooks/useDatabase', () => ({
 describe('navigation actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('opens the new customer screen from the customer empty state', async () => {
-    await renderWithTheme(<CustomersScreen />);
-
-    fireEvent.press(await screen.findByRole('button', { name: 'Cadastrar cliente' }));
-    expect(mockRouter.push).toHaveBeenCalledWith('/customers/new');
   });
 
   it('opens appearance settings', async () => {
@@ -84,10 +70,10 @@ describe('navigation actions', () => {
 
   it('uses the configured fallback when a deep link has no history', async () => {
     mockRouter.canGoBack.mockReturnValueOnce(false);
-    await renderWithTheme(<PageHeader fallbackRoute="/customers" title="Tela secundária" />);
+    await renderWithTheme(<PageHeader fallbackRoute="/debts" title="Tela secundária" />);
 
     fireEvent.press(screen.getByRole('button', { name: 'Voltar' }));
-    expect(mockRouter.replace).toHaveBeenCalledWith('/customers');
+    expect(mockRouter.replace).toHaveBeenCalledWith('/debts');
   });
 
   it('returns to the dashboard from an unknown route', async () => {

@@ -10,7 +10,7 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [x] Tokens completos, tipografia Inter, NativeWind e componentes base.
   - [x] Temas claro/escuro/sistema, persistência, acessibilidade e galeria de desenvolvimento.
 - [x] **Prompt 03 — Navegação**
-  - [x] Cinco abas, stacks, rotas dinâmicas, layouts e estruturas preliminares das telas.
+  - [x] Quatro abas, stacks, rotas dinâmicas, layouts e estruturas preliminares das telas.
 - [ ] **Prompt 04 — Banco de dados** (implementação concluída; aceite mobile pendente)
   - [x] Expo SQLite, Drizzle, schema, migrations, repositórios e serviços financeiros base.
   - [x] Integridade, transações, idempotência, auditoria e testes SQLite isolados.
@@ -25,6 +25,7 @@ As caixas indicam implementação efetiva, não apenas documentação. Cada etap
   - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 07 — Fiados** (implementação concluída; aceite mobile pendente)
   - [x] Cadastro, edição, detalhes, pesquisa, filtros, cancelamento e saldos derivados.
+  - [x] Seleção de cliente por nome/telefone e cadastro atômico de novo cliente com o fiado.
   - [x] Vínculos com clientes/veículos, auditoria, idempotência e testes SQLite isolados.
   - [ ] Validar persistência, teclado, telas pequenas e acessibilidade em Android e iOS.
 - [ ] **Prompt 08 — Pagamentos** (implementação concluída; aceite mobile pendente)

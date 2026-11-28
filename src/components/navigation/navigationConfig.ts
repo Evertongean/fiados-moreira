@@ -1,7 +1,7 @@
-import { ChartColumn, House, Settings, Users, Wallet, type LucideIcon } from 'lucide-react-native';
+import { ChartColumn, House, Settings, Wallet, type LucideIcon } from 'lucide-react-native';
 
 export interface MainTabConfig {
-  name: 'index' | 'customers' | 'debts' | 'reports' | 'settings';
+  name: 'index' | 'debts' | 'reports' | 'settings';
   title: string;
   accessibilityLabel: string;
   icon: LucideIcon;
@@ -9,7 +9,6 @@ export interface MainTabConfig {
 
 export const MAIN_TABS: readonly MainTabConfig[] = [
   { name: 'index', title: 'Início', accessibilityLabel: 'Aba Início', icon: House },
-  { name: 'customers', title: 'Clientes', accessibilityLabel: 'Aba Clientes', icon: Users },
   { name: 'debts', title: 'Fiados', accessibilityLabel: 'Aba Fiados', icon: Wallet },
   {
     name: 'reports',
