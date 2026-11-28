@@ -37,41 +37,41 @@ As tabs usam `backBehavior="history"`, cores dos tokens semânticos, área segur
 
 “Estrutural” significa que a tela, navegação, estados e acessibilidade iniciais existem, mas o módulo ainda não consulta ou persiste dados.
 
-| Tela                  | Rota                      | Responsabilidade                      | Status                | Funcionalidade definitiva |
-| --------------------- | ------------------------- | ------------------------------------- | --------------------- | ------------------------- |
-| Dashboard             | `/`                       | Indicadores, vencimentos e atividades | Funcional             | Prompt 10                 |
-| Pesquisa global       | `/search`                 | Busca agrupada e filtros offline      | Funcional             | Prompt 11                 |
-| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional             | Prompt 05                 |
-| Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional             | Prompt 05                 |
-| Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional             | Prompt 05                 |
-| Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional             | Prompt 05                 |
-| Histórico do cliente  | `/customers/[id]/history` | Resumo, filtros e linha do tempo      | Funcional             | Prompt 09                 |
-| Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional             | Prompt 06                 |
-| Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional             | Prompt 06                 |
-| Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional             | Prompt 06                 |
-| Fiados                | `/debts`                  | Pesquisa, filtros e listagem SQLite   | Funcional             | Prompt 07                 |
-| Novo fiado            | `/debts/new`              | Cadastro validado e auditado          | Funcional             | Prompt 07                 |
-| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional             | Prompt 07                 |
-| Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional             | Prompt 07                 |
-| Criar lembrete        | `/debts/[id]/reminder`    | Agendamento local personalizado       | Funcional             | Prompt 12                 |
-| Preparar cobrança     | `/collections/compose`    | Revisão, cópia e abertura do WhatsApp | Funcional             | Prompt 13                 |
-| Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional             | Prompt 08                 |
-| Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional             | Prompt 08                 |
-| Comprovante           | `/payments/[id]/receipt`  | Prévia, PDF e compartilhamento        | Funcional             | Prompt 15                 |
-| Relatórios            | `/reports`                | Indicadores, gráficos, ranking e CSV  | Funcional             | Prompt 14                 |
-| Valores a receber     | `/reports/receivables`    | Saldos atuais filtráveis              | Funcional             | Prompt 14                 |
-| Valores recebidos     | `/reports/received`       | Pagamentos e estornos por período     | Funcional             | Prompt 14                 |
-| Fiados atrasados      | `/reports/overdue`        | Saldos atuais vencidos                | Funcional             | Prompt 14                 |
-| Notificações          | `/notifications`          | Central, leitura e acesso ao fiado    | Funcional             | Prompt 12                 |
-| Ajustes               | `/settings`               | Categorias de configuração            | Estrutural            | Prompt 21                 |
-| Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional             | Prompt 02/03              |
-| Notificações          | `/settings/notifications` | Permissão, frequência e privacidade   | Funcional             | Prompt 12/21              |
-| Mensagens de cobrança | `/settings/collections`   | Modelos locais de cobrança            | Funcional             | Prompt 13/21              |
-| Segurança             | `/settings/security`      | Proteção e biometria futuras          | Estrutural            | Prompt 17/21              |
-| Backup                | `/settings/backup`        | Backup e restauração futuros          | Estrutural            | Prompt 18/21              |
-| Sobre                 | `/settings/about`         | Identidade e versão real              | Implementada          | Prompt 03                 |
-| Galeria               | `/dev/design-system`      | Demonstração do Design System         | Desenvolvimento       | Prompt 02                 |
-| Não encontrada        | qualquer rota inexistente | Retorno seguro ao início              | Implementada          | Prompt 03                 |
+| Tela                  | Rota                      | Responsabilidade                      | Status          | Funcionalidade definitiva |
+| --------------------- | ------------------------- | ------------------------------------- | --------------- | ------------------------- |
+| Dashboard             | `/`                       | Indicadores, vencimentos e atividades | Funcional       | Prompt 10                 |
+| Pesquisa global       | `/search`                 | Busca agrupada e filtros offline      | Funcional       | Prompt 11                 |
+| Clientes              | `/customers`              | Busca, filtros e listagem SQLite      | Funcional       | Prompt 05                 |
+| Novo cliente          | `/customers/new`          | Cadastro validado e offline           | Funcional       | Prompt 05                 |
+| Detalhes do cliente   | `/customers/[id]`         | Perfil, resumo, arquivo e restauração | Funcional       | Prompt 05                 |
+| Editar cliente        | `/customers/[id]/edit`    | Edição validada e auditada            | Funcional       | Prompt 05                 |
+| Histórico do cliente  | `/customers/[id]/history` | Resumo, filtros e linha do tempo      | Funcional       | Prompt 09                 |
+| Novo veículo          | `/vehicles/new`           | Cadastro validado vinculado a cliente | Funcional       | Prompt 06                 |
+| Detalhes do veículo   | `/vehicles/[id]`          | Dados, proprietário e arquivamento    | Funcional       | Prompt 06                 |
+| Editar veículo        | `/vehicles/[id]/edit`     | Edição preservando proprietário       | Funcional       | Prompt 06                 |
+| Fiados                | `/debts`                  | Pesquisa, filtros e listagem SQLite   | Funcional       | Prompt 07                 |
+| Novo fiado            | `/debts/new`              | Cadastro validado e auditado          | Funcional       | Prompt 07                 |
+| Detalhes do fiado     | `/debts/[id]`             | Resumo, situação e pagamentos         | Funcional       | Prompt 07                 |
+| Editar fiado          | `/debts/[id]/edit`        | Edição validada e auditada            | Funcional       | Prompt 07                 |
+| Criar lembrete        | `/debts/[id]/reminder`    | Agendamento local personalizado       | Funcional       | Prompt 12                 |
+| Preparar cobrança     | `/collections/compose`    | Revisão, cópia e abertura do WhatsApp | Funcional       | Prompt 13                 |
+| Registrar pagamento   | `/debts/[id]/payment`     | Pagamento validado e auditado         | Funcional       | Prompt 08                 |
+| Detalhes do pagamento | `/payments/[id]`          | Consulta e estorno integral           | Funcional       | Prompt 08                 |
+| Comprovante           | `/payments/[id]/receipt`  | Prévia, PDF e compartilhamento        | Funcional       | Prompt 15                 |
+| Relatórios            | `/reports`                | Indicadores, gráficos, ranking e CSV  | Funcional       | Prompt 14                 |
+| Valores a receber     | `/reports/receivables`    | Saldos atuais filtráveis              | Funcional       | Prompt 14                 |
+| Valores recebidos     | `/reports/received`       | Pagamentos e estornos por período     | Funcional       | Prompt 14                 |
+| Fiados atrasados      | `/reports/overdue`        | Saldos atuais vencidos                | Funcional       | Prompt 14                 |
+| Notificações          | `/notifications`          | Central, leitura e acesso ao fiado    | Funcional       | Prompt 12                 |
+| Ajustes               | `/settings`               | Categorias de configuração            | Estrutural      | Prompt 21                 |
+| Aparência             | `/settings/appearance`    | Tema claro, escuro ou sistema         | Funcional       | Prompt 02/03              |
+| Notificações          | `/settings/notifications` | Permissão, frequência e privacidade   | Funcional       | Prompt 12/21              |
+| Mensagens de cobrança | `/settings/collections`   | Modelos locais de cobrança            | Funcional       | Prompt 13/21              |
+| Segurança             | `/settings/security`      | Proteção e biometria futuras          | Estrutural      | Prompt 17/21              |
+| Backup                | `/settings/backup`        | Backup e restauração futuros          | Estrutural      | Prompt 18/21              |
+| Sobre                 | `/settings/about`         | Identidade e versão real              | Implementada    | Prompt 03                 |
+| Galeria               | `/dev/design-system`      | Demonstração do Design System         | Desenvolvimento | Prompt 02                 |
+| Não encontrada        | qualquer rota inexistente | Retorno seguro ao início              | Implementada    | Prompt 03                 |
 
 ## Rotas dinâmicas e parâmetros
 
@@ -121,7 +121,7 @@ O Stack raiz concentra providers e será o ponto de composição para um futuro 
 7. Defina estado vazio, indisponível, inválido e comportamento de deep link antes de conectar dados.
 8. Regenere os tipos de rota, execute `npm run validate` e teste o retorno em Android e iOS.
 
-Mudanças na configuração nativa da splash screen só aparecem em um novo development build ou build de produção; o Expo Go não representa integralmente essa configuração.
+O ícone e a splash screen usam o logotipo oficial em `assets/brand/logo-fiadosmoreira.png`. Mudanças nessa configuração nativa só aparecem em um novo development build ou build de produção; o Expo Go não representa integralmente essa configuração.
 
 Os formulários de cliente desabilitam o gesto de retorno e interceptam o botão físico Android quando há conteúdo alterado, oferecendo confirmação antes do descarte. Após criação ou edição confirmada no SQLite, a rota é substituída pelo perfil usando somente o UUID.
 

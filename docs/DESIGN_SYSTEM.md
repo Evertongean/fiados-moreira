@@ -10,14 +10,12 @@ O slogan institucional é **“Seu trabalho. Seu dinheiro. Seu controle.”**
 
 ## Identidade visual
 
-`BrandLogo` implementa uma marca vetorial inicial e provisória, sem recurso externo ou restrição de licença. O símbolo combina uma chave mecânica e barras de organização financeira.
+`BrandLogo` aplica o logotipo oficial armazenado em `assets/brand/logo-fiadosmoreira.png`. O recorte visual preserva a arte original e remove apenas o espaço externo no enquadramento do componente, permitindo uso legível em cabeçalhos, na tela Sobre e na galeria.
 
-- `variant="full"`: símbolo e nome; aceita o slogan com `showSlogan`.
-- `variant="symbol"`: somente o símbolo.
-- `background="light" | "dark"`: contraste para o fundo de destino; quando omitido, acompanha o tema.
-- `size`: dimensão configurável e proporção preservada.
+- `size`: altura da composição, com proporção preservada.
+- `showSlogan`: exibe “Seu trabalho. Seu dinheiro. Seu controle.” abaixo da marca.
 
-A descrição acessível identifica a arte como marca provisória. Ela não deve ser apresentada como logotipo definitivo.
+O arquivo oficial também é usado como ícone e imagem da splash screen na configuração Expo. Como a arte possui fundo branco, o componente mantém essa superfície nos temas claro e escuro. A descrição acessível identifica a imagem como “Logotipo Fiados Moreira”.
 
 ## Cores
 

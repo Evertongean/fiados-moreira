@@ -1,31 +1,37 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-  BanknoteArrowDown,
+  Bell,
   CalendarClock,
   CircleDollarSign,
   ClockAlert,
+  Eye,
+  EyeOff,
   HandCoins,
   MessageCircle,
   Plus,
   ReceiptText,
+  Search,
   UserPlus,
-  Users,
-  Wallet,
+  type LucideIcon,
 } from 'lucide-react-native';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AppState, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { BalanceCard, StatCard } from '@/components/cards';
-import { AppHeader, SectionHeader } from '@/components/navigation';
-import { Alert, Button, EmptyState, LoadingState, Screen } from '@/components/ui';
-import { DashboardActivityItem } from '@/features/dashboard/components/DashboardActivityItem';
+import { SectionHeader } from '@/components/navigation';
+import {
+  Alert,
+  AppText,
+  Button,
+  Card,
+  EmptyState,
+  IconButton,
+  LoadingState,
+  Screen,
+} from '@/components/ui';
 import { DashboardDebtItem } from '@/features/dashboard/components/DashboardDebtItem';
-import { ReceiptsChart } from '@/features/dashboard/components/ReceiptsChart';
 import { getLastCivilDaysRange } from '@/features/dashboard/domain/dashboardDateUtils';
-import type {
-  DashboardActivity,
-  DashboardSnapshot,
-} from '@/features/dashboard/domain/dashboardTypes';
+import type { DashboardSnapshot } from '@/features/dashboard/domain/dashboardTypes';
+import { useNotifications } from '@/features/notifications/NotificationProvider';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useTheme } from '@/hooks/useTheme';
 import { formatBRLCents } from '@/utils/currency';
@@ -112,12 +118,10 @@ export function DashboardScreen() {
   if (status === 'error' || !snapshot) {
     return (
       <Screen contentContainerStyle={styles.page} safeAreaEdges={['top', 'left', 'right']}>
-        <AppHeader
-          showBrand
-          showSearch
-          subtitle="Bem-vindo ao controle da sua oficina"
-          title="Fiados Moreira"
-        />
+        <View style={styles.header}>
+          <DashboardHeader />
+          <View style={[styles.divider, { backgroundColor: tokens.colors.border }]} />
+        </View>
         <EmptyState
           action={{ label: 'Tentar novamente', onPress: () => void load() }}
           description="Seus dados continuam armazenados localmente. Tente consultar novamente."
@@ -129,23 +133,6 @@ export function DashboardScreen() {
   }
 
   const { summary } = snapshot;
-  const hasReceipts = snapshot.dailyReceipts.some(
-    ({ grossCents, reversedCents }) => grossCents !== 0 || reversedCents !== 0,
-  );
-  const money = (valueCents: number) => (hidden ? 'R$ ••••••' : formatBRLCents(valueCents));
-
-  const openActivity = (activity: DashboardActivity) => {
-    if (
-      activity.paymentId &&
-      activity.type !== 'debt_created' &&
-      activity.type !== 'debt_updated'
-    ) {
-      router.push({ pathname: '/payments/[id]', params: { id: activity.paymentId } });
-      return;
-    }
-    router.push({ pathname: '/debts/[id]', params: { id: activity.debtId } });
-  };
-
   return (
     <Screen
       contentContainerStyle={styles.page}
@@ -162,12 +149,10 @@ export function DashboardScreen() {
         ),
       }}
     >
-      <AppHeader
-        showBrand
-        showSearch
-        subtitle="Bem-vindo ao controle da sua oficina"
-        title="Fiados Moreira"
-      />
+      <View style={styles.header}>
+        <DashboardHeader />
+        <View style={[styles.divider, { backgroundColor: tokens.colors.border }]} />
+      </View>
 
       {refreshError ? (
         <Alert
@@ -178,160 +163,78 @@ export function DashboardScreen() {
       ) : null}
 
       <View style={styles.section}>
-        <SectionHeader
-          action={
-            <Button
-              label="Ver fiados"
-              onPress={() => router.push({ pathname: '/debts', params: { filter: 'open' } })}
-              size="sm"
-              variant="link"
-            />
-          }
-          description="Saldo atual de todos os fiados não cancelados."
-          title="Resumo financeiro"
-        />
-        <BalanceCard
-          description={`${summary.openDebtCount} ${summary.openDebtCount === 1 ? 'fiado em aberto' : 'fiados em aberto'}`}
-          hidden={hidden}
-          icon={CircleDollarSign}
-          onToggleHidden={() => setHidden((current) => !current)}
-          title="Total a receber"
-          valueCents={summary.receivableCents}
-        />
-        <View style={styles.grid}>
-          <IndicatorLink
+        <SectionHeader title="Resumo financeiro" />
+        <View style={styles.summaryCards}>
+          <DashboardSummaryCard
+            countLabel={`${summary.openDebtCount} ${summary.openDebtCount === 1 ? 'fiado em aberto' : 'fiados em aberto'}`}
+            hidden={hidden}
+            icon={CircleDollarSign}
+            onToggleHidden={() => setHidden((current) => !current)}
+            title="Total a receber"
+            valueCents={summary.receivableCents}
+          />
+          <DashboardSummaryCard
             accessibilityLabel="Abrir fiados atrasados"
+            countLabel={`${summary.overdueDebtCount} ${summary.overdueDebtCount === 1 ? 'fiado atrasado' : 'fiados atrasados'}`}
+            hidden={hidden}
+            icon={ClockAlert}
             onPress={() => router.push({ pathname: '/debts', params: { filter: 'overdue' } })}
-          >
-            <StatCard
-              description={`${summary.overdueDebtCount} ${summary.overdueDebtCount === 1 ? 'fiado atrasado' : 'fiados atrasados'}`}
-              icon={ClockAlert}
-              label="Total em atraso"
-              value={money(summary.overdueCents)}
-              variant="destructive"
-            />
-          </IndicatorLink>
-          <IndicatorLink
-            accessibilityLabel="Abrir valores recebidos"
-            onPress={() => router.push('/reports/received')}
-          >
-            <StatCard
-              description={
-                hidden
-                  ? 'Bruto e estornos ocultos'
-                  : `Bruto ${formatBRLCents(summary.monthGrossReceivedCents)} · Estornos ${formatBRLCents(summary.monthReversedCents)}`
-              }
-              icon={BanknoteArrowDown}
-              label="Líquido recebido no mês"
-              value={money(summary.monthNetReceivedCents)}
-              variant={summary.monthNetReceivedCents < 0 ? 'destructive' : 'success'}
-            />
-          </IndicatorLink>
-          <IndicatorLink
-            accessibilityLabel="Abrir fiados com vencimento hoje"
-            onPress={() => router.push({ pathname: '/debts', params: { filter: 'due_today' } })}
-          >
-            <StatCard
-              description="Saldos que vencem na data civil de hoje"
-              icon={CalendarClock}
-              label="Vencem hoje"
-              value={money(summary.dueTodayCents)}
-              variant="warning"
-            />
-          </IndicatorLink>
-          <IndicatorLink
-            accessibilityLabel="Abrir clientes"
-            onPress={() =>
-              router.push({ pathname: '/customers', params: { financial: 'with_debt' } })
-            }
-          >
-            <StatCard
-              description="Com pelo menos um saldo pendente"
-              icon={Users}
-              label="Clientes com dívidas"
-              value={String(summary.debtorCustomerCount)}
-              variant="info"
-            />
-          </IndicatorLink>
-          <IndicatorLink
-            accessibilityLabel="Abrir fiados em aberto"
-            onPress={() => router.push({ pathname: '/debts', params: { filter: 'open' } })}
-          >
-            <StatCard
-              description="Pendentes ou parcialmente pagos"
-              icon={Wallet}
-              label="Fiados em aberto"
-              value={String(summary.openDebtCount)}
-            />
-          </IndicatorLink>
-          <IndicatorLink
-            accessibilityLabel="Abrir quantidade de fiados atrasados"
-            onPress={() => router.push({ pathname: '/debts', params: { filter: 'overdue' } })}
-          >
-            <StatCard
-              description="Vencimento anterior a hoje"
-              icon={ClockAlert}
-              label="Fiados atrasados"
-              value={String(summary.overdueDebtCount)}
-              variant="destructive"
-            />
-          </IndicatorLink>
+            title="Total em atraso"
+            valueCents={summary.overdueCents}
+            variant="overdue"
+          />
         </View>
       </View>
 
       <View style={styles.section}>
         <SectionHeader title="Ações rápidas" />
         <View style={styles.actions}>
-          <Button
-            icon={UserPlus}
-            label="Novo cliente"
-            onPress={() => router.push('/customers/new')}
-            size="sm"
-            variant="outline"
-          />
-          <Button
-            icon={Plus}
-            label="Novo fiado"
-            onPress={() => router.push('/debts/new')}
-            size="sm"
-            variant="outline"
-          />
-          <Button
-            icon={HandCoins}
-            label="Registrar pagamento"
-            onPress={() =>
-              router.push({ pathname: '/debts', params: { filter: 'open', mode: 'payment' } })
-            }
-            size="sm"
-            variant="outline"
-          />
+          <View style={styles.actionRow}>
+            <View style={styles.halfAction}>
+              <Button
+                accessibilityLabel="Novo cliente"
+                fullWidth
+                icon={UserPlus}
+                label="Novo cliente"
+                onPress={() => router.push('/customers/new')}
+                variant="outline"
+              />
+            </View>
+            <View style={styles.halfAction}>
+              <Button
+                accessibilityLabel="Novo fiado"
+                fullWidth
+                icon={Plus}
+                label="Novo fiado"
+                onPress={() => router.push('/debts/new')}
+                variant="primary"
+              />
+            </View>
+          </View>
+          <View style={styles.fullAction}>
+            <Button
+              accessibilityLabel="Registrar pagamento"
+              fullWidth
+              icon={HandCoins}
+              label="Registrar pagamento"
+              onPress={() =>
+                router.push({ pathname: '/debts', params: { filter: 'open', mode: 'payment' } })
+              }
+              variant="outline"
+            />
+          </View>
         </View>
-      </View>
-
-      <View style={styles.section}>
-        <SectionHeader
-          description="Recebimentos brutos e estornos pela data efetiva de cada evento."
-          title="Últimos sete dias"
-        />
-        {hasReceipts ? (
-          <ReceiptsChart data={snapshot.dailyReceipts} hidden={hidden} />
-        ) : (
-          <EmptyState
-            description="Pagamentos e estornos efetivados no período aparecerão aqui."
-            icon={BanknoteArrowDown}
-            title="Sem movimentações nos últimos sete dias"
-          />
-        )}
       </View>
 
       <View style={styles.section}>
         <SectionHeader
           action={
             <Button
+              accessibilityLabel="Ver todos os próximos vencimentos"
               label="Ver todos"
               onPress={() => router.push({ pathname: '/debts', params: { filter: 'open' } })}
               size="sm"
-              variant="link"
+              variant="ghost"
             />
           }
           title="Próximos vencimentos"
@@ -346,8 +249,8 @@ export function DashboardScreen() {
             />
           ))
         ) : (
-          <EmptyState
-            description="Fiados com saldo e vencimento hoje ou no futuro aparecerão aqui."
+          <DashboardEmptyState
+            description="Você não possui vencimentos próximos."
             icon={CalendarClock}
             title="Nenhum próximo vencimento"
           />
@@ -358,13 +261,13 @@ export function DashboardScreen() {
         <SectionHeader
           action={
             <Button
+              accessibilityLabel="Ver todos os fiados atrasados"
               label="Ver atrasados"
               onPress={() => router.push({ pathname: '/debts', params: { filter: 'overdue' } })}
               size="sm"
-              variant="link"
+              variant="ghost"
             />
           }
-          description="Mais antigos primeiro; em empate, maior saldo."
           title="Atrasados prioritários"
         />
         {snapshot.priorityOverdueDebts.length ? (
@@ -391,31 +294,10 @@ export function DashboardScreen() {
             </View>
           ))
         ) : (
-          <EmptyState
-            description="Não há fiados vencidos com saldo pendente."
+          <DashboardEmptyState
+            description="Não há dívidas vencidas."
             icon={ClockAlert}
             title="Nenhum fiado atrasado"
-          />
-        )}
-      </View>
-
-      <View style={styles.section}>
-        <SectionHeader title="Atividades financeiras recentes" />
-        {snapshot.recentActivities.length ? (
-          snapshot.recentActivities.map((activity) => (
-            <DashboardActivityItem
-              key={activity.id}
-              activity={activity}
-              hidden={hidden}
-              onPress={() => openActivity(activity)}
-              timezone={workspace.timezone}
-            />
-          ))
-        ) : (
-          <EmptyState
-            description="Fiados, pagamentos e estornos confirmados aparecerão aqui."
-            icon={ReceiptText}
-            title="Nenhuma atividade registrada"
           />
         )}
       </View>
@@ -423,32 +305,193 @@ export function DashboardScreen() {
   );
 }
 
-function IndicatorLink({
+function DashboardSummaryCard({
   accessibilityLabel,
+  countLabel,
+  hidden,
+  icon: Icon,
   onPress,
-  children,
+  onToggleHidden,
+  title,
+  valueCents,
+  variant = 'receivable',
 }: {
-  accessibilityLabel: string;
-  onPress: () => void;
-  children: ReactNode;
+  accessibilityLabel?: string;
+  countLabel: string;
+  hidden: boolean;
+  icon: LucideIcon;
+  onPress?: () => void;
+  onToggleHidden?: () => void;
+  title: string;
+  valueCents: number;
+  variant?: 'receivable' | 'overdue';
 }) {
+  const { tokens } = useTheme();
+  const overdue = variant === 'overdue';
+  const color = overdue ? tokens.colors.destructive : tokens.colors.primary;
+
   return (
-    <Pressable
+    <Card
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.gridItem, { opacity: pressed ? 0.78 : 1 }]}
+      style={[
+        styles.summaryCard,
+        {
+          backgroundColor: overdue ? tokens.colors.surface : tokens.colors.secondary,
+          borderColor: overdue ? tokens.colors.destructive : tokens.colors.accent,
+        },
+      ]}
+      variant="outlined"
     >
-      {children}
-    </Pressable>
+      <View style={styles.summaryContent}>
+        <View style={styles.summaryHeader}>
+          <View style={styles.summaryTitle}>
+            <Icon color={color} size={18} />
+            <AppText color={overdue ? 'destructive' : 'primary'} variant="bodySmall">
+              {title}
+            </AppText>
+          </View>
+          {onToggleHidden ? (
+            <View style={styles.summaryToggle}>
+              <IconButton
+                accessibilityLabel={hidden ? 'Mostrar valor' : 'Ocultar valor'}
+                icon={hidden ? EyeOff : Eye}
+                onPress={onToggleHidden}
+                size="sm"
+                variant="ghost"
+              />
+            </View>
+          ) : null}
+        </View>
+        <AppText color={overdue ? 'foreground' : 'primary'} variant="h3">
+          {hidden ? 'R$ ••••••' : formatBRLCents(valueCents)}
+        </AppText>
+        <AppText color="textSecondary" variant="caption">
+          {countLabel}
+        </AppText>
+      </View>
+    </Card>
+  );
+}
+
+function DashboardHeader() {
+  const router = useRouter();
+  const { unreadCount } = useNotifications();
+  const { tokens } = useTheme();
+
+  return (
+    <View style={styles.dashboardHeader}>
+      <View style={styles.headerCopy}>
+        <AppText accessibilityRole="header" variant="h4">
+          Fiados Moreira
+        </AppText>
+        <AppText color="textSecondary" variant="bodySmall">
+          Bem-vindo ao controle da sua oficina
+        </AppText>
+      </View>
+      <View style={styles.headerActions}>
+        <IconButton
+          accessibilityLabel="Abrir pesquisa global"
+          icon={Search}
+          onPress={() => router.push('/search')}
+          size="sm"
+          variant="ghost"
+        />
+        <View style={styles.notificationAction}>
+          <IconButton
+            accessibilityLabel={
+              unreadCount ? `Abrir notificações, ${unreadCount} não lidas` : 'Abrir notificações'
+            }
+            icon={Bell}
+            onPress={() => router.push('/notifications')}
+            size="sm"
+            variant="ghost"
+          />
+          {unreadCount ? (
+            <View
+              style={[styles.notificationBadge, { backgroundColor: tokens.colors.destructive }]}
+            >
+              <AppText color="primaryForeground" style={styles.notificationBadgeText} weight="bold">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </AppText>
+            </View>
+          ) : null}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function DashboardEmptyState({
+  description,
+  icon: Icon,
+  title,
+}: {
+  description: string;
+  icon: LucideIcon;
+  title: string;
+}) {
+  const { tokens } = useTheme();
+
+  return (
+    <Card variant="outlined">
+      <View style={styles.emptyRow}>
+        <Icon color={tokens.colors.textMuted} size={22} />
+        <View style={styles.emptyCopy}>
+          <AppText variant="label">{title}</AppText>
+          <AppText color="textSecondary" variant="caption">
+            {description}
+          </AppText>
+        </View>
+      </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 28, paddingBottom: 32 },
-  section: { gap: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  gridItem: { flexGrow: 1, flexBasis: 150, minWidth: 150 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  page: { gap: 16, paddingBottom: 24 },
+  header: { gap: 8 },
+  dashboardHeader: {
+    minHeight: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  headerCopy: { flex: 1, gap: 1 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  notificationAction: { position: 'relative' },
+  notificationBadge: {
+    position: 'absolute',
+    right: -2,
+    top: -1,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  notificationBadgeText: { fontSize: 9, lineHeight: 11 },
+  divider: { height: StyleSheet.hairlineWidth, width: '100%' },
+  section: { gap: 10 },
+  summaryCards: { gap: 10 },
+  summaryCard: { minHeight: 104 },
+  summaryContent: { position: 'relative', gap: 2 },
+  summaryHeader: {
+    minHeight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 36,
+  },
+  summaryToggle: { position: 'absolute', right: -8, top: -10, zIndex: 1 },
+  summaryTitle: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  actions: { gap: 8 },
+  actionRow: { flexDirection: 'row', gap: 8 },
+  halfAction: { flex: 1, minWidth: 0 },
+  fullAction: { width: '100%' },
+  emptyRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  emptyCopy: { flex: 1, gap: 1 },
   overdueItem: { gap: 8 },
 });

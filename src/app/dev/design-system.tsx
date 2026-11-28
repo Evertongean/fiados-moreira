@@ -96,10 +96,7 @@ export default function DesignSystemGallery() {
           title="Design System Gallery"
         />
 
-        <GallerySection
-          description="Marca vetorial inicial; não representa o logotipo definitivo."
-          title="Identidade"
-        >
+        <GallerySection description="Logotipo oficial aplicado no produto." title="Identidade">
           <View style={styles.stack}>
             <Card variant="outlined">
               <BrandLogo showSlogan size={52} />
@@ -110,7 +107,7 @@ export default function DesignSystemGallery() {
                 { backgroundColor: brandColors.dark, borderRadius: tokens.radius.lg },
               ]}
             >
-              <BrandLogo background="dark" showSlogan size={52} />
+              <BrandLogo showSlogan size={52} />
             </View>
           </View>
         </GallerySection>

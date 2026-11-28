@@ -2,7 +2,7 @@
 
 ## Estado da implementação
 
-O Prompt 10 conectou a tela inicial ao SQLite local. O dashboard consolida indicadores, fluxo de recebimentos dos últimos sete dias, próximos vencimentos, atrasos prioritários e atividades financeiras recentes sem depender de rede ou de dados simulados.
+O Prompt 10 conectou a tela inicial ao SQLite local. O dashboard apresenta os totais a receber e em atraso, ações rápidas, próximos vencimentos e atrasos prioritários sem depender de rede ou de dados simulados. Os demais indicadores, o fluxo dos últimos sete dias e as atividades permanecem calculados na camada de dados para relatórios e reutilização futura, mas não são exibidos na Home compacta.
 
 `DashboardRepository` executa consultas agregadas e isoladas por workspace. A tela recarrega ao receber foco, quando o aplicativo volta ao estado ativo, na próxima virada da data civil e por gesto de pull-to-refresh. Nenhuma migration ou dependência foi necessária.
 
@@ -22,15 +22,15 @@ O início e o fim dos períodos são calculados como instantes UTC correspondent
 
 ## Seções e navegação
 
-- o card principal permite ocultar os valores financeiros da tela;
-- indicadores abrem a lista de fiados com filtros `open`, `due_today` ou `overdue`, a lista de clientes com saldo ou a rota já reservada para recebidos;
+- os dois cards do resumo apresentam total a receber e total em atraso; o controle do primeiro oculta todos os valores financeiros visíveis na tela;
+- o card de total em atraso abre a lista com o filtro `overdue`;
+- as ações rápidas usam botões para novo cliente, novo fiado e registro de pagamento, com destaque visual para novo fiado;
 - **Registrar pagamento** abre a lista apenas com filtros compatíveis e, ao selecionar um fiado, segue para o formulário de pagamento;
-- o gráfico SVG mostra recebimentos brutos acima do eixo e estornos abaixo dele nos últimos sete dias;
 - próximos vencimentos incluem hoje e datas futuras, limitados aos quatro mais próximos;
 - atrasos prioritários são limitados a quatro, ordenados pelo vencimento mais antigo e, em empate, pelo maior saldo;
-- atividades recentes incluem criação, atualização e cancelamento de fiado, pagamento e estorno e abrem o registro relacionado.
+- os estados sem vencimentos e sem atrasos usam uma apresentação compacta, mantendo os links para as listagens.
 
-O módulo completo de relatórios, notificações reais, Supabase e sincronização continuam fora deste escopo. A rota de valores recebidos permanece estrutural até o Prompt 14.
+Os relatórios financeiros reutilizam as mesmas definições de saldo e recebimento. Supabase e sincronização continuam fora do escopo implementado.
 
 ## Validação
 

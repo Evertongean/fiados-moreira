@@ -61,8 +61,9 @@ describe('navigation actions', () => {
   });
 
   it('opens the global search from the dashboard header action', async () => {
-    await renderWithTheme(<AppHeader showSearch title="Fiados Moreira" />);
+    await renderWithTheme(<AppHeader showBrand showSearch title="Fiados Moreira" />);
 
+    expect(screen.getByRole('image', { name: 'Logotipo Fiados Moreira' })).toBeOnTheScreen();
     fireEvent.press(screen.getByRole('button', { name: 'Abrir pesquisa global' }));
     expect(mockRouter.push).toHaveBeenCalledWith('/search');
   });

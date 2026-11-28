@@ -3,6 +3,7 @@
     "name": "Fiados Moreira",
     "slug": "fiados-moreira",
     "version": "1.0.0",
+    "icon": "./assets/brand/logo-fiadosmoreira.png",
     "orientation": "portrait",
     "scheme": "fiadosmoreira",
     "userInterfaceStyle": "automatic",
@@ -18,9 +19,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F8FAFC",
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/brand/logo-fiadosmoreira.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
           "dark": {
-            "backgroundColor": "#101714"
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/brand/logo-fiadosmoreira.png"
           }
         }
       ],

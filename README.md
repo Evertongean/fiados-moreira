@@ -37,11 +37,12 @@ O projeto adota arquitetura modular por funcionalidades e estratégia Offline Fi
 
 ```text
 fiados-moreira/
+├── assets/                # Ativos estáticos e identidade visual oficial
 ├── docs/                  # Produto, arquitetura e decisões do projeto
 ├── src/
 │   ├── app/               # Rotas, tabs, stacks e galeria de desenvolvimento
 │   ├── components/
-│   │   ├── brand/         # Marca vetorial provisória
+│   │   ├── brand/         # Componente de aplicação da identidade visual
 │   │   ├── cards/         # Apresentações financeiras sem regras de domínio
 │   │   ├── layouts/       # Estados e composições compartilhadas de tela
 │   │   ├── navigation/    # Cabeçalhos e controles de navegação

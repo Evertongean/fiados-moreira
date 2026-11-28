@@ -29,7 +29,7 @@ export function AppHeader({
   return (
     <View style={styles.container}>
       <View style={styles.copy}>
-        {showBrand ? <BrandLogo size={36} variant="symbol" /> : null}
+        {showBrand ? <BrandLogo size={36} /> : null}
         <View style={styles.titleGroup}>
           <AppText accessibilityRole="header" variant="h3">
             {title}
